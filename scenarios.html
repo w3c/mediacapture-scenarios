@@ -7,7 +7,7 @@
     <script type="text/javascript" src='http://dev.w3.org/2009/dap/ReSpec.js/js/sh_main.min.js' class='remove'></script>
     <script type="text/javascript" class='remove'>
             var respecConfig = {
-                  specStatus: "CG-NOTE",
+                  specStatus: "ED",
                   editors: [{
                             name: "Travis Leithead", 
                             company: "Microsoft Corp.",
@@ -16,6 +16,18 @@
                   previousPublishDate:  null,
                   noIDLIn:  true,
               };
+
+              /* Fixup to get the working group TF correct (Travis Leithead) */
+            if (document.addEventListener) {
+                document.addEventListener("DOMContentLoaded", fixupConfig);
+            }
+            function fixupConfig() {
+                respecConfig.specStatus = "CG-NOTE",
+                respecConfig.wg = "Media Capture TF";
+                respecConfig.wgURI = "";
+                respecConfig.wgPublicList = "public-media-capture";
+            }
+            
     </script>
     <script type="text/javascript" src='http://dev.w3.org/2009/dap/common/config.js' class='remove'></script>
     <style type="text/css">
@@ -77,15 +89,13 @@
       </p>
     </section>
 
-    <section id='sotd'>
+    <section id="sotd">
       <p>
-        This document will eventually represent the consensus of the media capture task force on the set of scenarios 
-        supported by the MediaStream Capture API. If you wish to make comments regarding this document, please 
-        send them to <a href="mailto:public-media-capture@w3.org">public-media-capture@w3.org</a> (
-        <a href="mailto:public-media-capture-request@w3.org?subject=subscribe">subscribe</a>, 
-        <a href="http://lists.w3.org/Archives/Public/public-media-capture/">archives</a>).
+        This document is intended to represent the consensus of the media capture task force on the set of scenarios 
+        supported by the MediaStream Capture API.
       </p>
     </section>
+    
 
     <section class="informative">
       <h2>Introduction</h2>
@@ -96,7 +106,7 @@
       </p>
       <p>
         The capture scenarios from WebRTC are primarily driven from real-time-communication-based scenarios, such as 
-        the recording of live chats, teleconferences, and other media streamed from over the network from potentially 
+        capturing live chats, teleconferences, and other media streamed from over the network from potentially 
         multiple sources.
       </p>
       <p>
@@ -135,64 +145,233 @@
       <p>
          Also excluded are scenarios that involve declarative capture scenarios, such as those where media capture can be 
          obtained and submitted to a server entirely without the use of script. Such scenarios generally involve the use 
-         of a UA-specific app or mode for interacting with the recording device, altering settings and completing the 
+         of a UA-specific app or mode for interacting with the capture device, altering settings and completing the 
          capture. Such scenarios are currently captured by the DAP working group's <a href="http://dev.w3.org/2009/dap/camera/">HTML Media Capture</a>
          specification.
       </p>
       <p>
          The scenarios contained in this document are specific to scenarios in which web applications require direct access
-         to the capture device, its settings, and the recording mechanism and output. Such scenarios have been deemed 
+         to the capture device, its settings, and the capture mechanism and output. Such scenarios have been deemed 
          crucial to building applications that can create a site-specific look-and-feel to the user's interaction with the 
          capture device, as well as utilize advanced functionality that may not be available in a declarative model.
       </p>
     </section>
 
-    <!-- Travis: No conformance section necessary?
-
-      <section id='conformance'>
+    <section>
+      <h2>Scenarios</h2>
       <p>
-        This specification defines conformance criteria that apply to a single product: the 
-        <dfn id="ua">user agent</dfn> that implements the interfaces that it contains.
-      </p>
-      <p>
-        Implementations that use ECMAScript to implement the APIs defined in this specification must implement
-        them in a manner consistent with the ECMAScript Bindings defined in the Web IDL specification
-        [[!WEBIDL]], as this specification uses that specification and terminology.
-      </p>
-      <p>
-        A conforming implementation is required to implement all fields defined in this specification.
+         In this section, scenarios are presented first as a story that puts the scenario into perspective, and then 
+         as a list of specific capture scenarios included in the story.
       </p>
 
       <section>
-        <h2>Terminology</h2>
+        <h3>"Check out this new hat!" (photo upload with audio caption)</h3>
         <p>
-          The terms <dfn>document base URL</dfn>, <dfn>browsing context</dfn>, <dfn>event handler attribute</dfn>, 
-          <dfn>event handler event type</dfn>, <dfn>task</dfn>, <dfn>task source</dfn> and <dfn>task queues</dfn> 
-          are defined by the HTML5 specification [[!HTML5]].
+           	Amy logs in to her favorite social networking page. She wants to tell her friends about a new hat she recently 
+            bought for an upcoming school play. She clicks a "select photo" drop-down widget on the site, and choses the 
+            "from webcam" option. A blank video box appears on the site followed by a prompt from the browser to "allow the 
+            use of the webcam". She approves it, and immediately sees her own image as viewed by her webcam. She then hears 
+            an audio countdown starting from "3", giving her time to adjust herself in the video frame so that her hat is 
+            clearly visible. After the countdown reaches "0", the captured image is displayed along with some controls with 
+            which to resize/crop the image. She crops the image so that it just showcases her hat. She then clicks a button 
+            allowing her to record an "audio caption". A small box with an audio meter appears, immediately followed by 
+            another prompt from her browser to "allow the use of the microphone". After approving it, she sees an indicator 
+            showing that the microphone is listening, and then begins describing the features of her new hat. While she 
+            speaks she sees that the microphone is picking up her voice because the audio meter is reacting to her voice. 
+            She stops talking and after a moment the web page asks her to confirm that she's done with her caption. She 
+            confirms that she is finished, and then clicks on "check in" which uploads her new picture and audio caption to 
+            the social networking site's server.
         </p>
+        <ol>
+           <li>Browser requires webcam and microphone permissions before use</li>
+           <li>Local webcam video preview</li>
+           <li>Image capture from webcam</li>
+           <li>Image resizing after capture (scenario out of scope)</li>
+           <li>Local microphone preview via equalizer visualization</li>
+           <li>Local microphone stops capturing automatically after a period of silence</li>
+           <li>Upload captured image and audio to server</li>
+        </ol>
+
+        <section>
+          <h4>Variations</h4>
+          <p>TBD</p>
+        </section>
+      </section>
+
+      <section>
+         <h3>Election podcast and commentary (video capture and chat)</h3>
+         <p>
+            Every Wednesday at 6:45pm, Adam logs into his video podcast web site for his scheduled 7pm half-hour broadcast 
+            "commentary on the US election campaign". These podcasts are available to all his subscribers the next day, but 
+            a few of his friends tune-in at 7 to listen to the podcast live. Adam selects the "prepare podcast" option, 
+            approves the browser's request for access to his webcam and microphone, and situates himself in front of the 
+            webcam, using the "self-view" video window on the site. While waiting for 7pm to arrive, the video podcast site 
+            indicates that two of his close friends are now online. He approves their request to listen live to the podcast. 
+            Finally, at 7pm he selects "start podcast" and launches into his commentary. Half-hour later, he wraps up his 
+            concluding remarks, and opens the discussion up for comments. One of his friends has a comment, but has 
+            requested anonymity, since the comments on the show are also recorded. Adam enables the audio-only setting for 
+            that friend and directs him to share his comment. In response to the first comment another of Adam's friends 
+            wants to respond. This friend has not requested anonymity, and so Adam enables the audio/video mode for that 
+            friend, and hears the rebuttal. After a few back-and-forths, Adam sees that his half-hour is up, thanks his 
+            audience, and clicks "end podcast". A few moments later that site reports that the podcast has been uploaded.
+         </p>
+         <ol>
+            <li>Browser requires webcam and microphone permissions before use</li>
+            <li>Local webcam video preview</li>
+            <li>Approval/authentication before sending/receiving real-time video between browsers</li>
+            <li>Remote connection video + audio preview</li>
+            <li>Video capture from local webcam + microphone</li>
+            <li>Capture combined audio from local microphone/remote connections</li>
+            <li>Disabling video on a video+audio remote connection</li>
+            <li>Switching a running video+audio capture between local/remote connection without interruption</li>
+            <li>Adding an video+audio remote connection to a running video capture</li>
+            <li>Upload of video/audio capture to server while capture is running</li>
+         </ol>
+
+         <section>
+          <h4>Variations</h4>
+          <p>TBD</p>
+        </section>
+      </section>
+
+      <section>
+        <h3>Find the ball assignment (video effects and upload requirements)</h3>
         <p>
-          The <a>task source</a> used by this specification is the <dfn>device task source</dfn>.
+           	Alice is finishing up a college on-line course on image processing, and for the assignment she has to write 
+            code that finds a blue ball in each video frame and draws a box around it. She has just finished testing her 
+            code in the browser using her webcam to provide the input and the canvas element to draw the box around each 
+            frame of the video input. To finish the assignment, she must upload a video to the assignment page, which 
+            requires uploads to have a specific encoding (to make it easier for the TA to review and grade all the 
+            videos) and to be no larger than 50MB (small camera resolutions are recommended) and no longer than 30 
+            seconds. Alice is now ready; she enables the webcam, a video preview (to see herself), changes the camera's 
+            resolution down to 640x480, starts a video capture, and holds up the blue ball, moving it around to show that 
+            the image-tracking code is working. After recording for 30 seconds, Alice uploads the video to the assignment 
+            upload page using her class account.
         </p>
+        <ol>
+            <li>Browser requires webcam permissions before use</li>
+            <li>Image frames can be extracted from local webcam video</li>
+            <li>Modified image frames can be inserted/combined into a video capture</li>
+            <li>Assign (and check for) a specific video capture encoding format</li>
+            <li>Local webcam video preview</li>
+            <li>Enforce (or check for) video capture size constraints and recording time limits</li>
+            <li>Set the webcam into a low-resolution (640x480 or as supported by the hardware) capture mode</li>
+            <li>Captured video format is available for upload prerequisite inspection.</li>
+        </ol>
+
+         <section>
+          <h4>Variations</h4>
+          <p>TBD</p>
+        </section>
+      </section>
+
+      <section>
+         <h3>Video diary at the Coliseum (multiple webcams and error handling)</h3>
+         <p>
+            Albert is on vacation in Italy. He has a device with a front and rear webcam, and a web application that lets 
+            him document his trip by way of a video diary. After arriving at the Coliseum, he launches his video diary 
+            app. There is no internet connection to his device. The app prompts for permission to use his microphone and 
+            webcam(s), and he grants permission for both webcams (front and rear). Two video elements appear side-by-side 
+            in the app. Albert uses his device to capture a few still shots of the Coliseum using the rear camera, then 
+            starts recording a video, selecting the front-facing webcam to begin explaining where he is. While talking, 
+            he selects the rear-facing webcam to capture a video of the Coliseum (without having to turn his device 
+            around), and then switches back to the front-facing camera to continue checking in for his diary entry. 
+            Albert has a lot to say about the Coliseum, but before finishing, his device warns him that the battery is 
+            about to expire. At the same time, the device shuts down the cameras and microphones to conserve battery power. 
+            Later, after plugging in his device at a coffee shop, Albert returns to his diary app and notes that his 
+            recording from the Coliseum was saved.
+         </p>
+         <ol>
+            <li>Browser requires webcam(s) and microphone permissions before use</li>
+            <li>Local video previews from two separate webcams simultaneously</li>
+            <li>Image capture from webcam (high resolution)</li>
+            <li>Video capture from local webcam + microphone</li>
+            <li>Switching a running video+audio capture between two local webcams without interruption</li>
+            <li>Recording termination (error recovery) when camera(s) stop.</li>
+         </ol>
+      
+        <section>
+          <h4>Variations</h4>
+          <p>TBD</p>
+        </section>
+      </section>
+
+      <section>
+        <h3>Conference call product debate (multiple conversations and capture review)</h3>
         <p>
-          To <dfn>dispatch a <code>success</code> event</dfn> means that an event with the name
-          <code>success</code>, which does not bubble and is not cancellable, and which uses the
-          <code>Event</code> interface, is to be dispatched at the <a>ContactFindCB</a> object.
+           As part of a routine business video conference call, Amanda initiates a connection to the five other field 
+           agents in her company via the company's video call web site. Amanda is the designated scribe and archivist; 
+           she is responsible for keeping the meeting minutes and also saving the associated meeting video for later 
+           archiving. As each field agent connects to the video call web site, and after granting permission, their 
+           video feed is displayed on the site. After the five other field agents checkin, Amanda calls the meeting to 
+           order and starts the meeting recorder. The recorder captures all participant's audio, and selects a video 
+           channel to record based on dominance of the associated video channel's audio input level. As the meeting 
+           continues, several product prototypes are discussed. One field agent has created draft product sketch that 
+           he shows to the group by sending the image over his video feed. This image spurs a fast-paced debate and 
+           Amanda misses several of the participant's discussion points in the minutes. She calls for a point of order, 
+           and requests that the participants wait while she catches up. Amanda pauses the recording, rewinds it by 
+           thirty seconds, and then re-plays it in order to catch the parts of the debate that she missed in the 
+           minutes. When done, she resumes the recording and the meeting continues. Toward the end of the meeting, one 
+           field agent leaves early and his call is terminated.
         </p>
+        <ol>
+            <li>Approval/authentication before sending/receiving real-time video between browsers</li>
+            <li>Remote connection video + audio preview</li>
+            <li>Browser requires webcam(s) and microphone permissions before use</li>
+            <li>Local webcam video preview</li>
+            <li>Video capture from local webcam + microphone</li>
+            <li>Video capture from remote connections (audio + video)</li>
+            <li>Capture combined audio from local microphone/remote connections</li>
+            <li>Comparing audio input level from among various local/remote connections</li>
+            <li>Switching a running video+audio capture between local webcam/remote connections without interruption</li>
+            <li>Send an image through a remote [video] connection</li>
+            <li>Pause/resume video+audio capture</li>
+            <li>Rewind captured video and re-play</li>
+            <li>Remote connection termination and removal of video+audio preview</li>
+        </ol>
+
+         <section>
+          <h4>Variations</h4>
+          <p>TBD</p>
+        </section>
+      </section>
+      
+      <section>
+        <h3>Incident on driver-download page (device fingerprinting with malicious intent)</h3>
         <p>
-          To <dfn>dispatch an <code>error</code> event</dfn> means that an event with the name
-          <code>error</code>, which does not bubble and is not cancellable, and which uses the <code>Event</code>
-          interface, is to be dispatched at the <a>ContactErrorCB</a> object.
+           	While visiting a manufacturer's web site in order to download drivers for his new mouse, Austin unexpectedly 
+            gets prompted by his browser to allow access to his device's webcam. Thinking that this is strange (why is 
+            the page trying to use my webcam?), Austin denies the request. Several weeks later, Austin reads an article 
+            in the newspaper in which the same manufacturer is being investigated by a business-sector watchdog agency 
+            for poor business practice. Apparently this manufacturer was trying to discover how many visitors to their 
+            site had webcams (and other devices) from a competitor. If that information could be discovered, then the 
+            site would subject those users to slanderous advertising and falsified "webcam tests" that made it appear 
+            as if their competitor's devices were broken in order to convince users to purchase their own brand of webcam.
         </p>
+        <ol>
+           <li>Browser requires webcam(s) and microphone permissions before use</li>
+        </ol>
+
+          <section>
+          <h4>Variations</h4>
+          <p>TBD</p>
+        </section>
       </section>
     </section>
-    -->
+
+    <section>
+      <h2>Requirements</h2>
+      <p>
+         TBD
+      </p>
+    </section>
     
     <section>
       <h2>Concepts and Definitions</h2>
       <p>
-         This section describes some terminology and concepts that frame an understanding of the scenarios that 
-         follow. It is helpful to have a common understanding of some core concepts to ensure that the scenarios 
-         are interpreted uniformly.
+         This section describes some terminology and concepts that frame an understanding of the design considerations 
+         that follow. It is helpful to have a common understanding of some core concepts to ensure that the prose is
+         interpreted uniformly.
       </p>
        <dl>
          <dt>Stream</dt>
@@ -214,11 +393,11 @@
           <dd><blockquote>[The data from a <code>MediaStream</code> object does not necessarily have a canonical binary form; for 
            example, it could just be "the video currently coming from the user's video camera". This allows user agents 
            to manipulate media streams in whatever fashion is most suitable on the user's platform.]</blockquote></dd>
-          <dd>This document reinforces that view, especially when dealing with recording of the <code>MediaStream</code>'s content 
+          <dd>This document reinforces that view, especially when dealing with capturing of the <code>MediaStream</code> content 
           and the potential interaction with the <a href="http://dvcs.w3.org/hg/webapps/raw-file/tip/StreamAPI/Overview.htm">Streams API</a>.
         </dd>
         <dt>Virtualized device</dt>
-        <dd>Device virtualization (in my simplistic view) is the process of abstracting the settings for a device such 
+        <dd>Device virtualization (in a simplistic view) is the process of abstracting the settings for a device such 
             that code interacts with the virtualized layer, rather than with the actual device itself. Audio devices are 
             commonly virtualized. This allows many applications to use the audio device at the same time and apply 
             different audio settings like volume independently of each other. It also allows audio to be interleaved on 
@@ -234,7 +413,7 @@
     </section>
     
     <section>
-      <h2>Media Capture Scenarios</h2>
+      <h2>Design Considerations and Remarks</h2>
 
       <section>
         <h3>Stream initialization</h3>
@@ -242,9 +421,9 @@
         Additionally, the web application should be able to "hint" at specific device characteristics that are desired by 
         the particular usage scenario of the application. User consent is required before obtaining access to the requested 
         stream.</p>
-        <p>When then media capture devices have been obtained (after user consent), the associated stream should be active 
-        and populated with the appropriate devices (likely in the form of tracks to re-use an existing 
-        <code>MediaStream</code> concept). The active capture devices will be configured according to user preference; the 
+        <p>When the media capture devices have been obtained (after user consent), they must be associated with a 
+        <code>MediaStream</code> object, be active, and populated with the appropriate tracks.
+        The active capture devices will be configured according to user preference; the 
         user may have an opportunity to configure the initial state of the devices, select specific devices, and/or elect 
         to enable/disabled a subset of the requested devices at the point of consent or beyond—the user remains in control).
         </p>
@@ -254,8 +433,6 @@
          granted consent. Otherwise "drive-by" fingerprinting of a UA's devices and characteristics can be obtained without 
          the user's knowledge—a privacy issue.</p>
         </section>
-
-        <p>The navigator.getUserMedia API fulfills these scenarios today.</p>
 
         <section>
          <h4>Issues</h4>
@@ -295,9 +472,6 @@
        power). In such a scenario it should be reasonably simple for the application to be notified of the situation, and for 
        the application to re-request access to the stream.
        </p>
-       <p>Today, the <code>MediaStream</code> offers a single <code>ended</code> event. This could be sufficient for this 
-       scenario.
-       </p>
        <p>Additional information might also be useful either in terms of <code>MediaStream</code> state such as an error object,
        or additional events like an <code>error</code> event (or both).
        </p>
@@ -308,13 +482,16 @@
             <li>How shall the stream be re-acquired efficiently? Is it merely a matter of re-requesting the entire 
                 <code>MediaStream</code>, or can an "ended" mediastream be quickly revived? Reviving a local media stream makes 
                 more sense in the context of the stream representing a set of device states, than it does when the stream 
-                represents a network source.
+                represents a network source. The WebRTC editors are considering moving the "ended" event from the 
+                <code>MediaStream</code> to the <code>MediaStreamTrack</code> to help clarify these potential scenarios.
             </li>
             <li>What's the expected interaction model with regard to user-consent? For example, if the re-initialization 
-                request is for the same device(s), will the user be prompted for consent again?
+                request is for the same device(s), will the user be prompted for consent again? Minor glitches in the stream 
+                source connection should not revoke the user-consent.
             </li>
             <li>How can tug-of-war scenarios be avoided between two web applications both attempting to gain access to a 
-                non-virtualized device at the same time?
+                non-virtualized device at the same time? Should the API support the ability to request exclusive use of the 
+                device?
             </li>
            </ul>
           </section>
@@ -323,14 +500,14 @@
      <section>
       <h3>Preview a stream</h3>
       <p>The application should be able to connect a media stream (representing active media capture device(s) to a sink 
-       in order to "see" the content flowing through the stream. In nearly all digital capture scenarios, "previewing" 
+       in order to use/view the content flowing through the stream. In nearly all digital capture scenarios, "previewing" 
        the stream before initiating the capture is essential to the user in order to "compose" the shot (for example, 
        digital cameras have a preview screen before a picture or video is captured; even in non-digital photography, the 
        viewfinder acts as the "preview"). This is particularly important for visual media, but also for non-visual media 
        like audio.
       </p>
-      <p>Note that media streams connected to a preview output sink are not in a "recording" state as the media stream has 
-       no default buffer (see the <a>Stream</a> definition in section 2). Content conceptually "within" the media stream 
+      <p>Note that media streams connected to a preview output sink are not in a "capturing" state as the media stream has 
+       no default buffer (see the <a>Stream</a> definition in section 4). Content conceptually "within" the media stream 
        is streaming from the capture source device to the preview sink after which point the content is dropped (not 
        saved).
       </p>
@@ -339,9 +516,9 @@
       </p>
       <p>Today, the <code>MediaStream</code> object can be connected to several "preview" sinks in HTML5, including the 
        <code>video</code> and <code>audio</code> elements. (This support should also extend to the <code>source</code> 
-       elements of each as well.) The connection is accomplished via <code>URL.createObjectURL</code>.
+       elements of each as well.) The connection is accomplished via <code>URL.createObjectURL</code>. For RTC scenarios, 
+       <code>MediaStream</code>s are connected to <code>PeerConnection</code> sinks.
       </p>
-      <p>These concepts are fully supported by the current WebRTC specification.</p>
       <section>
         <h4>Issues</h4>
         <ul>
@@ -352,11 +529,11 @@
           algorithm. Therefore, audio preview could be turned off by default and only enabled by specific opt-in. 
           Implementations without acoustic feedback prevention could fail to enable the opt-in?
          </li>
-         <li>It makes a lot of sense for a 1:1 association between the source and sink of a media stream; for example, 
-          one media stream to one video element in HTML5. It is less clear what the value might be of supporting 1:many 
-          media stream sinks—for example, it could be a significant performance load on the system to preview a media 
-          stream in multiple video elements at once. Implementation feedback here would be valuable. It would also be 
-          important to understand that scenario that required a 1:many viewing of a single media stream.
+         <li>Are there any common scenarios that requires multiple media stream preview sinks via HTML5 video elements? 
+          In other words, is there value in showing multiple redundant videos of a capture device at the same time? Such
+          a scenario could be a significant performance load on the system; implementation feedback here would be valuable. 
+          Certainly attaching a <code>PeerConnection</code> sink to a media stream as well as an HTML5 video element 
+          should be a supported scenario.
          </li>
          <li>Are there any use cases for stopping or re-starting the preview (exclusively) that are sufficiently different 
           from the following scenarios?
@@ -381,14 +558,14 @@
       <p>Stopping or ending a media stream source device(s) in this context implies that the media stream source device(s)
        cannot be re-started. This is a distinct scenario from simply "muting" the video/audio tracks of a given media stream.
       </p>
-      <p>The current WebRTC draft describes a <code>stop</code> API on a <code>LocalMediaStream</code> interface, whose 
-       purpose is to stop the media stream at its source.
-      </p>
       <section>
        <h4>Issues</h4>
        <ul>
         <li>Is there a scenario where end-users will want to stop just a single device, rather than all devices participating 
-         in the current media stream?
+         in the current media stream? In the WebRTC case there seems to be, e.g. if the current connection cannot handle both 
+         audio and video streams then the user might want to back down to audio, or the user just wants to drop down to audio 
+         because they decide they don't need video. But otherwise, e.g. for local use cases, mute seems more likely and less 
+         disruptive (e.g. in terms of CPU load which might temporarily affect recorded quality of the remaining streams).
         </li>
        </ul>
       </section>
@@ -398,7 +575,7 @@
       <h3>Pre-processing</h3>
       <p>Pre-processing scenarios are a bucket of scenarios that perform processing on the "raw" or "internal" characteristics 
        of the media stream for the purpose of reporting information that would otherwise require processing of a known 
-       format (i.e., at the media stream sink—like Canvas, or via recording and post-processing), significant 
+       format (i.e., at the media stream sink—like Canvas, or via capturing and post-processing), significant 
        computationally-expensive scripting, etc.
       </p>
       <p>Pre-processing scenarios will require the UAs to provide an implementation (which may be non-trivial). This is 
@@ -406,7 +583,7 @@
        (and I believe advocating for the specification of such a format is unwise).
       </p>
       <p>Pre-processing scenarios provide information that is generally needed <i>before</i> a stream need be connected to a 
-       sink or recorded.
+       sink or captured.
       </p>
       <p>Pre-processing scenarios apply to both real-time-communication and local capture scenarios. Therefore, the 
        specification of various pre-processing requirements may likely fall outside the scope of this task force. However, 
@@ -419,10 +596,10 @@
         <li>Audio end-pointing. As described in <a href="http://lists.w3.org/Archives/Public/www-archive/2011Mar/att-0001/microsoft-api-draft-final.html">a 
          speech API proposal</a>, audio end-pointing allows for the detection of noise, speech, or silence and raises events 
          when these audio states change. End-pointing is necessary for scenarios that programmatically determine when to 
-         start and stop recording an audio stream for purposes of hands-free speech commands, dictation, and a variety of 
+         start and stop capturing an audio stream for purposes of hands-free speech commands, dictation, and a variety of 
          other speech and accessibility-related scenarios. The proposal linked above describes these scenarios in better 
          detail. Audio end-pointing would be required as a pre-processing scenario because it is a prerequisite to 
-         starting/stopping a recorder of the media stream itself.
+         starting/stopping a capture of the media stream itself.
         </li>
         <li>Volume leveling/automatic gain control. The ability to automatically detect changes in audio loudness and adjust 
          the input volume such that the output volume remains constant. These scenarios are useful in a variety of 
@@ -452,6 +629,13 @@
          Not all scenarios will be able to be served by any API that is designed, therefore this group might choose to 
          evaluate which scenarios (if any) are worth including in the first version of the API.
         </li>
+        <li>Similarly to gestures, speech recognition can also be used to control the stream itself. But both uses are about 
+         interpreting the content to derive events, it may be that these capabilities should be addressed in some other spec. 
+         The more generic capabilities (input level monitoring) or automatic controls based upon them (e.g. AGC) however are 
+         useful to consider here. These might be simplified (initially) to boolean options (capture auto-start/pause and AGC).
+         Going beyond that, input level events (e.g. threshold passing) or some realtime-updated attribute (input signal level)
+         on the API would be very useful in capture scenarios.
+        </li>
        </ul>
       </section>
      </section>
@@ -461,7 +645,7 @@
       <p>Post processing scenarios are a group of all scenarios that can be completed after either:</p>
       <ol>
        <li>Connecting the media stream to a sink (such as the <code>video</code> or <code>audio</code> elements</li>
-       <li>Recording the media stream to a known format (MIME type)</li>
+       <li>Capturing the media stream to a known format (MIME type)</li>
       </ol>
       <p>Post-processing scenarios will continue to expand and grow as the web platform matures and gains capabilities. 
        The key to understanding the available post-processing scenarios is to understand the other facets of the web 
@@ -506,9 +690,12 @@
          There's a cool explanation and example of TypedArrays 
          <a href="http://blogs.msdn.com/b/ie/archive/2011/12/01/working-with-binary-data-using-typed-arrays.aspx">here</a>.
         </li>
+        <li><a href="http://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html">Web Audio API</a>. A proposal 
+         for processing and synthesizing audio in web applications.
+        </li>
        </ul>
        </section>
-       <p>Of course, post-processing scenarios made possible after sending a media stream or recorded media stream to a 
+       <p>Of course, post-processing scenarios made possible after sending a media stream or captured media stream to a 
         server are unlimited.
        </p>
        <section>
@@ -522,19 +709,21 @@
          <li>Extract samples (video frames/audio clips) from a media stream sink and process each sample. Note that this 
           approach is vulnerable to sample loss (gaps between samples) if post-processing is too slow.
          </li>
-         <li>Record the media stream and extract samples from the recorded native format. Note that this approach requires 
-          significant understanding of the recorded native format.
+         <li>Capture the media stream and extract samples from the captured native format. Note that this approach requires 
+          significant understanding of the captured native format.
          </li>
         </ol>
-        <p>Both approaches are valid for different types of scenarios.</p>
+        <p>
+         Both approaches are valid for different types of scenarios.
+        </p>
         <p>The first approach is the technique described in the current WebRTC specification for the "take a picture" 
-         scenario.
+         example.
         </p>
         <p>The second approach is somewhat problematic from a time-sensitivity/performance perspective given that the 
-         recorded content is only provided via a <code>Blob</code> today. A more natural fit for post-processing scenarios 
-         that are time-or-performance sensitive is to supply a <code>Stream</code> as output from a recorder. 
+         captured content is only provided via a <code>Blob</code> today. A more natural fit for post-processing scenarios 
+         that are time-or-performance sensitive is to supply a <code>Stream</code> as output from a capture. 
          Thus time-or-performance sensitive post-processing applications can immediately start processing the [unfinished] 
-         recording, and non-sensitive applications can use the Stream API's <code>StreamReader</code> to eventually pack 
+         capture, and non-sensitive applications can use the Stream API's <code>StreamReader</code> to eventually pack 
          the full <code>Stream</code> into a <code>Blob</code>.
         </p>
        </section>
@@ -556,7 +745,7 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
          <li>Image scaling. Thumbnails or web image formatting can be done by scaling down the captured image to a common 
           width/height and reduce the output quality.
          </li>
-         <li>Speech-to-text. Post processing on a recorded audio format can be done to perform client-side speech 
+         <li>Speech-to-text. Post processing on a captured audio format can be done to perform client-side speech 
           recognition and conversion to text. Note, that speech recognition algorithms are generally done on the server for 
           time-sensitive or performance reasons.
          </li>
@@ -571,7 +760,7 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
       <h3>Device Selection</h3>
       <p>A particular user agent may have zero or more devices that provide the capability of audio or video capture. In 
        consumer scenarios, this is typically a webcam with a microphone (which may or may not be combined), and a "line-in"
-       and or microphone audio jack. The enthusiast users (e.g., recording enthusiasts), may have many more available 
+       and or microphone audio jack. The enthusiast users (e.g., audio recording enthusiasts), may have many more available 
        devices.
       </p>
       <p>Device selection in this section is not about the selection of audio vs. video capabilities, but about selection 
@@ -582,7 +771,7 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
       <p>Providing a mechanism for code to reliably enumerate the set of available devices enables programmatic control 
        over device selection. Device selection is important in a number of scenarios. For example, the user selected the 
        wrong camera (initially) and wants to change the media stream over to another camera. In another example, the 
-       developer wants to select the device with the highest resolution for recording.
+       developer wants to select the device with the highest resolution for capture.
       </p>
       <p>Depending on how stream initialization is managed in the consent user experience, device selection may or may not 
        be a part of the UX. If not, then it becomes even more important to be able to change device selection after media 
@@ -610,12 +799,10 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
        need to make some sort of comparison between devices—such a comparison should be done based on device capabilities rather 
        than a guess, hint, or special identifier (see related issue below).
       </p>
-      <p>Recording capabilities are an important decision-making point for media capture scenarios. However, recording capabilities 
+      <p>Capture capabilities are an important decision-making point for media capture scenarios. However, capture capabilities 
        are not directly correlated with individual devices, and as such should not be mixed with the device capabilities. For 
-       example, the capability of recording audio in AAC vs. MP3 is not correlated with a given audio device, and therefore not a 
+       example, the capability of capturing audio in AAC vs. MP3 is not correlated with a given audio device, and therefore not a 
        decision making factor for device selection.
-      </p>
-      <p>The current WebRTC spec does not provide an API for discovering the available devices nor a mechanism for selection.
       </p>
       <section>
        <h4>Issues</h4>
@@ -630,6 +817,13 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
          Additionally, knowing the GUID or hardware name is not helpful to web developers as part of a scenario other than device 
          identification (perhaps for purposes of providing device-specific help/troubleshooting, for example).
         </li>
+        <li>One strategy is to not return a set of devices, only the one that the user selected. Thus whether a device is "available" 
+         (meaning known by the system, and able to be connected to at the current time) is something that could presented through the 
+         browser UI and include other info (e.g. description of the device e.g. "front"/"back"/"internal"/"USB"/"Front Door"/...) as 
+         known. Providing a list of cameras requires then that the app be capable of some decision making, and thus requires more info 
+         which again is a privacy concern (resulting in a potential two-stage prompt: "Do you allow this app to know what cameras are 
+         connected" then "Do you allow this app to connect to the 'front' camera?").
+        </li>
        </ul>
       </section>
      </section>
@@ -638,7 +832,7 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
      <h3>Change user-selected device capabilities</h3>
      <p>In addition to selecting a device based on its capabilities, individual media capture devices may support multiple modes of 
       operation. For example, a webcam often supports a variety of resolutions which may be suitable for various scenarios (previewing 
-      or recording a sample whose destination is a web server over a slow network connection, recording archival HD video for storing 
+      or capturing a sample whose destination is a web server over a slow network connection, capturing archival HD video for storing 
       locally). An audio device may have a gain control, allowing a developer to build a UI for an audio blender (varying the gain on 
       multiple audio source devices until the desired blend is achieved).
      </p>
@@ -661,10 +855,7 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
       developer code to monitor the status of a media stream's devices and report statistics and state information without polling the 
       device (especially when the monitoring code is separate from the author's device-control code). This is also essential when the 
       change requests are asynchronous; to allow the developer to know at which point the requested change has been made in the media 
-      stream (in order to perform synchronization, or start/stop a recording, for example).
-     </p>
-     <p>The current WebRTC spec only provides the "enabled" (on/off) capability for devices (where a device may be equated to a particular 
-      track object).
+      stream (in order to perform synchronization, or start/stop a capture, for example).
      </p>
      <section>
       <h4>Issues</h4>
@@ -673,7 +864,7 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
         dynamic capability should be exposed to the web platform, and if so, what the usage policy around multiple access to that 
         capability should be.
        </li>
-       <li>The specifics of what happens to a recording-in-progress when device behavior is changed must be described in the spec.
+       <li>The specifics of what happens to a capture-in-progress when device behavior is changed must be described in the spec.
        </li>
       </ul>
      </section>
@@ -683,7 +874,7 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
      <h3>Multiple active devices</h3>
      <p>In some scenarios, users may want to initiate capture from multiple devices at one time in multiple media streams. For example, 
       in a home-security monitoring scenario, a user agent may want to capture 10 unique video streams representing various locations being 
-      monitored. The user may want to capture all 10 of these videos into one recording, or record all 10 individually (or some 
+      monitored. The user may want to collect all 10 of these videos into one capture, or capture all 10 individually (or some 
       combination thereof).
      </p>
      <section>
@@ -697,41 +888,41 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
         to create the new media stream. The constructor algorithm is modified to activate a track/device that is not "enabled".
        </li>
        <li>For many user agents (including mobile devices) preview of more than one media stream at a time can lead to performance problems. 
-        In many user agents, recording of more than one media stream can also lead to performance problems (dedicated encoding hardware 
-        generally supports the media stream recording scenario, and the hardware can only handle one stream at a time). Especially for 
-        recordings, an API should be designed such that it is not easy to accidentally start multiple recordings at once.
+        In many user agents, capturing of more than one media stream can also lead to performance problems (dedicated encoding hardware 
+        generally supports the media stream capture scenario, and the hardware can only handle one stream at a time). Especially for 
+        media capture, an API should be designed such that it is not easy to accidentally start multiple captures at once.
        </li>
       </ul>
      </section>
     </section>
 
     <section>
-     <h3>Recording a media stream</h3>
-     <p>In its most basic form, recording a media stream is simply the process of converting the media stream into a known format. There's 
-      also an expectation that the recording will end within a reasonable time-frame (since local buffer space is not unlimited).
+     <h3>Capturing a media stream</h3>
+     <p>In its most basic form, capturing a media stream is the process of converting the media stream into a known format during a 
+      bracketed timeframe.
      </p>
-     <p>Local media stream recordings are common in a variety of sharing scenarios such as:
+     <p>Local media stream captures are common in a variety of sharing scenarios such as:
      </p>
      <ul>
-      <li>record a video and upload to a video sharing site</li>
-      <li>record a picture for my user profile picture in a given web app</li>
-      <li>record audio for a translation site</li>
-      <li>record a video chat/conference</li>
+      <li>capture a video and upload to a video sharing site</li>
+      <li>capture a picture for my user profile picture in a given web app</li>
+      <li>capture audio for a translation site</li>
+      <li>capture a video chat/conference</li>
      </ul>
-     <p>There are other offline scenarios that are equally compelling, such as usage in native-camera-style apps, or web-based recording 
-      studios (where tracks are recorded and later mixed).
+     <p>There are other offline scenarios that are equally compelling, such as usage in native-camera-style apps, or web-based capturing
+      studios (where tracks are captured and later mixed).
      </p>
-     <p>The core functionality that supports most recording scenarios is a simple start/stop recording pair.
+     <p>The core functionality that supports most capture scenarios is a simple start/stop capture pair.
      </p>
-     <p>Ongoing recordings should report progress to enable developers to build UIs that pass this progress notification along to users.
+     <p>Ongoing captures should report progress to enable developers to build UIs that pass this progress notification along to users.
      </p>
-     <p>Recording API should be designed to gracefully handle changes to the media stream, and should also report (and perhaps even 
-      attempt to recover from) failures at the media stream source during recording.
+     <p>A capture API should be designed to gracefully handle changes to the media stream, and should also report (and perhaps even 
+      attempt to recover from) failures at the media stream source during capture.
      </p>
-     <p>Uses of the recorded information is covered in the Post-processing scenarios described previously. An additional usage is the 
-      possibility of default save locations. For example, by default a UA may store temporary recordings (those recordings that are 
-      in-progress) in a temp (hidden) folder. It may be desirable to be able to specify (or hint) at an alternate default recording 
-      location such as the users's common file location for videos or pictures.
+     <p>Uses of the captured information is covered in the Post-processing scenarios described previously. An additional usage is the 
+      possibility of default save locations. For example, by default a UA may store temporary captures (those captures that are 
+      in-progress) in a temp (hidden) folder. It may be desirable to be able to specify (or hint) at an alternate default capture
+      location such as the users' common file location for videos or pictures.
      </p>
      <section>
       <h4>DVR Scenarios</h4>
@@ -740,17 +931,17 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
        mentioning for completeness.
       </p>
       <p>The ability to quickly "rewind" can be useful, especially in video conference scenarios, when you may want to quickly go 
-       back and hear something you just missed. In these scenarios, you either started a recording from the beginning of the conference 
+       back and hear something you just missed. In these scenarios, you either started a capture from the beginning of the conference 
        and you want to seek back to a specific time, or you were only streaming it (not saving it) but you allowed yourself some amount 
        of buffer in order to review the last X minutes of video.
       </p>
       <p>To support these scenarios, buffers must be introduced (because the media stream is not implicitly buffered for this scenario). 
-       In the pre-recorded case, a full recording is in progress, and as long as the UA can access previous parts of the recording 
-       (without terminating the recording) then this scenario could be possible.
+       In the capture scenario, as long as the UA can access previous parts of the capture (without terminating it) then this scenario 
+       could be possible.
       </p>
-      <p>In the streaming case, the only way to support this scenario is to add a [configurable] buffer directly into the media stream 
-       itself. Given the complexities of this approach and the relatively limited scenarios, adding a buffer capability to a media stream 
-       object is not recommended.
+      <p>In the streaming case, this scenario could be supported by adding a buffer directly into the media stream itself, or by capturing
+       the media stream as previously mentioned. Given the complexities of integrating a buffer into the <code>MediaStream</code> proposal,
+       using capture to accomplish this scenario is recommended.
       </p>
       <p>Note that most streaming scenarios (where DVR is supported) are made possible exclusively on the server to avoid accumulating 
        large amounts of data (i.e., the buffer) on the client. Content protection also tends to require this limitation.
@@ -759,25 +950,25 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
      <section>
        <h4>Issues</h4>
        <ul>
-        <li>There are few (if any) scenarios that require support for overlapping recordings of a single media stream. Note, that the 
-         current <code>record</code> API supports overlapping recordings by simply calling <code>record()</code> twice. In the case of 
-         separate media streams (see previous section) overlapping recording makes sense. In either case, initiating multiple recordings 
-         should not be so easy so as to be accidental.
+        <li>There are few (if any) scenarios that require support for overlapping captures of a single media stream. Note, that the 
+         <code>record</code> API (as described in early WebRTC drafts) implicitly supports overlapping capture by simply calling 
+         <code>record()</code> twice. In the case of separate media streams (see previous section) overlapping recording makes sense. In 
+         either case, initiating multiple captures should not be so easy so as to be accidental.
         </li>
        </ul>
       </section>
     </section>
 
     <section>
-     <h3>Selection of recording method</h3>
-     <p>All post-processing scenarios for recorded data require a known [standard] format. It is therefore crucial that the media capture 
-      API provide a mechanism to specify the recording format. It is also important to be able to discover if a given format is supported.
+     <h3>Selection of a capture method</h3>
+     <p>All post-processing scenarios for captured data require a known [standard] format. It is therefore crucial that the media capture 
+      API provide a mechanism to specify the capture format. It is also important to be able to discover if a given format is supported.
      </p>
-     <p>Most scenarios in which the recorded data is sent to the server for upload also have restrictions on the type of data that the server 
+     <p>Most scenarios in which the captured data is sent to the server for upload also have restrictions on the type of data that the server 
       expects (one size doesn't fit all).
      </p>
-     <p>It should not be possible to change recording on-the-fly without consequences (i.e., a stop and/or re-start or failure). It is 
-      recommended that the mechanism for specifying a recording format not make it too easy to change the format (e.g., setting the format 
+     <p>It should not be possible to change captures on-the-fly without consequences (i.e., a stop and/or re-start or failure). It is 
+      recommended that the mechanism for specifying a capture format not make it too easy to change the format (e.g., setting the format 
       as a property may not be the best design).
      </p>
      <section>
@@ -785,7 +976,7 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
       <ul>
        <li>If we wish to re-use existing web platform concepts for format capability detection, the HTML5 <code>HTMLMediaElement</code> 
         supports an API called <code>canPlayType</code> which allows developer to probe the given UA for support of specific MIME types that 
-        can be played by <code>audio</code> and <code>video</code> elements. A recording format checker could use this same approach.
+        can be played by <code>audio</code> and <code>video</code> elements. A capture format checker could use this same approach.
        </li>
       </ul>
      </section>
@@ -795,7 +986,7 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
      <h3>Programmatic activation of camera app</h3>
      <p>As mentioned in the introduction, declarative use of a capture device is out-of-scope. However, there are some potentially interesting 
       uses of a hybrid programmatic/declarative model, where the configuration of a particular media stream is done exclusively via the user 
-      (as provided by some UA-specific settings UX), but the fine-grained control over the stream as well as the recording of the stream is 
+      (as provided by some UA-specific settings UX), but the fine-grained control over the stream as well as the stream capture is 
       handled programmatically.
      </p>
      <p>In particular, if the developer doesn't want to guess the user's preferred settings, or if there are specific settings that may not be 
@@ -806,24 +997,24 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
     <section>
      <h3>Take a picture</h3>
      <p>A common usage scenario of local device capture is to simply "take a picture". The hardware and optics of many camera-devices often 
-      support video in addition to photos, but can be set into a specific "camera mode" where the possible recording resolutions are 
+      support video in addition to photos, but can be set into a specific "camera mode" where the possible capture resolutions are 
       significantly larger than their maximum video resolution.
      </p>
      <p>The advantage to having a photo-mode is to be able to capture these very high-resolution images (versus the post-processing scenarios 
       that are possible with still-frames from a video source).
      </p>
-     <p>Recording a picture is strongly tied to the "video" capability because a video preview is often an important component to setting up 
+     <p>Capturing a picture is strongly tied to the "video" capability because a video preview is often an important component to setting up 
       the scene and getting the right shot.
      </p>
      <p>Because photo capabilities are somewhat different from those of regular video capabilities, devices that support a specific "photo" 
       mode, should likely provide their "photo" capabilities separately from their "video" capabilities.
      </p>
-     <p>Many of the considerations that apply to recording also apply to taking a picture.
+     <p>Many of the considerations that apply to video capture also apply to taking a picture.
      </p>
      <section>
       <h4>Issues</h4>
       <ul>
-       <li>What are the implications on the device mode switch on video recordings that are in progress? Will there be a pause? Can this 
+       <li>What are the implications on the device mode switch on video captures that are in progress? Will there be a pause? Can this 
         problem be avoided?
        </li>
        <li>Should a "photo mode" be a type of user media that can be requested via <code>getUserMedia</code>?
@@ -858,6 +1049,18 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
      </p>
     </section>
 
-    </section>
+   </section>
+
+   <section>
+    <h2>Acknowledgements</h2>
+    <p>Special thanks to the following who have contributed to this document: 
+     Harald Alvestrand, 
+     Stefan Hakansson, 
+     Randell Jesup, 
+     Bryan Sullivan, 
+     Timothy B. Terriberry, 
+     Tommy Widenflycht.
+    </p>
+   </section>
   </body>
 </html>
