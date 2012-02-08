@@ -110,8 +110,8 @@
         multiple sources.
       </p>
       <p>
-        The capture scenarios from DAP are primarily driven from "local" capture scenarios related to providing access 
-        to a user agent's camera and related experiences.
+        The capture scenarios from DAP represent "local" capture scenarios that providing access to a user agent's 
+        camera and other related experiences.
       </p>
       <p>
         Both groups include overlapping chartered deliverables in this space. Namely in DAP, 
@@ -139,11 +139,7 @@
          </ul>
       </p>
       <p>
-        Note, that the scenarios described in this document specifically exclude peer-to-peer and networking scenarios 
-        that do not overlap with local capture scenarios, as these are not considered in-scope for this task force.
-      </p>
-      <p>
-         Also excluded are scenarios that involve declarative capture scenarios, such as those where media capture can be 
+         Note, that the scenarios described in this document specifically exclude declarative capture scenarios, such as those where media capture can be 
          obtained and submitted to a server entirely without the use of script. Such scenarios generally involve the use 
          of a UA-specific app or mode for interacting with the capture device, altering settings and completing the 
          capture. Such scenarios are currently captured by the DAP working group's <a href="http://dev.w3.org/2009/dap/camera/">HTML Media Capture</a>
@@ -151,9 +147,16 @@
       </p>
       <p>
          The scenarios contained in this document are specific to scenarios in which web applications require direct access
-         to the capture device, its settings, and the capture mechanism and output. Such scenarios have been deemed 
+         to the capture device, its settings, and the capture mechanism and output. Such scenarios are 
          crucial to building applications that can create a site-specific look-and-feel to the user's interaction with the 
          capture device, as well as utilize advanced functionality that may not be available in a declarative model.
+      </p>
+      <p>
+         Some of the scenarios described in this document may overlap existing 
+         <a href="http://tools.ietf.org/html/draft-ietf-rtcweb-use-cases-and-requirements-06">usage scenarios</a>
+         defined by the <a href="http://datatracker.ietf.org/wg/rtcweb/">IETF RTCWEB Working Group</a>. This document
+         is specifically focused on the capture aspects of media streams, while the linked document is geared toward
+         networking and peer-to-peer RTC scenarios.
       </p>
     </section>
 
@@ -169,7 +172,7 @@
         <p>
            	Amy logs in to her favorite social networking page. She wants to tell her friends about a new hat she recently 
             bought for an upcoming school play. She clicks a "select photo" drop-down widget on the site, and choses the 
-            "from webcam" option. A blank video box appears on the site followed by a prompt from the browser to "allow the 
+            "from webcam" option. A blank video box appears on the site followed by a notice from the browser to "allow the 
             use of the webcam". She approves it, and immediately sees her own image as viewed by her webcam. She then hears 
             an audio countdown starting from "3", giving her time to adjust herself in the video frame so that her hat is 
             clearly visible. After the countdown reaches "0", the captured image is displayed along with some controls with 
@@ -183,7 +186,7 @@
             the social networking site's server.
         </p>
         <ol>
-           <li>Browser requires webcam and microphone permissions before use</li>
+           <li>Browser requires webcam and microphone permissions</li>
            <li>Local webcam video preview</li>
            <li>Image capture from webcam</li>
            <li>Image resizing after capture (scenario out of scope)</li>
@@ -204,10 +207,10 @@
             Every Wednesday at 6:45pm, Adam logs into his video podcast web site for his scheduled 7pm half-hour broadcast 
             "commentary on the US election campaign". These podcasts are available to all his subscribers the next day, but 
             a few of his friends tune-in at 7 to listen to the podcast live. Adam selects the "prepare podcast" option, 
-            approves the browser's request for access to his webcam and microphone, and situates himself in front of the 
+            is notified by the browser that he previously approved access to his webcam and microphone, and situates himself in front of the 
             webcam, using the "self-view" video window on the site. While waiting for 7pm to arrive, the video podcast site 
             indicates that two of his close friends are now online. He approves their request to listen live to the podcast. 
-            Finally, at 7pm he selects "start podcast" and launches into his commentary. While recording, Adam switches
+            Finally, at 7pm he selects "start podcast" and launches into his commentary. While capturing locally, Adam switches
             between several tabs in his browser to quote from web sites representing differing political views. Half-hour later, he wraps up his 
             concluding remarks, and opens the discussion up for comments. One of his friends has a comment, but has 
             requested anonymity, since the comments on the show are also recorded. Adam enables the audio-only setting for 
@@ -217,7 +220,7 @@
             audience, and clicks "end podcast". A few moments later that site reports that the podcast has been uploaded.
          </p>
          <ol>
-            <li>Browser requires webcam and microphone permissions before use</li>
+            <li>Browser saved and automatically granted webcam and microphone permissions</li>
             <li>Local webcam video preview</li>
             <li>Approval/authentication before sending/receiving real-time video between browsers</li>
             <li>Remote connection video + audio preview</li>
@@ -246,18 +249,17 @@
             requires uploads to have a specific encoding (to make it easier for the TA to review and grade all the 
             videos) and to be no larger than 50MB (small camera resolutions are recommended) and no longer than 30 
             seconds. Alice is now ready; she enables the webcam, a video preview (to see herself), changes the camera's 
-            resolution down to 640x480, starts a video capture, and holds up the blue ball, moving it around to show that 
+            resolution down to 320x200, starts a video capture, and holds up the blue ball, moving it around to show that 
             the image-tracking code is working. After recording for 30 seconds, Alice uploads the video to the assignment 
             upload page using her class account.
         </p>
         <ol>
-            <li>Browser requires webcam permissions before use</li>
             <li>Image frames can be extracted from local webcam video</li>
             <li>Modified image frames can be inserted/combined into a video capture</li>
             <li>Assign (and check for) a specific video capture encoding format</li>
             <li>Local webcam video preview</li>
             <li>Enforce (or check for) video capture size constraints and recording time limits</li>
-            <li>Set the webcam into a low-resolution (640x480 or as supported by the hardware) capture mode</li>
+            <li>Set the webcam into a low-resolution (320x200 or as supported by the hardware) capture mode</li>
             <li>Captured video format is available for upload prerequisite inspection.</li>
         </ol>
 
@@ -272,8 +274,8 @@
          <p>
             Albert is on vacation in Italy. He has a device with a front and rear webcam, and a web application that lets 
             him document his trip by way of a video diary. After arriving at the Coliseum, he launches his video diary 
-            app. There is no internet connection to his device. The app prompts for permission to use his microphone and 
-            webcam(s), and he grants permission for both webcams (front and rear). Two video elements appear side-by-side 
+            app. There is no internet connection to his device. The app asks Albert which of his microphones and 
+            webcams he'd like to use, and he activates both webcams (front and rear). Two video elements appear side-by-side 
             in the app. Albert uses his device to capture a few still shots of the Coliseum using the rear camera, then 
             starts recording a video, selecting the front-facing webcam to begin explaining where he is. While talking, 
             he selects the rear-facing webcam to capture a video of the Coliseum (without having to turn his device 
@@ -284,7 +286,7 @@
             recording from the Coliseum was saved. 
          </p>
          <ol>
-            <li>Browser requires webcam(s) and microphone permissions before use</li>
+            <li>Web app presents multiple webcams and microphones for activation</li>
             <li>Local video previews from two separate webcams simultaneously</li>
             <li>Image capture from webcam (high resolution)</li>
             <li>Video capture from local webcam + microphone</li>
@@ -305,6 +307,20 @@
            </p>
            <ol>
             <li>Video capture from multiple cameras + microphone</li>
+           </ol>
+          </section>
+          <section>
+           <h5>Picture-in-picture (video capture composition)</h5>
+           <p>While still on his Italy vacation, Albert hears that the Pope might make a public appearance at the vatican. Albert
+            arrives early to claim a spot, and starts his video diary. He activates both front and rear cameras so that he can 
+            capture both himself and the camera's view. He then sets up the view in his video diary so that the front-facing camera 
+            displays in a small frame contained in one corner of the larger rear-facing camera's view rectangle (picture-in-picture).
+            Albert excitely describes the sense of the crowd around him while simultaneously capturing the Pope's appearance. Afterward,
+            Albert is happy that he didn't miss the moment by having to switch between cameras.
+           </p>
+           <ol>
+            <li>Video capture from two local webcams + microphone</li>
+            <li>Capturing a single video composed of two local webcams simultaneously</li>
            </ol>
           </section>
         </section>
@@ -399,19 +415,15 @@
          interpreted uniformly.
       </p>
        <dl>
-         <dt>Stream</dt>
-         <dd>A stream including the implied derivative 
-           <code><a href="http://dev.w3.org/2011/webrtc/editor/webrtc.html#introduction">MediaStream</a></code>, 
-           can be conceptually understood as a tube or conduit between a source (the stream's generator) and  
-           destinations (the sinks). Streams don't generally include any type of significant buffer, that is, content 
-           pushed into the stream from a source does not collect into any buffer for later collection. Rather, content 
-           is simply dropped on the floor if the stream is not connected to a sink. This document assumes the 
-           non-buffered view of streams as previously described.
-         </dd>
-         <dt><code>MediaStream</code> vs "media stream"</dt>
-         <dd>In some cases, I use these two terms interchangeably; my usage of the term "media stream" is intended as 
+         <dt><code>MediaStream</code> vs "media stream" or "stream"</dt>
+         <dd>In some cases, I use these terms interchangeably; my usage of the term "media stream" or "stream" is intended as 
            a generalization of the more specific <code>MediaStream</code> interface as currently defined in the 
-           WebRTC spec.</dd>
+           WebRTC spec. Generally, a stream can be conceptually understood as a tube or conduit between sources (the stream's 
+           generators) and destinations (the sinks). Streams don't generally include any type of significant buffer, that is, 
+           content pushed into the stream from a source does not collect into any buffer for later collection. Rather, content 
+           is simply dropped on the floor if the stream is not connected to a sink. This document assumes the non-buffered view 
+           of streams as previously described.
+         </dd>
          <dt><code>MediaStream</code> format</dt>
          <dd>As stated in the WebRTC specification, the content flowing through a <code>MediaStream</code> is not in 
             any particular underlying format:</dd>
@@ -421,18 +433,29 @@
           <dd>This document reinforces that view, especially when dealing with capturing of the <code>MediaStream</code> content 
           and the potential interaction with the <a href="http://dvcs.w3.org/hg/webapps/raw-file/tip/StreamAPI/Overview.htm">Streams API</a>.
         </dd>
-        <dt>Virtualized device</dt>
-        <dd>Device virtualization (in a simplistic view) is the process of abstracting the settings for a device such 
-            that code interacts with the virtualized layer, rather than with the actual device itself. Audio devices are 
-            commonly virtualized. This allows many applications to use the audio device at the same time and apply 
-            different audio settings like volume independently of each other. It also allows audio to be interleaved on 
-            top of each other in the final output to the device. In some operating systems, such as Windows, a webcam's 
-            video source is not virtualized, meaning that only one application can have control over the device at any 
-            one time. In order for an app to use the webcam either another app already using the webcam must yield it up 
-            or the new app must "steal" the camera from the previous app. An API could be exposed from a device that 
-            changes the device configuration in such a way that prevents that device from being virtualized--for example,
-            if a "zoom" setting were applied to a webcam device. Changing the zoom level on the device itself would affect 
-            all potential virtualized versions of the device, and therefore defeat the virtualization.</dd>
+        <dt>Shared devices, devices with manipulatable state, and virtualization</dt>
+        <dd>
+           <p>A shared device (in this document) is a media device (camera or microphone) that is usable by more than 
+             one application at a time. When considering sharing a device (or not), an operating system must evaluate
+             whether applications consuming the device will have the ability to manipulate the state of the device. A shared device 
+             with manipulatable state has the side-effect of allowing one application to make changes to a device that will then
+             affect other applications who are also sharing.
+           </p>
+           <p>To avoid these effects and unexpected state changes in applications, operating systems may virtualize a 
+             device. Device virtualization (in a simplistic view) is an abstraction of the actual device, so that the abstraction
+             is provided to the application rather than providing the actual device. When an application manipulates the state 
+             of the virtualized device, changes occur only in the virtualized layer, and do not affect other applications that 
+             may be sharing the device.
+           </p>
+           <p>Audio devices are commonly virtualized. This allows many applications to share the audio device and manipulate its
+             state (e.g., apply different input volume levels) without affecting other applications.
+           </p>
+           <p>Video virtualization is more challenging and not as common. For example, the Microsoft Windows operating system does
+             not virtualize webcam devices, and thus chooses not to share the webcam between applications. As a result, in order 
+             for an application to use the webcam either 1) another application already using the webcam must yield it up or 2) 
+             the requesting application may be allowed to "steal" the device.
+           </p>
+        </dd>
        </dl>
       </p>
     </section>
@@ -529,7 +552,7 @@
                 source connection should not revoke the user-consent.
             </li>
             <li>How can tug-of-war scenarios be avoided between two web applications both attempting to gain access to a 
-                non-virtualized device at the same time? Should the API support the ability to request exclusive use of the 
+                non-shared device at the same time? Should the API support the ability to request exclusive use of the 
                 device?
             </li>
            </ol>
@@ -604,10 +627,12 @@
        computationally-expensive scripting, etc.
       </p>
       <p>Pre-processing scenarios will require the UAs to provide an implementation (which may be non-trivial). This is 
-       required because the media stream has no internal format upon which a script-based implementation could be derived
-       (and I believe advocating for the specification of such a format is unwise).
+       required because the media stream's internal format should be opaque to user-code. Note, if a future 
+       specification described an interface to allow low-level access to a media stream, such an interface would enable 
+       user-code to implement many of the pre-processing scenarios described herein using post-processing techniques (see 
+       next section).
       </p>
-      <p>Pre-processing scenarios provide information that is generally needed <i>before</i> a stream need be connected to a 
+      <p>Pre-processing scenarios provide information that is generally desired <i>before</i> a stream need be connected to a 
        sink or captured.
       </p>
       <p>Pre-processing scenarios apply to both real-time-communication and local capture scenarios. Therefore, the 
@@ -683,7 +708,8 @@
       <section>
        <h4>Web platform post-processing toolbox</h4>
        <p>The common post-processing capabilities for media stream scenarios are built on a relatively small set of web 
-        platform capabilities:
+        platform capabilities. The capabilities described here are derived from current W3C draft specifications, many 
+        of which have widely-deployed implementations:
        </p>
        <ol>
         <li>HTML5 <a href="http://dev.w3.org/html5/spec/Overview.html#the-video-element"><code>video</code></a> and 
@@ -810,8 +836,8 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
       <section>
        <h4>Privacy</h4>
        <ol>
-        <li>As mentioned in the "Stream initialization" section, exposing the set of available devices before media stream 
-         consent is given leads to privacy issues. Therefore, the device selection API should only be available after consent.
+        <li>As mentioned in the "Stream initialization" section, exposing the set of available devices before giving media stream 
+         consent leads to privacy issues. Therefore, the device selection API should only be available after consent.
         </li>
         <li>Device selection should not be available for the set of devices within a given category/kind (e.g., "audio" 
          devices) for which user consent was not granted.
@@ -824,8 +850,8 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
        and providing the user a method for changing the device. For example, with multiple USB-attached webcams, there's no 
        reliable mechanism to describe how each device is oriented (front/back/left/right) with respect to the user.
       </p>
-      <p>Device selection should be a mechanism for exposing device capabilities which inform the developer of which device to 
-       select. In order for the developer to make an informed decision about which device to select, the developer's code would 
+      <p>Device selection should be a mechanism for exposing device capabilities which inform the application of which device to 
+       select. In order for the user to make an informed decision about which device to select (if at all), the developer's code would 
        need to make some sort of comparison between devices—such a comparison should be done based on device capabilities rather 
        than a guess, hint, or special identifier (see related issue below).
       </p>
@@ -869,9 +895,9 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
      <p>A media capture API should support a mechanism to configure a particular device dynamically to suite the expected scenario. 
       Changes to the device should be reflected in the related media stream(s) themselves.
      </p>
-     <p>Device capabilities that can be changed should be done in such a way that the changes are virtualized to the window that is 
-      consuming the API (see definition of "virtual device"). For example, if two applications are using a device, changes to the 
-      device's configuration in one window should not affect the other window.
+     <p>If a device supports sharing (providing a virtual version of itself to an app), any changes to the device's manipulatable state 
+      should by isolated to the application requesting the change. For example, if two applications are using a device, changes to the 
+      device's configuration in one app should not affect the other one.
      </p>
      <p>Changes to a device capability should be made in the form of requests (async operations rather than synchronous commands). 
       Change requests allow a device time to make the necessary internal changes, which may take a relatively long time without 
@@ -932,7 +958,8 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
      </p>
      <p>The core functionality that supports most capture scenarios is a simple start/stop capture pair.
      </p>
-     <p>Ongoing captures should report progress to enable developers to build UIs that pass this progress notification along to users.
+     <p>Ongoing captures should report progress either via the user agent, or directly through an API to enable developers to build UIs 
+      that pass this progress notification along to users.
      </p>
      <p>A capture API should be designed to gracefully handle changes to the media stream, and should also report (and perhaps even 
       attempt to recover from) failures at the media stream source during capture.
@@ -960,9 +987,6 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
       <p>In the streaming case, this scenario could be supported by adding a buffer directly into the media stream itself, or by capturing
        the media stream as previously mentioned. Given the complexities of integrating a buffer into the <code>MediaStream</code> proposal,
        using capture to accomplish this scenario is recommended.
-      </p>
-      <p>Note that most streaming scenarios (where DVR is supported) are made possible exclusively on the server to avoid accumulating 
-       large amounts of data (i.e., the buffer) on the client. Content protection also tends to require this limitation.
       </p>
      </section>
      <section>
