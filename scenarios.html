@@ -173,7 +173,7 @@
            	Amy logs in to her favorite social networking page. She wants to tell her friends about a new hat she recently 
             bought for an upcoming school play. She clicks a "select photo" drop-down widget on the site, and choses the 
             "from webcam" option. A blank video box appears on the site followed by a notice from the browser to "allow the 
-            use of the webcam". She approves it, and immediately sees her own image as viewed by her webcam. She then hears 
+            use of the webcam". She approves it (just like she did the last time she used her camera on this site), and immediately sees her own image as viewed by her webcam. She then hears 
             an audio countdown starting from "3", giving her time to adjust herself in the video frame so that her hat is 
             clearly visible. After the countdown reaches "0", the captured image is displayed along with some controls with 
             which to resize/crop the image. She crops the image so that it just showcases her hat. She then clicks a button 
@@ -186,7 +186,7 @@
             the social networking site's server.
         </p>
         <ol>
-           <li>Browser requires webcam and microphone permissions</li>
+           <li>Browser requires webcam and microphone permissions (one-time-use example)</li>
            <li>Local webcam video preview</li>
            <li>Image capture from webcam</li>
            <li>Image resizing after capture (scenario out of scope)</li>
@@ -220,7 +220,7 @@
             audience, and clicks "end podcast". A few moments later that site reports that the podcast has been uploaded.
          </p>
          <ol>
-            <li>Browser saved and automatically granted webcam and microphone permissions</li>
+            <li>Browser persisted webcam and microphone permissions</li>
             <li>Local webcam video preview</li>
             <li>Approval/authentication before sending/receiving real-time video between browsers</li>
             <li>Remote connection video + audio preview</li>
@@ -291,13 +291,14 @@
             <li>Image capture from webcam (high resolution)</li>
             <li>Video capture from local webcam + microphone</li>
             <li>Switching a running video+audio capture between two local webcams without interruption</li>
+            <li>Use of battery status to automatically manage video and audio capture</li>
             <li>Recording termination (error recovery) when camera(s) stop.</li>
          </ol>
       
         <section>
           <h4>Variations</h4>
           <section>
-           <h5>Recording a sports event (simultaneous recording from multiple webcams)</h5>
+           <h5>Recording a sports event (simultaneous capture from multiple webcams)</h5>
            <p>Albert's day job is a sports commentator. He works for a local television station and records the local
             hockey games at various schools. Albert uses a web-based front-end on custom hardware that allows him to connect
             three cameras covering various angles of the game and a microphone with which he is running the commentary.
@@ -306,11 +307,11 @@
             evening news.
            </p>
            <ol>
-            <li>Video capture from multiple cameras + microphone</li>
+            <li>Capture from three cameras + microphone at the same time (to separate captures)</li>
            </ol>
           </section>
           <section>
-           <h5>Picture-in-picture (video capture composition)</h5>
+           <h5>Picture-in-picture (capture a composed video)</h5>
            <p>While still on his Italy vacation, Albert hears that the Pope might make a public appearance at the vatican. Albert
             arrives early to claim a spot, and starts his video diary. He activates both front and rear cameras so that he can 
             capture both himself and the camera's view. He then sets up the view in his video diary so that the front-facing camera 
@@ -319,8 +320,8 @@
             Albert is happy that he didn't miss the moment by having to switch between cameras.
            </p>
            <ol>
-            <li>Video capture from two local webcams + microphone</li>
-            <li>Capturing a single video composed of two local webcams simultaneously</li>
+            <li>Preview two webcams at the same time</li>
+            <li>Combining two webcams + microphone into one capture</li>
            </ol>
           </section>
         </section>
@@ -494,6 +495,9 @@
          <p>Specific information about a given webcam and/or microphone must not be available until after the user has 
          granted consent. Otherwise "drive-by" fingerprinting of a UA's devices and characteristics can be obtained without 
          the user's knowledge—a privacy issue.</p>
+         <p>In addition, care must be taken that webcam and audio devices are not able to record and stream data without the 
+         user's knowledge. Explicit permission should be granted for a specific activity of a limited duration. Configuration 
+         controls should be possible to enable age-limits on webcam use or other similar techniques.</p>
         </section>
 
         <section>
@@ -521,6 +525,8 @@
           <li>When a user has only one of two requested device capabilities (for example only "audio" but not "video", and both 
               "audio" and "video" are requested), should access be granted without the video or should the request fail?
           </li>
+          <li>Enabling control configuration of webcam based on age (parental control)</li>
+          <li>Phishing and other attacks using webcam, audio (possible issue to note)</li>
          </ol>
         </section>
       </section>
@@ -604,7 +610,7 @@
        using hardware on/off buttons which may not always be available).
       </p>
       <p>Stopping or ending a media stream source device(s) in this context implies that the media stream source device(s)
-       cannot be re-started. This is a distinct scenario from simply "muting" the video/audio tracks of a given media stream.
+       cannot be re-started. This is a distinct scenario from simply pausing the video/audio tracks of a given media stream.
       </p>
       <section>
        <h4>Issues</h4>
@@ -844,12 +850,6 @@ canvas.toBlob(function(blob) {}, 'image/jpeg', 0.2);</pre>
         </li>
        </ol>
       </section>
-      <p>A selected device should provide some state information that identifies itself as "selected" (so that the set of 
-       current device(s) in use can be programmatically determined). This is important because some relevant device information 
-       cannot be surfaced via an API, and correct device selection can only be made by selecting a device, connecting a sink, 
-       and providing the user a method for changing the device. For example, with multiple USB-attached webcams, there's no 
-       reliable mechanism to describe how each device is oriented (front/back/left/right) with respect to the user.
-      </p>
       <p>Device selection should be a mechanism for exposing device capabilities which inform the application of which device to 
        select. In order for the user to make an informed decision about which device to select (if at all), the developer's code would 
        need to make some sort of comparison between devices—such a comparison should be done based on device capabilities rather 
