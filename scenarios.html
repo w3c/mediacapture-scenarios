@@ -184,6 +184,9 @@
             confirms that she is finished, and then clicks on "check in" which uploads her new picture and audio caption to 
             the social networking site's server.
         </p>
+        <p>Requirements: <a href="#p1">P1</a>, <a href="#p1">P2</a>, <a href="#lm1">LM1</a>, 
+        	<a href="#lm2">LM2</a>,<a href="#lm3">LM3</a>,<a href="#LM12">LM12</a>, <a href="#mc1">MC1</a>,
+        	<a href="#mc2">MC2</a>.</p>
         <ol>
            <li>Browser requires webcam and microphone permissions (one-time-use example)</li>
            <li>Local webcam video preview</li>
@@ -193,6 +196,7 @@
            <li>Local microphone stops capturing automatically after a period of silence</li>
            <li>Upload captured image and audio to server</li>
         </ol>
+        
 
         <section>
           <h4>Variations</h4>
@@ -218,6 +222,11 @@
             friend, and hears the rebuttal. After a few back-and-forths, Adam sees that his half-hour is up, thanks his 
             audience, and clicks "end podcast". A few moments later that site reports that the podcast has been uploaded.
          </p>
+         <p>Requirements: <a href="#p1">P3</a>,<a href="#p4">P4</a>, <a href="#lm1">LM1</a>,
+         	<a href="#lm5">LM5</a>
+         	<a href="#rm2">RM2</a>, <a href="#rm3">RM3</a>,<a href="#rm4">RM4</a>, <a href="#mc3">MC3</a>,
+         	<a href="#mc6">MC6</a>.
+         	</p>
          <ol>
             <li>Browser persisted webcam and microphone permissions</li>
             <li>Local webcam video preview</li>
@@ -252,6 +261,9 @@
             the image-tracking code is working. After recording for 30 seconds, Alice uploads the video to the assignment 
             upload page using her class account.
         </p>
+        <p>Requirements:<a href="#lm1">LM1</a>, <a href="#lm6">LM6</a>, <a href="#lm7">LM7</a>,
+        	<a href="#mc1">MC1</a>,
+        	<a href="#mc4">MC4</a>, <a href="#mc5">MC5</a>. </p>
         <ol>
             <li>Image frames can be extracted from local webcam video</li>
             <li>Modified image frames can be inserted/combined into a video capture</li>
@@ -284,6 +296,8 @@
             Later, after plugging in his device at a coffee shop, Albert returns to his diary app and notes that his 
             recording from the Coliseum was saved. 
          </p>
+         <p>Requirements: <a href="#p2">P2</a>, <a href="#lm9">LM9</a>,
+         	<a href="#mc1">MC1</a>, <a href="#mc6">MC6</a>, <a href="#mc7">MC8</a>.</p>
          <ol>
             <li>Web app presents multiple webcams and microphones for activation</li>
             <li>Local video previews from two separate webcams simultaneously</li>
@@ -305,6 +319,7 @@
             likes to highlight great plays by showing them from multiple angles. The final composited video is shown on the
             evening news.
            </p>
+           <p>Requirements: <a href="#mc9">MC9</a>.</p>
            <ol>
             <li>Capture from three cameras + microphone at the same time (to separate captures)</li>
            </ol>
@@ -318,6 +333,7 @@
             Albert excitely describes the sense of the crowd around him while simultaneously capturing the Pope's appearance. Afterward,
             Albert is happy that he didn't miss the moment by having to switch between cameras.
            </p>
+           <p>Requirements: <a href="#lm9">LM9</a>, <a href="#lmc10">MC10</a>.</p>
            <ol>
             <li>Preview two webcams at the same time</li>
             <li>Combining two webcams + microphone into one capture</li>
@@ -344,6 +360,11 @@
            minutes. When done, she resumes the recording and the meeting continues. Toward the end of the meeting, one 
            field agent leaves early and his call is terminated.
         </p>
+        <p>Requirements: <a href="#p1">P1</a>, <a href="#p2">P2</a>, <a href="#p3">P3</a>, 
+        	<a href="#lm1">LM1</a>, <a href="#lm4">LM4</a>, <a href="#rm2">RM2</a>, 
+        	<a href="#rm5">RM5</a>, <a href="#rm6">RM6</a>, <a href="#mc1">MC1</a>, <a href="#mc6">MC6</a>,
+        	<a href="#mc11">MC11</a>, <a href="#mc12">MC12</a>, <a href="#mc13">MC13</a>.        	
+        	 </p>
         <ol>
             <li>Approval/authentication before sending/receiving real-time video between browsers</li>
             <li>Remote connection video + audio preview</li>
@@ -370,6 +391,7 @@
             since they will ultimately be using the tool. The developer is able to select the screen as a local media 
             source and send that video to the group as he demonstrates the UI elements.
            </p>
+           <p>Requirements: <a href="#lm10">LM10</a>.</p>
            <ol>
             <li>Video capture from local screen/display</li>
            </ol>
@@ -389,6 +411,7 @@
             site would subject those users to slanderous advertising and falsified "webcam tests" that made it appear 
             as if their competitor's devices were broken in order to convince users to purchase their own brand of webcam.
         </p>
+        <p>Requirements: <a href="#p5">P5</a>.</p>
         <ol>
            <li>Browser requires webcam(s) and microphone permissions before use</li>
         </ol>
@@ -403,7 +426,72 @@
     <section>
       <h2>Requirements</h2>
       <p>
-         TBD
+      	<ol>
+      		<p>PERMISSIONS</p>
+      		<li ><a name="p1">The UA must </a> request the user's permission before accessing any media devices.</li>
+      		<li><a name="p2">The UA must </a>allow the user to grant permission to specific devices.  (Example: front camera is ok, back camera is not.)</li>
+      		<li><a name="p3">The UA must </a>request the user's permission before sending or receiving  a media stream to or from another user.</li> 
+      		<li><a name="p4">The UA must </a>be able to store permissions granted to certain applications. [THIS NEEDS TO BE RESTRICTED.]</li>
+      		<li><a name="p5">The UA must </a>not make information about the user's media devices available to the Application
+      			until the user grants permission to use them.</li>
+      		</ol>
+      		<p>LOCAL MEDIA</p>
+      		<ol>
+      		<li><a name="lm1">The UA must </a>be able to show the image stream from a camera on the screen.</li>
+          <li><a name="lm2">The UA must </a>be able to provide a visual display of the properties of the sound captured from from a microphone (volume in this  case).</li>
+         <li><a name="lm3">The UA must </a>be able to trigger an event based on the volume of sound over some period of
+time (silence, in this case).</li>
+<li><a name="lm4">The UA must </a>be able to blend remote audio streams with the local stream.</li>
+<li><a name="lm5">The UA must </a>be able to continue sending and/or capturing media while the tab is in the background.</li>
+<li><a name="lm6">The UA must </a>be able to extract image frames from video.</li>
+<li><a name="lm7">The UA must </a>be able to insert image frames into a local video stream (or capture).</li>
+<li><a name="lm8">The UA must </a>be able to modify stream parameters such as size and frame rate within the
+	limits set by the local hardware. </li>
+	<li><a name="lm9">The UA must </a>be able to show previews of multiple local or remote streams simultaneously.</li>
+	<li><a name="lm10">The UA must </a>support the use of the local screen/display as a video source.</li>
+	<li><a name="lm11">The UA must </a>allow the user to pause or stop media streams via UXes (and not just the 
+		buttons on the underlying hardware.)</li>
+		<li><a name="lm12">The UA must </a>provide a UX letting the user know when it is using one or more of
+			his media devices.</li>
+	</ol>
+
+<p>REMOTE MEDIA</p>
+<ol>
+<li><a name="rm1">The UA must </a>be able to transmit media to one or more remote sites and to receive media from them.</li>
+<li><a name="rm2">The UA must </a>be able to offer a preview of audio and video media received from a remote site.</li>
+<li><a name="rm3">The UA must </a>be able to stop or pause the reception and/or transmission of any media stream independent of any other streams.</li>
+<li><a name="rm4">The UA must </a>be able to add new remote media connections while a capture is running.  The new remote streams
+	may or may not be included in the capture. </li>
+	<li><a name="rm5">The UA must </a>be able to send or receive a still image over a video stream.</li>
+	<li><a name="rm6">The UA must </a>provide the Application with the parameters of all streams (for example, audio level). </li>
+<p>The following  requirement was suggested on the mailing list but is not part of any of the 
+	scenarios:</p>
+<li>Ability for user simply drag a image over a area of website, so the image is send to all of the other users</li>
+	</ol>
+
+
+<p>Media Capture</p>
+<ol>
+<li><a name="mc1">The UA must </a>be able to capture local or remote audio streams, video streams or still images from a camera or microphone 
+	and store the result as a [local?] file.</li>
+<li><a name="mc2"> The UA must </a>enable the Application to trigger media capture either from a button click or a timer event.</li>
+<li><a name="mc3">The UA must </a>be able to send captured media to one or more remote locations while capture is running.</li>
+<li><a name="mc4">The UA must </a>enable the Application to select the capture format and resolution from those available on the local hardware.</li>
+<li><a name="mc5">the UA must </a>enable the Application to set size contraints and time limits on media capture. </li>
+<li><a name="mc6">The UA must </a>allow the user to switch capture between one or more local and remote streams without interruption.</li>
+<li><a name="mc7">The UA must </a>enable the Application to use device properties, such as battery level, to determine when to terminate media capture.</li>
+<li><a name="mc8">The UA must </a>enable error recovery in the case of premature termination of media capture.</li>
+<li><a name="mc9">The UA must </a>support simultaneous recording from multiple devices into separate captures.</li>
+<li><a name="mc10">The UA must </a>support simultaneous recording from multiple devices into a single capture. </li>
+<li><a name="mc11">The UA must </a>support the dynamic addition and deletion of  streams from a capture.</li>
+<li><a name="mc12">The UA must </a>enable the Application to pause and resume the capture of local or remote streams.</li>
+<li><a name="mc13">The UA must </a>enable the Application to rewind and replay a paused capture stream.</li>
+<p>The following three requirements were suggested on the mailing list but are not part of any of the 
+	scenarios:</p>
+<li>Ability for user to request recorded video/audio stream from secretary for preview or reference in discussion</li>
+<li>Ability for user or secretary to playback the capture video/audio to new comers to a arbitrary time point for his quickly catch-up</li>
+<li>Ability for user simply drag a image over video of other attendee to directly send the image(to other user without open a new window</li>
+</ol>
       </p>
     </section>
     
