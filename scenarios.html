@@ -13,7 +13,7 @@
                             company: "Microsoft Corp.",
                             url: "mailto:travis.leithead@microsoft.com?subject=MediaStream Capture Scenarios Feedback",
                             companyURL: "http://www.microsoft.com"}],
-                  publishDate:  "2012-08-24",
+                  publishDate:  "2012-08-31",
                   edDraftURI:   "http://dvcs.w3.org/hg/dap/raw-file/tip/media-stream-capture/scenarios.html",
                   previousPublishDate:  null,
                   noIDLIn:  true,
@@ -413,9 +413,9 @@
 
     <section>
       <h2>Requirements</h2>
-      <p>
+           		<p>PERMISSIONS</p>
       	<ol>
-      		<p>PERMISSIONS</p>
+ 
       		<li ><a name="p1">The UA must </a> request the user's permission before accessing any media devices.</li>
       		<li><a name="p2">The UA must </a>allow the user to grant permission to specific devices.  (Example: front camera is ok, back camera is not.)</li>
       		<li><a name="p3">The UA must </a>request the user's permission before sending or receiving  a media stream to or from another user.</li> 
@@ -445,20 +445,24 @@ time (silence, in this case).</li>
 	</ol>
 
 <p>REMOTE MEDIA</p>
+<p>These requirements for remote media are outside the scope of the Media Capture task force, but are relevant to
+	the related WebRTC/rtcWeb work, which is a joint effort of the W3C and the IETF.  The <a href="http://datatracker.ietf.org/doc/draft-ietf-rtcweb-use-cases-and-requirements">
+		scenarios
+	and requirements document</a> for that effort contains requirements that are similar to those given here.
+	They are listed in parentheses after each item. .</p>
 <ol>
-<li><a name="rm1">The UA must </a>be able to transmit media to one or more remote sites and to receive media from them.</li>
-<li><a name="rm2">The UA must </a>be able to play audio and video media received from a remote site.</li>
-<li><a name="rm3">The UA must </a>be able to stop or pause the reception and/or transmission of any media stream independent of any other streams.</li>
+<li><a name="rm1">The UA must </a>be able to transmit media to one or more remote sites and to receive media from them. (rtcWeb: F2, F4, F11, F12)</li>
+<li><a name="rm2">The UA must </a>be able to play audio and video media received from a remote site. (rtcWeb: F4, F10)</li>
+<li><a name="rm3">The UA must </a>be able to stop or pause the reception and/or transmission of any media stream independent of any other streams. (rtcWeb: A8)</li>
 <li><a name="rm4">The UA must </a>be able to add new remote media connections while a recording is running.  The new remote streams
 	may or may not be included in the recording. </li>
-	<li><a name="rm5">The UA must </a>be able to send or receive a still image over a video stream.</li>
-	<li><a name="rm6">The UA must </a>provide the Application with the parameters of all streams (for example, audio level). </li>
-<p>The following  requirement was suggested on the mailing list but is not part of any of the 
-	scenarios:</p>
+	<li><a name="rm5">The UA must </a>be able to send or receive a still image over a video stream. </li>
+	<li><a name="rm6">The UA must </a>provide the Application with the parameters of all streams (for example, audio level). (rtcWeb: F14, F38, A12, A14) </li>
+
 	</ol>
 
 
-<p>Recording</p>
+<p>RECORDING</p>
 <ol>
 <li><a name="mc1">The UA must </a>be able to record local or remote audio streams, video streams or still images from a camera or microphone 
 	and store the result as a file.</li>
@@ -476,7 +480,7 @@ time (silence, in this case).</li>
 <li><a name="mc13">The UA must </a>enable the Application to rewind and replay a paused recorded stream.</li>
 
 </ol>
-      </p>
+    
     </section>
     
 
