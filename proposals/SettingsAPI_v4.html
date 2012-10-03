@@ -1,0 +1,908 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <title>Proposal: Settings API Version 4</title>
+    <meta http-equiv='Content-Type' content='text/html;charset=utf-8' />
+    <script src='http://darobin.github.com/respec/builds/respec-w3c-common.js' class='remove'></script>
+    <script class='remove'>
+        var respecConfig = {
+            // document info
+            specStatus: "ED",
+            shortName: "settingsv4",
+            // publishDate:   "2009-08-06",
+            // previousMaturity: "WD",
+            // previousPublishDate:  "2009-03-15",
+            // previousURI : "http://dev.w3.org/2009/dap/ReSpec.js/documentation.html",
+            copyrightStart: "2012",
+            edDraftURI: "blah",
+            // lcEnd:  "2010-08-06",
+
+
+            // editors
+            editors: [
+                {
+                    name: "Travis Leithead", company: "Microsoft", companyURL: "http://www.microsoft.com/"
+                }
+            ],
+
+            // WG
+            wg: "Media Capture TF",
+            wgURI: "http://blah.com/",
+            wgPublicList: "public-media-capture",
+            wgPatentURI: "",
+            noIDLSorting: true,
+            maxTocLevel: 3
+        };
+    </script>
+  </head>
+  <body>
+    <section id='abstract'>
+      This proposal describes additions and suggested changes to the 
+        <a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html">Media Capture and Streams</a>
+        specification in order to support the goal of device settings retrieval and modification. This proposal incorporates 
+        feedback (link) from three [link] prior [link] proposals [link] with the same goal.
+    </section>
+
+    <section>
+        <h1>Remove <code>LocalMediaStream</code> interface</h1>
+        <p>In this proposal, the derived LocalMediaStream interface is removed. Rather than returning a LocalMediaStream
+            instance in the NavigatorUserMediaSuccessCallback, a vanilla MediaStream object is returned. The primary difference
+            is in the tracks contained in that MediaStream object.
+        </p>
+
+        <section>
+            <h2>Rationale</h2>
+
+            The LocalMediaStream object currently extends MediaStream by adding a single method "stop()". In my prior proposals, this
+            object was radically altered in order to facilite several goals:
+            <dl>
+                <dt>Provide a predicatable home for developers to find and modify device settings</dt>
+                <dd>A previous proposal went out of its way to strongly associate LocalMediaStream objects with devices. This 
+                    seemed like a good design because local device configuration is always on the local media stream. This made
+                    for a stable, dependable API surface for all local media stream instances (no guesswork).
+                </dd>
+                <dt>Prevent track-list mutations</dt>
+                <dd>A previous proposal also removed the track lists on local media streams (resulting in some dramatic inheritence
+                    changes). Mutable tracks lists on LocalMediaStream objects seemed like the wrong design considering the current 
+                    thinking that a getUserMedia request would only ever produce a LocalMediaStream with at most one audio or video 
+                    track. 
+                </dd>
+            </dl>
+        
+            <p>Some feedback even suggested re-considering the "at most one video/audio track per request to getUserMedia".</p>
+        
+            <p>While thinking about these goals and the feedback, I began to consider a few things:</p>
+
+            <dl>
+                <dt>Device-centric tracks</dt>
+                <dd>With tracks supplemented with device-characteristics (duck-typing), the LocalMediaStream's stop() API was a 
+                    convenience feature for stopping all tracks backed by a device on the LocalMediaStream object. With device-
+                    centric tracks a stop() API should be present on the tracks themselves.
+                </dd>
+                <dt>Mutable track lists</dt>
+                <dd>Mutable track lists were not a desireable feature while I was locked into considering the LocalMediaStream 
+                    as strongly associated with device-control. What is actually necessary, is that there is a something immutable
+                    associated with devices--that "something" doesn't necessarily need to be a LocalMediaStream or any MediaStream-like
+                    object at all! Once I unlocked that line of thinking, I began to experiement with the notion of a device list
+                    which then ultimately brought back a use-case for having mutable track lists for MediaStream objects. (It did not
+                    bring back a need for LocalMediaStream objects themselves though.)
+                </dd>
+                <dt>Workflow for access to additional device streams</dt>
+                <dd>It is now understood that to request additional streams for different devices (e.g., the second camera on a 
+                    dual-camera mobile phone), one must invoke getUserMedia a second time. In my prior proposal, this would result 
+                    in a separate LocalMediaStream instance. At this point there are two LocalMediaStream objects each with their 
+                    own devices. While this was nice for consistency of process, it was a challenge in terms of use of the objects 
+                    with a MediaStream consumer like the Video tag.
+                
+                    <p>To illustrate this challenge, consider how my prior proposal required a re-hookup of the MediaStream 
+                        to a video tag consumer:</p>
+                
+                    <ol>
+                        <li>First request to getUserMedia</li>
+                        <li>LocalMediaStream (1) obtained from success callback</li>
+                        <li>createObjectURL and preview in a video tag</li>
+                        <li>Second call to getUserMedia</li>
+                        <li>LocalMediaStream (2) obtained from success callback</li>
+                        <li>createObjectURL and preview in same video tag</li>
+                    </ol>
+                
+                    <p>Note that this process has to bind a completely new LocalMediaStream to the video tag a second time (if 
+                        re-using the same video tag) only because the second LocalMediaStream object was different than the 
+                        first.</p>
+                
+                    <p>It is much more efficient for developer code to simply add/remove tracks to a MediaStream that are 
+                        relevant, without needing to change the consumer of the MediaStream.</p>
+                </dd>
+                <dt>Usage of getUserMedia for permission rather than for additional device access</dt>
+                <dd>The getUserMedia method is the gateway for permission to media. This proposal does not suggest 
+                    changing that concept. It <em>does</em> suggest, however, that more information can be made available for 
+                    discovery of additional devices within the approved "category" or "type" of media, and provide a way to 
+                    obtain those additional devices without needing to go through the "permissions" route (i.e., getUserMedia).
+                </dd>
+                <dt>Importance of restricting control to LocalMediaStream</dt>
+                <dd>Upon reflection of the feedback around the prior proposal, the relative importance of restricting control
+                    of the devices associated with tracks on the LocalMediaStream to <em>only</em> the LocalMediaStream did not
+                    seem as vital, insofar as the device-level access via the track is not directly available through a 
+                    PeerConnection to a remote browser.
+                </dd>
+            </dl>
+        </section>
+    </section>
+
+    <section>
+        <h1>New <code>MediaStreamTrack</code> (derived) types</h1>
+
+        <p>This proposal consolidates settings directly into the tracks that are provided by devices. However, in order to
+            do this efficiently and in a future-extendible manner, the highly-generic MediaStreamTrack is now extended for
+            specific characteristics of the devices it embodies, resulting in a hierarchy:
+        </p>
+
+        <ul>
+            <li>MediaStreamTrack
+                <ul>
+                    <li>VideoStreamTrack
+                        <ul>
+                            <li>VideoDeviceTrack</li>
+                            <li>PictureDeviceTrack</li>
+                        </ul>
+                    </li>
+                    <li>AudioStreamTrack
+                        <ul>
+                            <li>AudioDeviceTrack</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+
+        <section>
+            <h2>Local and remote video tracks</h2>
+
+            <p>MediaStreamTrack objects that are of <code>kind</code> "video" and that are located in a MediaStream's 
+                <code>videoTracks</code> list will be instances of a <code>VideoStreamTrack</code>. The VideoStreamTrack
+                provides basic (read-only) properties pertinent to all sources of video.
+            </p>
+
+            <p class="note">There is no takePicture API on a VideoStreamTrack because a simple frame-grab can be accomplished using a
+                combination of a &lt;video> and &lt;canvas> APIs (takePicture is intended for use with a camera's high-resolution
+                picture mode, not for arbitrary video frame capture).
+            </p>
+
+            <p>I'm intentionally keeping this interface as sparce as possible. Features about the video that can be calculated like
+                aspect ratio are not provided.
+            </p>
+
+            <section>
+                <h3><code>VideoStreamTrack</code> interface</h3>
+                <dl class="idl" title="interface VideoStreamTrack : MediaStreamTrack">
+                    <dt>readonly attribute unsigned long width</dt>
+                    <dd>The "natural" width (in pixels) of the video flowing through the track. In the case of a VideoDeviceTrack, this
+                        value represents the current setting of the camera's sensor (still in terms of number of pixels). This value is 
+                        indpendent of the camera's rotation (if the camera's rotation setting is changed, it does not impact this value).
+                        For example, consider a camera setting with width of 1024 pixels and height of 768 pixels. If the camera's rotation
+                        setting is changed by 90 degrees, the width is still reported as 1024 pixels. However, a &lt;video> element used
+                        to preview this track would report a width of 768 pixels (the effective width with rotation factored in).
+                    </dd>
+                    <dt>readonly attribute unsigned long height</dt>
+                    <dd>The "natural" height (in pixels) of the video in this track. See the "width" attribute for additional info.</dd>
+                </dl>
+            </section>
+        </section>
+
+        <section>
+            <h2>Local and remote audio tracks</h2>
+        
+            <p>MediaStreamTrack objects that are of <code>kind</code> "audio" and that are located in a MediaStream's 
+                <code>audioTracks</code> list will be instances of an <code>AudioStreamTrack</code>. The AudioStreamTrack
+                provides basic (read-only) properties pertinent to all sources of audio.
+            </p>
+
+            <section>
+                <h2><code>AudioStreamTrack</code> interface</h2>
+                <dl class="idl" title="interface AudioStreamTrack : MediaStreamTrack">
+                </dl>
+            </section>
+        </section>
+
+        <section>
+            <h2>Camera device tracks</h2>
+
+            <p>VideoDeviceTracks are created by the user agent to represent a camera device that provides local video.</p>
+
+            <section>
+                <h2><code>VideoDeviceTrack</code> interface</h2>
+                <dl class="idl" title="interface VideoDeviceTrack : VideoStreamTrack">
+                    <dt>readonly attribute PictureDeviceTrack? pictureTrack</dt>
+                    <dd>If the device providing this VideoDeviceTrack supports a "high-resolution picture mode", this 
+                        attribute will be reference to a PictureDeviceTrack object. Otherwise, this attribute will be null.
+                    </dd>
+                    <dt>readonly attribute VideoFacingEnum facing</dt>
+                    <dd>From the user's perspective, this attribute describes whether this camera is pointed toward the 
+                        user ("user") or away from the user ("environment"). If this information cannot be reliably obtained, 
+                        for example from a USB external camera, the value "unknown" is returned.
+                    </dd>
+                    <dt>void stop()</dt>
+                    <dd>Causes this track to enter the <code>ENDED</code> state. Same behavior of the old LocalMediaStream's 
+                        stop API, but only affects this device track.</dd>
+                </dl>
+            </section>
+
+            <section>
+                <h3><code>VideoFacingEnum</code> enumeration</h3>
+                <dl class="idl" title="enum VideoFacingEnum">
+                    <dt>unknown</dt>
+                    <dd>The relative directionality of the camera cannot be determined by the user agent based on the hardware.</dd>
+                    <dt>user</dt>
+                    <dd>The camera is facing toward the user (a self-view camera).</dd>
+                    <dt>environment</dt>
+                    <dd>The camera is facing away from the user (viewing the environment).</dd>
+                </dl>
+            </section>
+        </section>
+
+        <section>
+            <h2>Cameras with "high-resolution picture" modes</h2>
+
+            <p>The PictureDeviceTrack interface is created by the user agent if the camera device providing the VideoDeviceTrack 
+                supports an optional "high-resolution picture mode" with picture settings different (better) from those of 
+                its basic video constraints.</p>
+
+            <p>This track is initially available from a VideoDeviceTrack via the <code>pictureTrack</code> property. This track type
+                is not present in the video device list (<code>MediaDeviceList</code>). Likewise, it cannot be stopped directly, and 
+                its VideoStreamTrack inherited attributes reflect the values of its "owning" VideoDeviceTrack.
+            </p>
+
+            <p>The PictureDeviceTrack is essentially a specialized VideoStreamTrack (this track type is of kind <code>"video"</code>).
+                It may be explicitly added to a videoTracks list (MediaStreamTrackList) in order to output its track video to a &lt;video> 
+                tag, but its preview video stream reflects the owning VideoDeviceTrack's settings, rather than the settings directly 
+                available on this object. Rather the settings of this object are only applied at the time when the takePicture API is 
+                invoked.
+            </p>
+
+            <section>
+                <h2><code>PictureDeviceTrack</code> interface</h2>
+                <dl class="idl" title="interface PictureDeviceTrack : VideoStreamTrack">
+                    <dt>void takePicture()</dt>
+                    <dd>Temporarily mutes the owning VideoDeviceTrack's stream, then asynchronously switches the camera into "high 
+                        resolution picture mode", applies the PictureDeviceTrack settings (a snapshot from the time the takePicture
+                        API was called, and records/encodes an image using a user-agent determined format into a Blob object. 
+                        Finally, queues a task to fire a "picture" event with the resulting Blob instance.
+                        <p class="issue">Could consider providing a hint or setting for the desired picture format.</p>
+                    </dd>
+                    <dt>attribute EventHandler onpicture</dt>
+                    <dd>Register/unregister for "picture" events. The handler should expect to get a PictureEvent object as its first
+                        parameter.
+                        <p class="issue">Is an "error" event necessary here too?</p>
+                    </dd>
+                </dl>
+            </section>
+
+            <p class="note">In the previous proposal, the PictureEvent returned a Canvas ImageData object, however it makes
+                sense to return a compressed format (PNG/JPEG), especially given that picture snapshots will be very high
+                resolution, and ImageData objects are essentially raw images.
+            </p>
+
+            <section>
+                <h2><code>PictureEvent</code> interface</h2>
+                <dl class="idl" title="[Constructor(DOMString type, optional PictureEventInit eventInitDict)] interface PictureEvent : Event">
+                    <dt>readonly attribute Blob data</dt>
+                    <dd>Returns a Blob object whose type attribute indicates the encoding of the picture data. An implementation must
+                        return a Blob in a format that is capable of being viewed in an HTML &lt;img> tag.
+                    </dd>
+                </dl>
+            </section>
+        </section>
+
+        <section>
+            <h2>Microphone device tracks</h2>
+
+            <p>AudioDeviceTracks are created by the user agent to represent a microphone device that provides local audio.</p>
+
+            <section>
+                <h3><code>AudioDeviceTrack</code> interface</h3>
+                <dl class="idl" title="interface AudioDeviceTrack : AudioStreamTrack">
+                    <dt>readonly attribute unsigned long level</dt>
+                    <dd>The sensitivity of the microphone. This value must be a whole number between 0 and 100 inclusive. 
+                        When a MediaStreamTrack is muted, the level attribute must return 0. A value of 100 means the microphone
+                        is configured for maximum gain.
+                    </dd>
+                    <dt>void stop()</dt>
+                    <dd>Causes this track to enter the <code>ENDED</code> state. Same behavior of the old LocalMediaStream's stop 
+                        API, but only for this device track.</dd>
+                </dl>
+            </section>
+        </section>
+
+    </section>
+
+    <section>
+        <h1>Settings Retrieval/Application</h1>
+
+        <p>As noted in prior proposals, camera/microphone settings must be applied asynchronously to ensure that web
+            applications can remain responsive for all device types that may not respond quickly to setting changes.
+        </p>
+
+        <p>My prior proposals used a monolithic dictionary of settings for inspection and application. This proposal takes a 
+            different approach, considering the feedback for more-direct access to settings, expected patterns for settings 
+            adjustment (which is generally one setting at at time as initiated by a web application UI), difficulties in 
+            understanding what values were read-only vs. writable, and the current already-defined constraint application 
+            engine.</p>
+
+        <section>
+            <h2>Grouping setting features</h2>
+
+            <p>Settings are organized into two groups: value ranges (a continuum of values) and enumerated values. Value ranges
+                include a min and max value, while enumerated values are provided in an array with an associated length.
+                Both groups of settings include an "initial" value, which is the value that is expected to be the device's 
+                default value when it is acquired.
+            </p>
+
+            <p>The key to changing settings in either setting group is the request() API. This is the mechanism for asynchronously 
+                requesting that the device change the value of the setting that the setting group is applicable to. The 
+                mechanics for applying setting change requests follows exactly the model used when applying constraints at
+                getUserMedia invocation. Each team a request() is made, the user agent begins building up an [internally-represented]
+                constraint structure which is associated with the device making the request (and only that device). For example, 
+                if a "width" setting change request is made, the user agent creates a constraint structure equivalent to the 
+                following getUserMedia constraint (except that this constraint only applies to the specific device--not all 
+                video devices):
+            </p>
+
+            <p><pre><code>{ video: { optional: [ { width: <em>value</em> } ] } }</code></pre></p>
+
+            <p>If this is the only request during this script-execution task, then when control returns to the user agent,
+                this constraint will be committed (i.e., like an indexedDB transaction) and the constraint application logic
+                will evaluate the request making changes to the current device if applicable.
+            </p>
+
+            <p>If there is another request during the same script-execution task, it is appended to the optional list. Since
+                order is important in the optional constraints list, the first requested setting has priority over the next.
+            </p>
+
+            <p>The request() API also has a flag used to signal to the UA that the requested setting change should be 
+                manditory. In this case, the constraint is added to the manditory set, and replaces an existing setting in 
+                that set if the names collide (last setting wins). My expectation is that if a manditory constraint cannot
+                be satisfied, then the UA must end that stream as a result of the failure.
+            </p>
+
+            <p>Unlike constraints built using dictionaries for getUserMedia, the constraint structures produced by calls to 
+                the request() API will always be individual proposed values, rather than min/max ranges. This is because 
+                min/max information is already available within the relevant settings, and can be included in calculations 
+                <em>before</em> making the call to request(). Therefore, I didn't feel it was necessary to clutter the API 
+                surface with that feature.
+            </p>
+
+            <p>MediaSettingsRange objects should be used when the setting can generally actually assume a value along a continuum of
+                values. This specification should indicate what the range of values must be for each setting. Given that implementations
+                of various hardware may not exactly map to the same range, an implementation should make a reasonable attempt to 
+                translate and scale the hardware's setting onto the mapping provided by this specification. If this is not possible due
+                to a hardware setting supporting (for example) fewer levels of granularity, then the implementation should make the device
+                settings min value reflect the min value reported in this specification, and the same for the max value. Then for values
+                in between the min and max, the implementation may round to the nearest supported value and report that value in the
+                setting.
+            </p>
+
+            <p class="note">For example, if the setting is fluxCapacitance, and has a specified range from -10 (min) to 10 (max) in 
+                this specification, but the implementation's fluxCapacitance hardware setting only supports values of "off" "medium" and
+                "full", then -10 should be mapped to "off", 10 should map to "full", and 0 should map to "medium". A request to change the 
+                value to 3 should be rounded down to the closest supported setting (0). 
+            </p>
+
+            <section>
+                <h3><code>MediaSettingsRange</code> interface</h3>
+                <dl class="idl" title="interface MediaSettingsRange">
+                    <dt>readonly attribute any max</dt>
+                    <dd>The maximum value of this setting. The type of value is specific to the setting.</dd>
+                    <dt>readonly attribute any min</dt>
+                    <dd>The minimum value of this setting. The type of value is specific to the setting.</dd>
+                    <dt>readonly attribute any initial</dt>
+                    <dd>The initial value of this setting. When the object associated with this setting is first made available
+                        to the application, the current value of the setting should be set to the initial value.
+                        For example, in a browsing scenario, if one web site changes this setting and a subsequent web site
+                        gets access to this same setting, the setting should have been reset back to its initial value.
+                    </dd>
+                    <dt>void request(any value, optional boolean manditory)</dt>
+                    <dd>Creates an internal constraint based on the setting name with the provided value, adds that constraint
+                        into the pending constraint structure (to the MediaTrackConstraint array by default or replaces an entry
+                        in the MediaTrackConstraintSet if the manditory flag is set) and queues a task (if not already queued) to 
+                        process the pending constraint structure at the conclusion of this task.
+                        <p>The manditory parameter defaults to false.</p>
+                    </dd>
+                </dl>
+            </section>
+
+            <section>
+                <h3><code>MediaSettingsList</code> interface</h3>
+                <dl class="idl" title="interface MediaSettingsList">
+                    <dt>readonly attribute unsigned long length</dt>
+                    <dd>The length of the enuerated values that this setting may assume.</dd>
+                    <dt>getter any item(unsigned long index)</dt>
+                    <dd>Retrieves the value of the <code>index</code>ed enumerated item of this setting.</dd>
+                    <dt>readonly attribute any initial</dt>
+                    <dd>The initial value of this setting. When the object associated with this setting is first made available
+                        to the application, the current value of the setting should be set to the initial value.
+                        For example, in a browsing scenario, if one web site changes this setting and a subsequent web site
+                        gets access to this same setting, the setting should have been reset back to its initial value.
+                    </dd>
+                    <dt>void request(any value, optional boolean manditory)</dt>
+                    <dd>Creates an internal constraint based on the setting name with the provided value, adds that constraint
+                        into the pending constraint structure (to the MediaTrackConstraint array by default or replaces an entry
+                        in the MediaTrackConstraintSet if the manditory flag is set) and queues a task (if not already queued) to 
+                        process the pending constraint structure at the conclusion of this task.
+                        <p>The manditory parameter defaults to false.</p>
+                    </dd>
+                </dl>
+            </section>            
+        </section>
+
+        <section>
+            <h2>Basic settings for pictures and video devices</h2>
+
+            <p>Settings (read/writable) are defined as separate properties from their read-only counterparts. This allows for 
+                a variety of benefits: 
+            </p>
+
+            <ul>
+                <li>Some read-only settings can be surfaced on super-interfaces (like VideoStreamTrack) to benefit non-device 
+                    centric tracks.</li>
+                <li>Some read-only settings have no corresponding read/write version (for example "facing" cannot be changed).</li>
+                <li>Some read/write settings have no (or do not really require) a similar read-only value (for example, dimensions
+                is already reported separately as width/height).</li>
+                <li>Simple to access read-only settings are more convenient (versus accessing an object to then get the propery).</li>
+            </ul>
+    
+            <p class="note">These are pluralized for compatness and easy identification as a "setting". The more verbose
+                "widthSettings", "horizontalAspectRatioSettings", "orientationSettings", etc., were considered (and may still be 
+                considered).
+            </p>
+
+            <div class="note">The following settings have been proposed, but are not included in this version to keep the 
+                initial set of settings scoped to those that:
+                
+                <ol>
+                    <li>cannot be easily computed in post-processing</li>
+                    <li>are not redundant with other settings</li>
+                    <li>are settings found in nearly all devices (common)</li>
+                    <li>can be easily tested for conformance</li>
+                </ol>
+                Each setting also includes a brief explanitory rationale for why it's not included:
+                <ol>
+                    <li><code>width</code> - I've used "dimension" for the setting instead, since resolutions of the camera are nearly 
+                        always in step-wise pairs of width/height combinations. These are thus an enumerated type rather than
+                        a range continuum of possible width/height (independent) pairs.
+                    </li>
+                    <li><code>height</code> - see width explanation</li>
+                    <li><code>horizontalAspectRatio</code> - easily calculated based on width/height in the dimension values</li>
+                    <li><code>verticalAspectRatio</code> - see horizontalAspectRatio explanation</li>
+                    <li><code>orientation</code> - can be easily calculated based on the width/height values and the current rotation</li>
+                    <li><code>aperatureSize</code> - while more common on digital cameras, not particularly common on webcams (major use-case 
+                        for this feature)</li>
+                    <li><code>shutterSpeed</code> - see aperatureSize explanation</li>
+                    <li><code>denoise</code> - may require specification of the algorithm processing or related image processing filter required
+                        to implement.
+                    </li>
+                    <li><code>effects</code> - sounds like a v2 or indpendent feature (depending on the effect).</li>
+                    <li><code>faceDetection</code> - sounds like a v2 feature. Can also be done using post-processing techniques (though
+                        perhaps not as fast...)
+                    </li>
+                    <li><code>antiShake</code>  - sounds like a v2 feature.</li>
+                    <li><code>geoTagging</code> - this can be independently associated with a recorded picture/video/audio clip using the 
+                        Geolocation API. Automatically hooking up Geolocation to Media Capture sounds like an exercise for v2
+                        given the possible complications.
+                    </li>
+                    <li><code>highDynamicRange</code> - not sure how this can be specified, or if this is just a v2 feature.</li>
+                    <li><code>skintoneEnhancement</code> - not a particularly common setting.</li>
+                    <li><code>shutterSound</code> - Can be accomplished by syncing custom audio playback via the &lt;audio> tag if desired.
+                        By default, there will be no sound issued.
+                    </li>
+                    <li><code>redEyeReduction</code> - photo-specific setting. (Could be considered if photo-specific settings
+                        are introduced.)
+                    </li>
+                    <li><code>meteringMode</code> - photo-specific setting. (Could be considered if photo-specific settings
+                        are introduced.)</li>
+                    <li><code>iso</code> - photo-specific setting. while more common on digital cameras, not particularly common on webcams (major use-case 
+                        for this feature)</li>
+                    <li><code>sceneMode</code> - while more common on digital cameras, not particularly common on webcams (major use-case 
+                        for this feature)</li>
+                    <li><code>antiFlicker</code> - not a particularly common setting.</li>
+                    <li><code>zeroShutterLag</code> - this seems more like a <em>hope</em> than a setting. I'd rather just have implementations
+                        make the shutter snap as quickly as possible after takePicture, rather than requiring an opt-in/opt-out
+                        for this setting.
+                    </li>
+                </ol>
+                The following settings are up for debate in my opinion:
+                <ol>
+                    <li>exposure</li>
+                    <li>exposureCompensation (is this the same as exposure?)</li>
+                    <li>autoExposureMode</li>
+                    <li>brightness</li>
+                    <li>contrast</li>
+                    <li>saturation</li>
+                    <li>sharpness</li>
+                    <li>evShift</li>
+                    <li>whiteBalance</li>
+                </ol>
+                <p>Some of the above settings <em>are</em> available as constraints, and so are included in the proposed set of constraints in the 
+                    last section.
+                </p>
+            </div>
+        
+            <section>
+                <h3><code>PictureAndVideoSettings</code> mix-in interface</h3>
+                <pre><code>VideoDeviceTrack</code> implements <code>PictureAndVideoSettings</code>;</pre>
+                <pre><code>PictureDeviceTrack</code> implements <code>PictureAndVideoSettings</code>;</pre>
+                <dl class="idl" title="[NoInterfaceObject] interface PictureAndVideoSettings">
+                    <dt>readonly attribute MediaSettingsList dimensions</dt>
+                    <dd>The MediaSettingsList reports values of type VideoDimensionDict. The width/height reported are of the 
+                        camera's sensor, not reflecting a particular orientation.</dd>
+                    <dt>readonly attribute unsigned long rotation</dt>
+                    <dd>The current rotation value in use by the camera. If not supported, the property returns the 
+                        value 0.</dd>
+                    <dt>readonly attribute MediaSettingsList? rotations</dt>
+                    <dd>The MediaSettingsList reports values of type unsigned long. (0-90-180-270) degrees).
+                        <p class="issue">Rotation makes me think I could set this to 45 degrees or some such. Maybe there's a 
+                            better setting name for this. I only want to support right-angles.
+                        </p>
+                    </dd>
+                    <dt>readonly attribute float zoom</dt>
+                    <dd>The current zoom scale value in use by the camera. If the zooms property is not available (not 
+                        supported), then this property will always return 1.0.
+                        <p class="issue">In the case that a camera device supports both optical and digital zoom, does it make sense
+                            to have just one property? I expect this to be the "digitalZoom" version, which is more common on devices.
+                        </p>
+                    </dd>
+                    <dt>readonly attribute MediaSettingsRange? zooms</dt>
+                    <dd>The MediaSettingsRange reports values of type float. (initial value is 1. The float value is a scale
+                        factor, for example 0.5 is zoomed out by double, while 2.0 is zoomed in by double. Requests should be
+                        rounded to the nearest supporting zoom factor by the implementation (when zoom is supported).
+                    </dd>
+                    <dt>readonly attribute VideoFocusModeEnum focusMode</dt>
+                    <dd>The camera's current focusMode state.</dd>
+                    <dt>readonly attribute MediaSettingsList? focusModes</dt>
+                    <dd>The MediaSettingsList reports values of type VideoFocusModeEnum (less the "notavailable" value). The 
+                        initial value is "auto".</dd>
+                    <dt>readonly attribute VideoFillLightModeEnum fillLightMode</dt>
+                    <dd>The camera's current fill light mode.
+                        <p class="note">fillLight seemed more appropriate a term to use for both cameras and photo settings.</p>
+                    </dd>
+                    <dt>readonly attribute MediaSettingsList? fillLightModes</dt>
+                    <dd>The MediaSettingsList reports values of type VideoFillLightModeEnum (less the "notavailable" value). 
+                        The initial value is "auto".</dd>
+                </dl>
+            </section>
+
+            <section>
+                <h3><code>VideoDimensionDict</code> dictionary</h3>
+                <dl class="idl" title="dictionary VideoDimensionDict">
+                    <dt>unsigned long width</dt>
+                    <dd>A supported camera width (long axis).</dd>
+                    <dt>unsigned long height</dt>
+                    <dd>A supported camera height (short axis).</dd>
+                </dl>
+            </section>
+
+            <p class="note">The following enums had many more values in the prior proposal, but in the interest of testing,
+                I've scoped the initial list to those that seem most easily testable.
+            </p>
+
+            <section>
+                <h3><code>VideoFocusModeEnum</code> enumeration</h3>
+                <dl class="idl" title="enum VideoFocusModeEnum">
+                    <dt>notavailable</dt>
+                    <dd>This camera does not have an option to change focus modes.</dd>
+                    <dt>auto</dt>
+                    <dd>The camera auto-focuses.</dd>
+                    <dt>manual</dt>
+                    <dd>The camera must be manually focused.</dd>
+                </dl>
+            </section>
+
+            <section>
+                <h3><code>VideoFillLightModeEnum</code> enumeration</h3>
+                <dl class="idl" title="enum VideoFillLightModeEnum">
+                    <dt>notavailable</dt>
+                    <dd>This camera does not have an option to change fill light modes (e.g., the camera does not have a flash).</dd>
+                    <dt>auto</dt>
+                    <dd>The camera's fill light will be enabled when required (typically low light conditions). Otherwise it will be 
+                        off.
+                    </dd>
+                    <dt>off</dt>
+                    <dd>The camera's fill light will not be used.</dd>
+                    <dt>on</dt>
+                    <dd>The camera's fill light will be turned on until this setting is changed again, or the underlying track object
+                        has ended.
+                    </dd>
+                </dl>
+            </section>
+        </section>
+
+        <section>
+            <h2>Expanded settings for video devices</h2>
+
+            <section>
+                <h3><code>VideoDeviceTrack</code> partial interface</h3>
+                <dl class="idl" title="partial interface VideoDeviceTrack">
+                    <dt>readonly attribute float framesPerSecond</dt>
+                    <dd>The camera's currently configured (estimated) framesPerSecond.</dd>
+                    <dt>readonly attribute MediaSettingsRange? framesPerSeconds</dt>
+                    <dd>The MediaSettingRange reports values of type float.
+                        <p class="issue">I wonder if this should just be a MediaSettingsList with the common values of 15, 30, and 60. Are
+                            there really any other values coming from hardware?
+                        </p>
+                    </dd>
+                </dl>
+            </section>
+        </section>
+
+        <section>
+            <h2>Settings for audio devices</h2>
+
+            <p class="note">My previous proposal included a "bassTone" and "trebleTone" setting value, but on reflection, those settings
+                are more relevant to playback than to microphone device settings. Those settings have been removed.
+            </p>
+            <section>
+                <h3><code>AudioDeviceTrack</code> partial interface</h3>
+                <dl class="idl" title="partial interface AudioDeviceTrack">
+                    <dt>readonly attribute MediaSettingsRange? levels</dt>
+                    <dd>The MediaSettingRange reports values of type unsigned long.</dd>
+                </dl>
+            </section>
+        </section>
+
+        <section>
+            <h2>Tracking the result of constraint application</h2>
+
+            <section>
+                <h3><code>MediaConstraintResultEventHandlers</code> mix-in interface</h3>
+                <pre><code>AudioDeviceTrack</code> implements <code>MediaConstraintResultEventHandlers</code>;</pre>
+                <pre><code>VideoDeviceTrack</code> implements <code>MediaConstraintResultEventHandlers</code>;</pre>
+                <pre><code>PictureDeviceTrack</code> implements <code>MediaConstraintResultEventHandlers</code>;</pre>
+                <pre><code>MediaDeviceList</code> implements <code>MediaConstraintResultEventHandlers</code>;</pre></pre>
+                <dl class="idl" title="[NoInterfaceObject] interface MediaConstraintResultEventHandlers">
+                    <dt>attribute EventHandler onconstrainterror</dt>
+                    <dd>Register/unregister for "constrainterror" events. The handler should expect to get a ConstraintErrorEvent object as its first
+                        parameter. The event is fired asynchronously after [potentially many] settings change requests are made but resulted in 
+                        one or more failures to meet those constraints. The ConstraintErrorEvent reports the name of the settings that could not be 
+                        applied.</dd>
+                    <dt>attribute EventHandler onconstraintsuccess</dt>
+                    <dd>Register/unregister for "constraintsuccess" events. The handler should expect to get a DeviceEvent object as its first
+                        parameter. The event is fired asynchronously after the [potentially many] settings change requests are made and applied 
+                        successfully. Note, if any one setting change fails, then the "constrainterror" event fires instead. The DeviceEvent 
+                        will fire on the track making the settings request (with the device attribute referring to the same object), with the 
+                        exception of the MediaDeviceList (see the MediaDeviceList's select() API).
+                    </dd>
+                </dl>
+            </section>
+
+            <section>
+                <h3><code>ConstraintErrorEvent</code> interface</h3>
+                <dl class="idl" title="[Constructor(DOMString type, optional ConstraintErrorEventInit eventInitDict)] interface ConstraintErrorEvent : Event">
+                    <dt>readonly attribute DOMString[] optionalConstraints</dt>
+                    <dd>A list of optional contraints that failed or succeeded (depending on the event type).</dd>
+                    <dt>readonly attribute DOMString[] manditoryConstraints</dt>
+                </dl>
+            </section>
+
+            <section>
+                <h3><code>ConstraintErrorEventInit</code> dictionary</h3>
+                <dl class="idl" title="dictionary ConstraintErrorEventInit : EventInit">
+                    <dt>sequence&lt'DOMString> optionalConstraints</dt>
+                    <dd>List of optional constraints to populate into the ConstraintErrorEvent object's optionalConstraints readonly attribute.</dd>
+                    <dt>sequence&lt'DOMString> manditoryConstraints</dt>
+                    <dd>List of manditory constraints to populate into the ConstraintErrorEvent object's manditoryConstraints readonly attribute.</dd>
+                </dl>
+            </section>
+        </section>
+    </section>
+
+    <section>
+        <h1>Device Lists</h1>
+
+        <p>One common problem with all my previous proposals, and with the existing model for using getUserMedia to request access to 
+            additional devices, is the problem of discovery of multiple devices. As I understand it, 
+            <a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html#implementation-suggestions">the existing recommendation</a>
+            relies on "guessing" by making a second (or third, etc.) request to getUserMedia for access to additional devices. This 
+            model has two primary advantages:</p>
+        
+        <p>First, it ensures privacy by making sure that each device request could be approved by the user. I say "could" because there
+            is no current requirement that the user agent be involved, especially when re-requesting a device type that was already approved,
+            for example, a second "video" device. I surmise that a request for a different class of device ("audio", when exclusive "video" was 
+            previously approved), would be cause for an implementation to ask the user for approval.
+        </p>
+
+        <p>Second, it ensure privacy by not leaking any information about additional devices until the code has sucessfully requested a device.</p>
+
+        <p>Unfortunately, this model does not provide a means for discovery of additional devices. Such a discovery mechanism could be 
+            trivially added to this proposal in the form of a device-specific "totalDevices" property, but there's an opportunity for 
+            considering a solution that both streamlines the usability of multiple devices while maintaining the privacy benefits of the current
+            model.
+        </p>
+
+        <p>The device list is such a proposal. The device list offers the following benefits:</p>
+
+        <ul>
+            <li>Privacy of multiple devices is maintained (multiple device discovery is not available until the user has approved at least
+                one device, and then discovery is only permitted for devices matching its device type).
+            </li>
+            <li>Multiple device discovery is as easy as a hypothetical "totalDevices" property.</li>
+            <li>Multiple devices (of a common type) can be used/switched-to directly without needing to re-request a second MediaStream from
+                getUserMedia.</li>
+            <li>Provides a mechanism for discovery of "new" devices at run-time (for example, when a USB camera is plugged-in while the 
+                application is running).</li>
+            <li>Just like getUserMedia, it allows for the application of constraints against a set of devices with visibility into the results.</li>
+        </ul>
+
+        <p>A device list is merely a list of all AudioDeviceTrack or VideoDeviceTrack objects that are available to the application. Device lists are 
+            device-type specific, so there is one device list for all AudioDeviceTrack objects and one device list for all VideoDeviceTrack objects. 
+            There is only one instance of each of these lists at any time, and the lists are <em>LIVE</em> (meaning the user agent keeps them up-to-date
+            at all times). Device track objects are added to the list as soon as they are available to the application (e.g., as soon as they are 
+            plugged-in) A device track object in the device list will have a readyState set to either <code>LIVE</code> or <code>MUTED</code>). Device 
+            tracks are removed from the list when they are unplugged, or otherwise disassociated with their device source such that their readyState 
+            changes to <code>ENDED</code>.
+        </p>
+
+        <p>Every non-ended device track object will belong to a device list. Of course, the same device track object may also belong to zero or more
+            <code>MediaStreamTrackList</code> objects. The device list provides the one-stop list for all devices of that type regardless of which 
+            MediaStream's (if any) the device track objects also belong to.
+        </p>
+
+        <section>
+            <h3><code>MediaDeviceList</code> interface</h3>
+            <dl class="idl" title="interface MediaDeviceList : EventTarget">
+                <dt>readonly attribute unsigned long length</dt>
+                <dd>The number of devices in this list (including those that are <code>MUTED</code> and <code>LIVE</code>.</dd>
+                <dt>getter any item(unsigned long index)</dt>
+                <dd>Retrieves a device object (an AudioDeviceTrack if this is the audio devices list or a VideoDeviceTrack if this is the video devices list).</dd>
+                <dt>readonly attribute unsigned long totalEnabled</dt>
+                <dd>The number of devices in this list that whose <code>readyState</code> is in the <code>LIVE</code> state.</dd>
+                <dt>void select(MediaTrackConstraints constraints)</dt>
+                <dd>Apply a set of optional and/or manditory constraints to the set of devices in the device list, with the goal of 
+                    selecting a single device. This will queue a task to fire either a "constrainterror" or "constraintsuccess" event 
+                    depending on the result. The "constraintsuccess" event includes the selected device on the DeviceEvent object's device
+                    attribute.
+                </dd>
+                <dt>attribute EventHandler ondeviceadded</dt>
+                <dd>Register/unregister for "deviceadded" events. The handler should expect to get a DeviceEvent object as its first
+                    parameter. The event is fired whenever a new video device (or audio device, depending on the device list) becomes available for use.
+                    This can happen when a new device is plugged in, for example. Prevoiusly ended device tracks are not re-used, and if the user agent 
+                    is able to re-purpose a physical device for use in the application, it fires the "deviceadded" event providing a new device track 
+                    object (in its default initial state).</dd>
+                <dt>attribute EventHandler ondeviceremoved</dt>
+                <dd>Register/unregister for "deviceremoved" events. The handler should expect to get a DeviceEvent object as its first
+                    parameter. The event is fired whenever an existing video device (or audio device, depending on the device list) moves into the 
+                    <code>ENDED</code> state. Note that before dispatching this event, the device in question is removed from the device list.
+                </dd>
+            </dl>
+        </section>
+
+        <section>
+            <h3><code>DeviceEvent</code> interface</h3>
+            <dl class="idl" title="[Constructor(DOMString type, optional DeviceEventInit eventInitDict)] interface DeviceEvent : Event">
+                <dt>readonly attribute any device</dt>
+                <dd>Contains a reference to the relevant device.</dd>
+            </dl>
+        </section>
+
+        <section>
+            <h3><code>DeviceEventInit</code> dictionary</h3>
+            <dl class="idl" title="dictionary DeviceEventInit : EventInit">
+                <dt>any device</dt>
+                <dd>Video or Audio device track used to initialize the "device" property on the DeviceEvent.</dd>
+            </dl>
+        </section>
+
+        <p>Device lists are only accessible from an existing device track object. In other words, the device list itself can only be accessed from 
+            one of the devices contained within it (this is an inside-to-outside reference). To help orient the traversal of the list, each device
+            track object includes a (dynaimcally updated) device index property. If a given device track transitions to the <coded>ENDED</coded>
+            state, then it will not belong to the device list any longer and its device index property becomes invalid (null); however, the device
+            list itself will still be accessible from that object.
+        </p>
+
+        <section>
+            <h2><code>DeviceListAccess</code> mix-in interface</h2>
+            <pre><code>AudioDeviceTrack</code> implements <code>DeviceListAccess</code>;</pre>
+            <pre><code>VideoDeviceTrack</code> implements <code>DeviceListAccess</code>;</pre>
+            <dl class="idl" title="[NoInterfaceObject] interface DeviceListAccess">
+                <dt>readonly attribute MediaDeviceList devices</dt>
+                <dd>A reference to the device list for the associated video (or audio) device.</dd>
+                <dt>readonly attribute unsigned long? deviceIndex</dt>
+                <dd>The current index of this device in the device list. This value can be dynamically changed when other devices are added to (or
+                    removed from) the device list. If this device is removed from the device list (because it enters the <code>ENDED</code> state),
+                    then the deviceIndex property returns null to signal that this device is not in the device list any longer.
+                </dd>
+            </dl>
+        </section>
+    </section>
+
+    <section>
+        <h1>Constraints for navigator.getUserMedia/MediaDeviceList.select</h1>
+
+        <p>This proposal defines several constraints for use with video and audio devices.</p>
+
+        <p>These constraints are applied against the device's <em>range</em> or set of
+            <em>enumerated</em> possible settings, but do not result in a setting change 
+            on the device. To change actual settings, use the request() API on each setting.
+        </p>
+
+        <section>
+            <h2>Video Constraints</h2>
+
+            <p>The following constraints are applicable to video devices</p>
+
+            <section>
+                <h3><code>VideoConstraints</code> dictionary</h3>
+                <dl class="idl" title="dictionary VideoConstraints : MediaTrackConstraintSet">
+                    <dt>(unsigned long or MinMaxULongSubConstraint) width</dt>
+                    <dd>A device that supports the desired width or width range.</dd>
+                    <dt>(unsigned long or MinMaxULongSubConstraint) height</dt>
+                    <dd>A device that supports the desired height or height range.</dd>
+                    <dt>(float or MinMaxFloatSubConstraint) horizontalAspectRatio</dt>
+                    <dd>A device that supports the desired horizontal aspect ratio (width/height)</dd>
+                    <dt>(float or MinMaxFloatSubConstraint) verticalAspectRatio</dt>
+                    <dd>A device that supports the desired vertical aspect ratio (height/width)</dd>
+                    <dt>unsigned long rotation</dt>
+                    <dd>A device that supports the desired rotation.</dd>
+                    <dt>(float or MinMaxFloatSubConstraint) zoom</dt>
+                    <dd>A device that supports the desired zoom setting.</dd>
+                    <dt>VideoFocusModeEnum focusMode</dt>
+                    <dd>A device that supports the desired focus mode.</dd>
+                    <dt>VideoFillLightModeEnum fillLightMode</dt>
+                    <dd>A device that supports the desired fill light (flash) mode.</dd>
+                    <dt>(float or MinMaxFloatSubConstraint) framesPerSecond</dt>
+                    <dd>A device that supports the desired frames per second.</dd>
+                </dl>
+            </section>
+        </section>
+
+        <section>
+            <h2>Audio Constraints</h2>
+
+            <p>The following constraints are applicable to audio devices</p>
+
+            <section>
+                <h3><code>AudioConstraints</code> dictionary</h3>
+                <dl class="idl" title="dictionary AudioConstraints : MediaTrackConstraintSet">
+                    <dt>(unsigned long or MinMaxULongSubConstraint) level</dt>
+                    <dd>A device that supports the desired level or level range.</dd>
+                </dl>
+            </section>
+
+        </section>
+
+        <section>
+            <h2>Common sub-constraint structures</h2>
+
+            <section>
+                <h3><code>MinMaxULongSubConstraint</code> dictionary</h3>
+                <dl class="idl" title="dictionary MinMaxULongSubConstraint">
+                    <dt>unsigned long max</dt>
+                    <dt>unsigned long min</dt>
+                </dl>
+            </section>
+
+            <section>
+                <h3><code>MinMaxFloatSubConstraint</code> dictionary</h3>
+                <dl class="idl" title="dictionary MinMaxFloatSubConstraint">
+                    <dt>float max</dt>
+                    <dt>float min</dt>
+                </dl>
+            </section>
+
+            <section>
+                <h3><code>VideoOrientationEnum</code> enumeration</h3>
+                <dl class="idl" title="enum VideoOrientationDict">
+                    <dt>landscape</dt>
+                    <dd>The long axis of the "effective" video (width/height + rotation) is landscape.</dd>
+                    <dt>portrait</dt>
+                    <dd>The long axis of the "effective" video (width/height + rotation) is portrait.</dd>
+                </dl>
+            </section>
+        </section>
+    </section>
+
+    <section>
+        <h1></h1>
+    </section>
+  </body>
+</html>
+
+
