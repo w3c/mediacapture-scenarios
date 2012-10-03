@@ -12,7 +12,7 @@
                             company: "Microsoft Corp.",
                             url: "mailto:travis.leithead@microsoft.com?subject=MediaStream Capture Scenarios Feedback",
                             companyURL: "http://www.microsoft.com"}],
-                  publishDate:  "2012-03-06",
+                  publishDate:  "2012-08-31",
                   edDraftURI:   "http://dvcs.w3.org/hg/dap/raw-file/tip/media-stream-capture/scenarios.html",
                   previousPublishDate: null,
                   prevED: "http://dvcs.w3.org/hg/dap/raw-file/a8e255b904df/media-stream-capture/scenarios.html",
@@ -158,7 +158,57 @@
          networking and peer-to-peer RTC scenarios.
       </p>
     </section>
-
+    <section>
+      <h2>Concepts and Definitions</h2>
+      <p>
+         This section describes some terminology and concepts that frame an understanding of the design considerations 
+         that follow. It is helpful to have a common understanding of some core concepts to ensure that the prose is
+         interpreted uniformly.
+      </p>
+       <dl>
+         <dt> Media Stream and Stream</dt>
+         <dd>This document uses these terms interchangeably.  They are intended to be
+           a generalization of the more specific <code>MediaStream</code> interface as currently defined in the 
+           WebRTC spec. Generally, a stream can be understood as a tube or conduit between sources (the stream's 
+           generators) and destinations (the sinks). Streams don't generally include any type of significant buffer, that is, 
+           content pushed into the stream from a source does not collect into any buffer for later collection. Rather, content 
+           is simply dropped on the floor if the stream is not connected to a sink.  The content flowing through a media
+           stream is not in any particular underlying format.  (Note that the    
+        the WebRTC specification makes a similar assertion about the content flowing
+        through a <code>MediaStream</code>.)
+        </dd>
+        <dt>Media Capture versus Recording</dt>
+        <dd>This document uses 'media capture' to refer to the process of obtaining a stream of data
+        	from a device.  As noted above, that data is not assumed to be in any particular format.  
+        	'Recording', on the other hand, refers to the capture of media under application control
+        	and in a specific, known, format.  Such data can be written to a local file or sent to a
+        	remote destination.</dd>
+        <dt>Shared devices, devices with manipulatable state, and virtualization</dt>
+        <dd>
+           <p>A shared device (in this document) is a media device (camera or microphone) that is usable by more than 
+             one application at a time. When considering sharing a device (or not), an operating system must evaluate
+             whether applications consuming the device will have the ability to manipulate the state of the device. A shared device 
+             with manipulatable state has the side-effect of allowing one application to make changes to a device that will then
+             affect other applications who are also sharing.
+           </p>
+           <p>To avoid these effects and unexpected state changes in applications, operating systems may virtualize a 
+             device. Device virtualization (in a simplistic view) is an abstraction of the actual device, so that the abstraction
+             is provided to the application rather than providing the actual device. When an application manipulates the state 
+             of the virtualized device, changes occur only in the virtualized layer, and do not affect other applications that 
+             may be sharing the device.
+           </p>
+           <p>Audio devices are commonly virtualized. This allows many applications to share the audio device and manipulate its
+             state (e.g., apply different input volume levels) without affecting other applications.
+           </p>
+           <p>Video virtualization is more challenging and not as common. For example, the Microsoft Windows operating system does
+             not virtualize webcam devices, and thus chooses not to share the webcam between applications. As a result, in order 
+             for an application to use the webcam either 1) another application already using the webcam must yield it up or 2) 
+             the requesting application may be allowed to "steal" the device.
+           </p>
+        </dd>
+       </dl>
+      </p>
+    </section>
     <section>
       <h2>Scenarios</h2>
       <p>
@@ -187,15 +237,6 @@
         <p>Requirements: <a href="#p1">P1</a>, <a href="#p1">P2</a>, <a href="#lm1">LM1</a>, 
         	<a href="#lm2">LM2</a>,<a href="#lm3">LM3</a>,<a href="#LM12">LM12</a>, <a href="#mc1">MC1</a>,
         	<a href="#mc2">MC2</a>.</p>
-        <ol>
-           <li>Browser requires webcam and microphone permissions (one-time-use example)</li>
-           <li>Local webcam video preview</li>
-           <li>Image capture from webcam</li>
-           <li>Image resizing after capture (scenario out of scope)</li>
-           <li>Local microphone preview via equalizer visualization</li>
-           <li>Local microphone stops capturing automatically after a period of silence</li>
-           <li>Upload captured image and audio to server</li>
-        </ol>
         
 
         <section>
@@ -227,19 +268,6 @@
          	<a href="#rm2">RM2</a>, <a href="#rm3">RM3</a>,<a href="#rm4">RM4</a>, <a href="#mc3">MC3</a>,
          	<a href="#mc6">MC6</a>.
          	</p>
-         <ol>
-            <li>Browser persisted webcam and microphone permissions</li>
-            <li>Local webcam video preview</li>
-            <li>Approval/authentication before sending/receiving real-time video between browsers</li>
-            <li>Remote connection video + audio preview</li>
-            <li>Video capture from local webcam + microphone</li>
-            <li>Capture combined audio from local microphone/remote connections</li>
-            <li>Persisting the capture while in a background tab</li>
-            <li>Disabling video on a video+audio remote connection</li>
-            <li>Switching a running video+audio capture between local/remote connection without interruption</li>
-            <li>Adding an video+audio remote connection to a running video capture</li>
-            <li>Upload of video/audio capture to server while capture is running</li>
-         </ol>
 
          <section>
           <h4>Variations</h4>
@@ -264,15 +292,6 @@
         <p>Requirements:<a href="#lm1">LM1</a>, <a href="#lm6">LM6</a>, <a href="#lm7">LM7</a>,
         	<a href="#mc1">MC1</a>,
         	<a href="#mc4">MC4</a>, <a href="#mc5">MC5</a>. </p>
-        <ol>
-            <li>Image frames can be extracted from local webcam video</li>
-            <li>Modified image frames can be inserted/combined into a video capture</li>
-            <li>Assign (and check for) a specific video capture encoding format</li>
-            <li>Local webcam video preview</li>
-            <li>Enforce (or check for) video capture size constraints and recording time limits</li>
-            <li>Set the webcam into a low-resolution (320x200 or as supported by the hardware) capture mode</li>
-            <li>Captured video format is available for upload prerequisite inspection.</li>
-        </ol>
 
          <section>
           <h4>Variations</h4>
@@ -298,15 +317,7 @@
          </p>
          <p>Requirements: <a href="#p2">P2</a>, <a href="#lm9">LM9</a>,
          	<a href="#mc1">MC1</a>, <a href="#mc6">MC6</a>, <a href="#mc7">MC8</a>.</p>
-         <ol>
-            <li>Web app presents multiple webcams and microphones for activation</li>
-            <li>Local video previews from two separate webcams simultaneously</li>
-            <li>Image capture from webcam (high resolution)</li>
-            <li>Video capture from local webcam + microphone</li>
-            <li>Switching a running video+audio capture between two local webcams without interruption</li>
-            <li>Use of battery status to automatically manage video and audio capture</li>
-            <li>Recording termination (error recovery) when camera(s) stop.</li>
-         </ol>
+      
       
         <section>
           <h4>Variations</h4>
@@ -320,9 +331,7 @@
             evening news.
            </p>
            <p>Requirements: <a href="#mc9">MC9</a>.</p>
-           <ol>
-            <li>Capture from three cameras + microphone at the same time (to separate captures)</li>
-           </ol>
+     
           </section>
           <section>
            <h5>Picture-in-picture (capture a composed video)</h5>
@@ -334,10 +343,7 @@
             Albert is happy that he didn't miss the moment by having to switch between cameras.
            </p>
            <p>Requirements: <a href="#lm9">LM9</a>, <a href="#lmc10">MC10</a>.</p>
-           <ol>
-            <li>Preview two webcams at the same time</li>
-            <li>Combining two webcams + microphone into one capture</li>
-           </ol>
+        
           </section>
         </section>
       </section>
@@ -365,21 +371,7 @@
         	<a href="#rm5">RM5</a>, <a href="#rm6">RM6</a>, <a href="#mc1">MC1</a>, <a href="#mc6">MC6</a>,
         	<a href="#mc11">MC11</a>, <a href="#mc12">MC12</a>, <a href="#mc13">MC13</a>.        	
         	 </p>
-        <ol>
-            <li>Approval/authentication before sending/receiving real-time video between browsers</li>
-            <li>Remote connection video + audio preview</li>
-            <li>Browser requires webcam(s) and microphone permissions before use</li>
-            <li>Local webcam video preview</li>
-            <li>Video capture from local webcam + microphone</li>
-            <li>Video capture from remote connections (audio + video)</li>
-            <li>Capture combined audio from local microphone/remote connections</li>
-            <li>Comparing audio input level from among various local/remote connections</li>
-            <li>Switching a running video+audio capture between local webcam/remote connections without interruption</li>
-            <li>Send an image through a remote [video] connection</li>
-            <li>Pause/resume video+audio capture</li>
-            <li>Rewind captured video and re-play</li>
-            <li>Remote connection termination and removal of video+audio preview</li>
-        </ol>
+       
 
          <section>
           <h4>Variations</h4>
@@ -392,9 +384,7 @@
             source and send that video to the group as he demonstrates the UI elements.
            </p>
            <p>Requirements: <a href="#lm10">LM10</a>.</p>
-           <ol>
-            <li>Video capture from local screen/display</li>
-           </ol>
+         
           </section>          
         </section>
       </section>
@@ -412,9 +402,7 @@
             as if their competitor's devices were broken in order to convince users to purchase their own brand of webcam.
         </p>
         <p>Requirements: <a href="#p5">P5</a>.</p>
-        <ol>
-           <li>Browser requires webcam(s) and microphone permissions before use</li>
-        </ol>
+       
 
           <section>
           <h4>Variations</h4>
@@ -425,9 +413,9 @@
 
     <section>
       <h2>Requirements</h2>
-      <p>
+           		<p>PERMISSIONS</p>
       	<ol>
-      		<p>PERMISSIONS</p>
+ 
       		<li ><a name="p1">The UA must </a> request the user's permission before accessing any media devices.</li>
       		<li><a name="p2">The UA must </a>allow the user to grant permission to specific devices.  (Example: front camera is ok, back camera is not.)</li>
       		<li><a name="p3">The UA must </a>request the user's permission before sending or receiving  a media stream to or from another user.</li> 
@@ -447,106 +435,55 @@ time (silence, in this case).</li>
 <li><a name="lm7">The UA must </a>be able to insert image frames into a local video stream (or capture).</li>
 <li><a name="lm8">The UA must </a>be able to modify stream parameters such as size and frame rate within the
 	limits set by the local hardware. </li>
-	<li><a name="lm9">The UA must </a>be able to show previews of multiple local or remote streams simultaneously.</li>
+	<li><a name="lm9">The UA must </a>be able to display multiple local or remote streams simultaneously.</li>
 	<li><a name="lm10">The UA must </a>support the use of the local screen/display as a video source.</li>
 	<li><a name="lm11">The UA must </a>allow the user to pause or stop media streams via UXes (and not just the 
-		buttons on the underlying hardware.)</li>
+		buttons on the underlying hardware.)  The UX provided by the chrome must override any UX provided
+		by the Application. </li>
 		<li><a name="lm12">The UA must </a>provide a UX letting the user know when it is using one or more of
 			his media devices.</li>
 	</ol>
 
 <p>REMOTE MEDIA</p>
+<p>These requirements for remote media are outside the scope of the Media Capture task force, but are relevant to
+	the related WebRTC/rtcWeb work, which is a joint effort of the W3C and the IETF.  The <a href="http://datatracker.ietf.org/doc/draft-ietf-rtcweb-use-cases-and-requirements">
+		scenarios
+	and requirements document</a> for that effort contains requirements that are similar to those given here.
+	They are listed in parentheses after each item. .</p>
 <ol>
-<li><a name="rm1">The UA must </a>be able to transmit media to one or more remote sites and to receive media from them.</li>
-<li><a name="rm2">The UA must </a>be able to offer a preview of audio and video media received from a remote site.</li>
-<li><a name="rm3">The UA must </a>be able to stop or pause the reception and/or transmission of any media stream independent of any other streams.</li>
-<li><a name="rm4">The UA must </a>be able to add new remote media connections while a capture is running.  The new remote streams
-	may or may not be included in the capture. </li>
-	<li><a name="rm5">The UA must </a>be able to send or receive a still image over a video stream.</li>
-	<li><a name="rm6">The UA must </a>provide the Application with the parameters of all streams (for example, audio level). </li>
-<p>The following  requirement was suggested on the mailing list but is not part of any of the 
-	scenarios:</p>
-<li>Ability for user simply drag a image over a area of website, so the image is send to all of the other users</li>
+<li><a name="rm1">The UA must </a>be able to transmit media to one or more remote sites and to receive media from them. (rtcWeb: F2, F4, F11, F12)</li>
+<li><a name="rm2">The UA must </a>be able to play audio and video media received from a remote site. (rtcWeb: F4, F10)</li>
+<li><a name="rm3">The UA must </a>be able to stop or pause the reception and/or transmission of any media stream independent of any other streams. (rtcWeb: A8)</li>
+<li><a name="rm4">The UA must </a>be able to add new remote media connections while a recording is running.  The new remote streams
+	may or may not be included in the recording. </li>
+	<li><a name="rm5">The UA must </a>be able to send or receive a still image over a video stream. </li>
+	<li><a name="rm6">The UA must </a>provide the Application with the parameters of all streams (for example, audio level). (rtcWeb: F14, F38, A12, A14) </li>
+
 	</ol>
 
 
-<p>Media Capture</p>
+<p>RECORDING</p>
 <ol>
-<li><a name="mc1">The UA must </a>be able to capture local or remote audio streams, video streams or still images from a camera or microphone 
-	and store the result as a [local?] file.</li>
-<li><a name="mc2"> The UA must </a>enable the Application to trigger media capture either from a button click or a timer event.</li>
-<li><a name="mc3">The UA must </a>be able to send captured media to one or more remote locations while capture is running.</li>
-<li><a name="mc4">The UA must </a>enable the Application to select the capture format and resolution from those available on the local hardware.</li>
-<li><a name="mc5">the UA must </a>enable the Application to set size contraints and time limits on media capture. </li>
-<li><a name="mc6">The UA must </a>allow the user to switch capture between one or more local and remote streams without interruption.</li>
+<li><a name="mc1">The UA must </a>be able to record local or remote audio streams, video streams or still images from a camera or microphone 
+	and store the result as a file.</li>
+<li><a name="mc2"> The UA must </a>enable the Application to trigger recording either from a button click or a timer event.</li>
+<li><a name="mc3">The UA must </a>be able to send recorded media to one or more remote locations while recording is running.</li>
+<li><a name="mc4">The UA must </a>enable the Application to select the recording format and resolution from those available on the local hardware.</li>
+<li><a name="mc5">the UA must </a>enable the Application to set size contraints and time limits on recording. </li>
+<li><a name="mc6">The UA must </a>allow the user to switch recording between one or more local and remote streams without interruption.</li>
 <li><a name="mc7">The UA must </a>enable the Application to use device properties, such as battery level, to determine when to terminate media capture.</li>
-<li><a name="mc8">The UA must </a>enable error recovery in the case of premature termination of media capture.</li>
-<li><a name="mc9">The UA must </a>support simultaneous recording from multiple devices into separate captures.</li>
-<li><a name="mc10">The UA must </a>support simultaneous recording from multiple devices into a single capture. </li>
-<li><a name="mc11">The UA must </a>support the dynamic addition and deletion of  streams from a capture.</li>
-<li><a name="mc12">The UA must </a>enable the Application to pause and resume the capture of local or remote streams.</li>
-<li><a name="mc13">The UA must </a>enable the Application to rewind and replay a paused capture stream.</li>
-<p>The following three requirements were suggested on the mailing list but are not part of any of the 
-	scenarios:</p>
-<li>Ability for user to request recorded video/audio stream from secretary for preview or reference in discussion</li>
-<li>Ability for user or secretary to playback the capture video/audio to new comers to a arbitrary time point for his quickly catch-up</li>
-<li>Ability for user simply drag a image over video of other attendee to directly send the image(to other user without open a new window</li>
+<li><a name="mc8">The UA must </a>enable error recovery in the case of premature termination of recording.</li>
+<li><a name="mc9">The UA must </a>support simultaneous recording from multiple devices into separate recordings.</li>
+<li><a name="mc10">The UA must </a>support simultaneous recording from multiple devices into a single recording. </li>
+<li><a name="mc11">The UA must </a>support the dynamic addition and deletion of  streams from a recording.</li>
+<li><a name="mc12">The UA must </a>enable the Application to pause and resume the recording of local or remote streams.</li>
+<li><a name="mc13">The UA must </a>enable the Application to rewind and replay a paused recorded stream.</li>
+
 </ol>
-      </p>
+    
     </section>
     
-    <section>
-      <h2>Concepts and Definitions</h2>
-      <p>
-         This section describes some terminology and concepts that frame an understanding of the design considerations 
-         that follow. It is helpful to have a common understanding of some core concepts to ensure that the prose is
-         interpreted uniformly.
-      </p>
-       <dl>
-         <dt><code>MediaStream</code> vs "media stream" or "stream"</dt>
-         <dd>In some cases, I use these terms interchangeably; my usage of the term "media stream" or "stream" is intended as 
-           a generalization of the more specific <code>MediaStream</code> interface as currently defined in the 
-           WebRTC spec. Generally, a stream can be conceptually understood as a tube or conduit between sources (the stream's 
-           generators) and destinations (the sinks). Streams don't generally include any type of significant buffer, that is, 
-           content pushed into the stream from a source does not collect into any buffer for later collection. Rather, content 
-           is simply dropped on the floor if the stream is not connected to a sink. This document assumes the non-buffered view 
-           of streams as previously described.
-         </dd>
-         <dt><code>MediaStream</code> format</dt>
-         <dd>As stated in the WebRTC specification, the content flowing through a <code>MediaStream</code> is not in 
-            any particular underlying format:</dd>
-          <dd><blockquote>[The data from a <code>MediaStream</code> object does not necessarily have a canonical binary form; for 
-           example, it could just be "the video currently coming from the user's video camera". This allows user agents 
-           to manipulate media streams in whatever fashion is most suitable on the user's platform.]</blockquote></dd>
-          <dd>This document reinforces that view, especially when dealing with capturing of the <code>MediaStream</code> content 
-          and the potential interaction with the Streams API.
-        </dd>
-        <dt>Shared devices, devices with manipulatable state, and virtualization</dt>
-        <dd>
-           <p>A shared device (in this document) is a media device (camera or microphone) that is usable by more than 
-             one application at a time. When considering sharing a device (or not), an operating system must evaluate
-             whether applications consuming the device will have the ability to manipulate the state of the device. A shared device 
-             with manipulatable state has the side-effect of allowing one application to make changes to a device that will then
-             affect other applications who are also sharing.
-           </p>
-           <p>To avoid these effects and unexpected state changes in applications, operating systems may virtualize a 
-             device. Device virtualization (in a simplistic view) is an abstraction of the actual device, so that the abstraction
-             is provided to the application rather than providing the actual device. When an application manipulates the state 
-             of the virtualized device, changes occur only in the virtualized layer, and do not affect other applications that 
-             may be sharing the device.
-           </p>
-           <p>Audio devices are commonly virtualized. This allows many applications to share the audio device and manipulate its
-             state (e.g., apply different input volume levels) without affecting other applications.
-           </p>
-           <p>Video virtualization is more challenging and not as common. For example, the Microsoft Windows operating system does
-             not virtualize webcam devices, and thus chooses not to share the webcam between applications. As a result, in order 
-             for an application to use the webcam either 1) another application already using the webcam must yield it up or 2) 
-             the requesting application may be allowed to "steal" the device.
-           </p>
-        </dd>
-       </dl>
-      </p>
-    </section>
+
     
     <section>
       <h2>Design Considerations and Remarks</h2>
