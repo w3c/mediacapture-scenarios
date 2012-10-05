@@ -40,7 +40,10 @@
       This proposal describes additions and suggested changes to the 
         <a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html">Media Capture and Streams</a>
         specification in order to support the goal of device settings retrieval and modification. This proposal incorporates 
-        feedback (link) from three [link] prior [link] proposals [link] with the same goal.
+        <a href="http://lists.w3.org/Archives/Public/public-media-capture/2012Oct/0001.html">feedback</a> from three prior proposals with the same goal
+        [<a href="http://lists.w3.org/Archives/Public/public-media-capture/2012Aug/0143.html">v3</a>]
+        [<a href="http://lists.w3.org/Archives/Public/public-media-capture/2012Aug/0066.html">v2</a>]
+        [<a href="http://lists.w3.org/Archives/Public/public-media-capture/2012Jul/0069.html">v1</a>].
     </section>
 
     <section>
@@ -54,15 +57,15 @@
             <h2>Rationale</h2>
 
             The LocalMediaStream object currently extends MediaStream by adding a single method "stop()". In my prior proposals, this
-            object was radically altered in order to facilite several goals:
+            object was radically altered in order to facilitate several goals:
             <dl>
-                <dt>Provide a predicatable home for developers to find and modify device settings</dt>
+                <dt>Provide a predictable home for developers to find and modify device settings</dt>
                 <dd>A previous proposal went out of its way to strongly associate LocalMediaStream objects with devices. This 
                     seemed like a good design because local device configuration is always on the local media stream. This made
                     for a stable, dependable API surface for all local media stream instances (no guesswork).
                 </dd>
                 <dt>Prevent track-list mutations</dt>
-                <dd>A previous proposal also removed the track lists on local media streams (resulting in some dramatic inheritence
+                <dd>A previous proposal also removed the track lists on local media streams (resulting in some dramatic inheritance
                     changes). Mutable tracks lists on LocalMediaStream objects seemed like the wrong design considering the current 
                     thinking that a getUserMedia request would only ever produce a LocalMediaStream with at most one audio or video 
                     track. 
@@ -80,10 +83,10 @@
                     centric tracks a stop() API should be present on the tracks themselves.
                 </dd>
                 <dt>Mutable track lists</dt>
-                <dd>Mutable track lists were not a desireable feature while I was locked into considering the LocalMediaStream 
+                <dd>Mutable track lists were not a desirable feature while I was locked into considering the LocalMediaStream 
                     as strongly associated with device-control. What is actually necessary, is that there is a something immutable
                     associated with devices--that "something" doesn't necessarily need to be a LocalMediaStream or any MediaStream-like
-                    object at all! Once I unlocked that line of thinking, I began to experiement with the notion of a device list
+                    object at all! Once I unlocked that line of thinking, I began to experiment with the notion of a device list
                     which then ultimately brought back a use-case for having mutable track lists for MediaStream objects. (It did not
                     bring back a need for LocalMediaStream objects themselves though.)
                 </dd>
@@ -133,7 +136,7 @@
         <h1>New <code>MediaStreamTrack</code> (derived) types</h1>
 
         <p>This proposal consolidates settings directly into the tracks that are provided by devices. However, in order to
-            do this efficiently and in a future-extendible manner, the highly-generic MediaStreamTrack is now extended for
+            do this efficiently and in a future-extensible manner, the highly-generic MediaStreamTrack is now extended for
             specific characteristics of the devices it embodies, resulting in a hierarchy:
         </p>
 
@@ -168,7 +171,7 @@
                 picture mode, not for arbitrary video frame capture).
             </p>
 
-            <p>I'm intentionally keeping this interface as sparce as possible. Features about the video that can be calculated like
+            <p>I'm intentionally keeping this interface as sparse as possible. Features about the video that can be calculated like
                 aspect ratio are not provided.
             </p>
 
@@ -178,7 +181,7 @@
                     <dt>readonly attribute unsigned long width</dt>
                     <dd>The "natural" width (in pixels) of the video flowing through the track. In the case of a VideoDeviceTrack, this
                         value represents the current setting of the camera's sensor (still in terms of number of pixels). This value is 
-                        indpendent of the camera's rotation (if the camera's rotation setting is changed, it does not impact this value).
+                        independent of the camera's rotation (if the camera's rotation setting is changed, it does not impact this value).
                         For example, consider a camera setting with width of 1024 pixels and height of 768 pixels. If the camera's rotation
                         setting is changed by 90 degrees, the width is still reported as 1024 pixels. However, a &lt;video> element used
                         to preview this track would report a width of 768 pixels (the effective width with rotation factored in).
@@ -359,8 +362,8 @@
             </p>
 
             <p>The request() API also has a flag used to signal to the UA that the requested setting change should be 
-                manditory. In this case, the constraint is added to the manditory set, and replaces an existing setting in 
-                that set if the names collide (last setting wins). My expectation is that if a manditory constraint cannot
+                mandatory. In this case, the constraint is added to the mandatory set, and replaces an existing setting in 
+                that set if the names collide (last setting wins). My expectation is that if a mandatory constraint cannot
                 be satisfied, then the UA must end that stream as a result of the failure.
             </p>
 
@@ -400,12 +403,12 @@
                         For example, in a browsing scenario, if one web site changes this setting and a subsequent web site
                         gets access to this same setting, the setting should have been reset back to its initial value.
                     </dd>
-                    <dt>void request(any value, optional boolean manditory)</dt>
+                    <dt>void request(any value, optional boolean mandatory)</dt>
                     <dd>Creates an internal constraint based on the setting name with the provided value, adds that constraint
                         into the pending constraint structure (to the MediaTrackConstraint array by default or replaces an entry
-                        in the MediaTrackConstraintSet if the manditory flag is set) and queues a task (if not already queued) to 
+                        in the MediaTrackConstraintSet if the mandatory flag is set) and queues a task (if not already queued) to 
                         process the pending constraint structure at the conclusion of this task.
-                        <p>The manditory parameter defaults to false.</p>
+                        <p>The mandatory parameter defaults to false.</p>
                     </dd>
                 </dl>
             </section>
@@ -414,7 +417,7 @@
                 <h3><code>MediaSettingsList</code> interface</h3>
                 <dl class="idl" title="interface MediaSettingsList">
                     <dt>readonly attribute unsigned long length</dt>
-                    <dd>The length of the enuerated values that this setting may assume.</dd>
+                    <dd>The length of the enumerated values that this setting may assume.</dd>
                     <dt>getter any item(unsigned long index)</dt>
                     <dd>Retrieves the value of the <code>index</code>ed enumerated item of this setting.</dd>
                     <dt>readonly attribute any initial</dt>
@@ -423,12 +426,12 @@
                         For example, in a browsing scenario, if one web site changes this setting and a subsequent web site
                         gets access to this same setting, the setting should have been reset back to its initial value.
                     </dd>
-                    <dt>void request(any value, optional boolean manditory)</dt>
+                    <dt>void request(any value, optional boolean mandatory)</dt>
                     <dd>Creates an internal constraint based on the setting name with the provided value, adds that constraint
                         into the pending constraint structure (to the MediaTrackConstraint array by default or replaces an entry
-                        in the MediaTrackConstraintSet if the manditory flag is set) and queues a task (if not already queued) to 
+                        in the MediaTrackConstraintSet if the mandatory flag is set) and queues a task (if not already queued) to 
                         process the pending constraint structure at the conclusion of this task.
-                        <p>The manditory parameter defaults to false.</p>
+                        <p>The mandatory parameter defaults to false.</p>
                     </dd>
                 </dl>
             </section>            
@@ -447,10 +450,10 @@
                 <li>Some read-only settings have no corresponding read/write version (for example "facing" cannot be changed).</li>
                 <li>Some read/write settings have no (or do not really require) a similar read-only value (for example, dimensions
                 is already reported separately as width/height).</li>
-                <li>Simple to access read-only settings are more convenient (versus accessing an object to then get the propery).</li>
+                <li>Simple to access read-only settings are more convenient (versus accessing an object to then get the property).</li>
             </ul>
     
-            <p class="note">These are pluralized for compatness and easy identification as a "setting". The more verbose
+            <p class="note">These are pluralized for compactness and easy identification as a "setting". The more verbose
                 "widthSettings", "horizontalAspectRatioSettings", "orientationSettings", etc., were considered (and may still be 
                 considered).
             </p>
@@ -464,7 +467,7 @@
                     <li>are settings found in nearly all devices (common)</li>
                     <li>can be easily tested for conformance</li>
                 </ol>
-                Each setting also includes a brief explanitory rationale for why it's not included:
+                Each setting also includes a brief explanatory rationale for why it's not included:
                 <ol>
                     <li><code>width</code> - I've used "dimension" for the setting instead, since resolutions of the camera are nearly 
                         always in step-wise pairs of width/height combinations. These are thus an enumerated type rather than
@@ -480,7 +483,7 @@
                     <li><code>denoise</code> - may require specification of the algorithm processing or related image processing filter required
                         to implement.
                     </li>
-                    <li><code>effects</code> - sounds like a v2 or indpendent feature (depending on the effect).</li>
+                    <li><code>effects</code> - sounds like a v2 or independent feature (depending on the effect).</li>
                     <li><code>faceDetection</code> - sounds like a v2 feature. Can also be done using post-processing techniques (though
                         perhaps not as fast...)
                     </li>
@@ -677,8 +680,8 @@
                 <h3><code>ConstraintErrorEvent</code> interface</h3>
                 <dl class="idl" title="[Constructor(DOMString type, optional ConstraintErrorEventInit eventInitDict)] interface ConstraintErrorEvent : Event">
                     <dt>readonly attribute DOMString[] optionalConstraints</dt>
-                    <dd>A list of optional contraints that failed or succeeded (depending on the event type).</dd>
-                    <dt>readonly attribute DOMString[] manditoryConstraints</dt>
+                    <dd>A list of optional constraints that failed or succeeded (depending on the event type).</dd>
+                    <dt>readonly attribute DOMString[] mandatoryConstraints</dt>
                 </dl>
             </section>
 
@@ -687,8 +690,8 @@
                 <dl class="idl" title="dictionary ConstraintErrorEventInit : EventInit">
                     <dt>sequence&lt'DOMString> optionalConstraints</dt>
                     <dd>List of optional constraints to populate into the ConstraintErrorEvent object's optionalConstraints readonly attribute.</dd>
-                    <dt>sequence&lt'DOMString> manditoryConstraints</dt>
-                    <dd>List of manditory constraints to populate into the ConstraintErrorEvent object's manditoryConstraints readonly attribute.</dd>
+                    <dt>sequence&lt'DOMString> mandatoryConstraints</dt>
+                    <dd>List of mandatory constraints to populate into the ConstraintErrorEvent object's mandatoryConstraints readonly attribute.</dd>
                 </dl>
             </section>
         </section>
@@ -709,7 +712,7 @@
             previously approved), would be cause for an implementation to ask the user for approval.
         </p>
 
-        <p>Second, it ensure privacy by not leaking any information about additional devices until the code has sucessfully requested a device.</p>
+        <p>Second, it ensure privacy by not leaking any information about additional devices until the code has successfully requested a device.</p>
 
         <p>Unfortunately, this model does not provide a means for discovery of additional devices. Such a discovery mechanism could be 
             trivially added to this proposal in the form of a device-specific "totalDevices" property, but there's an opportunity for 
@@ -755,7 +758,7 @@
                 <dt>readonly attribute unsigned long totalEnabled</dt>
                 <dd>The number of devices in this list that whose <code>readyState</code> is in the <code>LIVE</code> state.</dd>
                 <dt>void select(MediaTrackConstraints constraints)</dt>
-                <dd>Apply a set of optional and/or manditory constraints to the set of devices in the device list, with the goal of 
+                <dd>Apply a set of optional and/or mandatory constraints to the set of devices in the device list, with the goal of 
                     selecting a single device. This will queue a task to fire either a "constrainterror" or "constraintsuccess" event 
                     depending on the result. The "constraintsuccess" event includes the selected device on the DeviceEvent object's device
                     attribute.
@@ -763,7 +766,7 @@
                 <dt>attribute EventHandler ondeviceadded</dt>
                 <dd>Register/unregister for "deviceadded" events. The handler should expect to get a DeviceEvent object as its first
                     parameter. The event is fired whenever a new video device (or audio device, depending on the device list) becomes available for use.
-                    This can happen when a new device is plugged in, for example. Prevoiusly ended device tracks are not re-used, and if the user agent 
+                    This can happen when a new device is plugged in, for example. Previously ended device tracks are not re-used, and if the user agent 
                     is able to re-purpose a physical device for use in the application, it fires the "deviceadded" event providing a new device track 
                     object (in its default initial state).</dd>
                 <dt>attribute EventHandler ondeviceremoved</dt>
@@ -792,7 +795,7 @@
 
         <p>Device lists are only accessible from an existing device track object. In other words, the device list itself can only be accessed from 
             one of the devices contained within it (this is an inside-to-outside reference). To help orient the traversal of the list, each device
-            track object includes a (dynaimcally updated) device index property. If a given device track transitions to the <coded>ENDED</coded>
+            track object includes a (dynamically updated) device index property. If a given device track transitions to the <coded>ENDED</coded>
             state, then it will not belong to the device list any longer and its device index property becomes invalid (null); however, the device
             list itself will still be accessible from that object.
         </p>

@@ -420,7 +420,7 @@ table.exceptions table {
             The LocalMediaStream object currently extends MediaStream by adding a single method "stop()". In my prior proposals, this
             object was radically altered in order to facilite several goals:
             <dl>
-                <dt>Provide a predicatable home for developers to find and modify device settings</dt>
+                <dt>Provide a predictable home for developers to find and modify device settings</dt>
                 <dd>A previous proposal went out of its way to strongly associate LocalMediaStream objects with devices. This 
                     seemed like a good design because local device configuration is always on the local media stream. This made
                     for a stable, dependable API surface for all local media stream instances (no guesswork).
@@ -444,10 +444,10 @@ table.exceptions table {
                     centric tracks a stop() API should be present on the tracks themselves.
                 </dd>
                 <dt>Mutable track lists</dt>
-                <dd>Mutable track lists were not a desireable feature while I was locked into considering the LocalMediaStream 
+                <dd>Mutable track lists were not a desirable feature while I was locked into considering the LocalMediaStream 
                     as strongly associated with device-control. What is actually necessary, is that there is a something immutable
                     associated with devices--that "something" doesn't necessarily need to be a LocalMediaStream or any MediaStream-like
-                    object at all! Once I unlocked that line of thinking, I began to experiement with the notion of a device list
+                    object at all! Once I unlocked that line of thinking, I began to experiment with the notion of a device list
                     which then ultimately brought back a use-case for having mutable track lists for MediaStream objects. (It did not
                     bring back a need for LocalMediaStream objects themselves though.)
                 </dd>
@@ -497,7 +497,7 @@ table.exceptions table {
         <!--OddPage--><h2><span class="secno">2. </span>New <code>MediaStreamTrack</code> (derived) types</h2>
 
         <p>This proposal consolidates settings directly into the tracks that are provided by devices. However, in order to
-            do this efficiently and in a future-extendible manner, the highly-generic MediaStreamTrack is now extended for
+            do this efficiently and in a future-extensible manner, the highly-generic MediaStreamTrack is now extended for
             specific characteristics of the devices it embodies, resulting in a hierarchy:
         </p>
 
@@ -532,7 +532,7 @@ table.exceptions table {
                 picture mode, not for arbitrary video frame capture).
             </p></div>
 
-            <p>I'm intentionally keeping this interface as sparce as possible. Features about the video that can be calculated like
+            <p>I'm intentionally keeping this interface as sparse as possible. Features about the video that can be calculated like
                 aspect ratio are not provided.
             </p>
 
@@ -543,7 +543,7 @@ table.exceptions table {
 <span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>unsigned long</a></span> <span class="idlAttrName"><a href="#widl-VideoStreamTrack-height">height</a></span>;</span>
 };</span></pre><section><h5 id="attributes-3">Attributes</h5><dl class="attributes"><dt id="widl-VideoStreamTrack-width"><code>width</code> of type <span class="idlAttrType"><a>unsigned long</a></span>, readonly</dt><dd>The "natural" width (in pixels) of the video flowing through the track. In the case of a VideoDeviceTrack, this
                         value represents the current setting of the camera's sensor (still in terms of number of pixels). This value is 
-                        indpendent of the camera's rotation (if the camera's rotation setting is changed, it does not impact this value).
+                        independent of the camera's rotation (if the camera's rotation setting is changed, it does not impact this value).
                         For example, consider a camera setting with width of 1024 pixels and height of 768 pixels. If the camera's rotation
                         setting is changed by 90 degrees, the width is still reported as 1024 pixels. However, a &lt;video&gt; element used
                         to preview this track would report a width of 768 pixels (the effective width with rotation factored in).
@@ -711,8 +711,8 @@ interface <span class="idlInterfaceID">PictureEvent</span> : <span class="idlSup
             </p>
 
             <p>The request() API also has a flag used to signal to the UA that the requested setting change should be 
-                manditory. In this case, the constraint is added to the manditory set, and replaces an existing setting in 
-                that set if the names collide (last setting wins). My expectation is that if a manditory constraint cannot
+                mandatory. In this case, the constraint is added to the mandatory set, and replaces an existing setting in 
+                that set if the names collide (last setting wins). My expectation is that if a mandatory constraint cannot
                 be satisfied, then the UA must end that stream as a result of the failure.
             </p>
 
@@ -745,17 +745,17 @@ interface <span class="idlInterfaceID">PictureEvent</span> : <span class="idlSup
 <span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>any</a></span> <span class="idlAttrName"><a href="#widl-MediaSettingsRange-max">max</a></span>;</span>
 <span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>any</a></span> <span class="idlAttrName"><a href="#widl-MediaSettingsRange-min">min</a></span>;</span>
 <span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>any</a></span> <span class="idlAttrName"><a href="#widl-MediaSettingsRange-initial">initial</a></span>;</span>
-<span class="idlMethod">    <span class="idlMethType"><a>void</a></span> <span class="idlMethName"><a href="#widl-MediaSettingsRange-request-void-any-value-boolean-manditory">request</a></span> (<span class="idlParam"><span class="idlParamType"><a>any</a></span> <span class="idlParamName">value</span></span>, <span class="idlParam">optional <span class="idlParamType"><a>boolean</a></span> <span class="idlParamName">manditory</span></span>);</span>
+<span class="idlMethod">    <span class="idlMethType"><a>void</a></span> <span class="idlMethName"><a href="#widl-MediaSettingsRange-request-void-any-value-boolean-mandatory">request</a></span> (<span class="idlParam"><span class="idlParamType"><a>any</a></span> <span class="idlParamName">value</span></span>, <span class="idlParam">optional <span class="idlParamType"><a>boolean</a></span> <span class="idlParamName">mandatory</span></span>);</span>
 };</span></pre><section><h5 id="attributes-8">Attributes</h5><dl class="attributes"><dt id="widl-MediaSettingsRange-max"><code>max</code> of type <span class="idlAttrType"><a>any</a></span>, readonly</dt><dd>The maximum value of this setting. The type of value is specific to the setting.</dd><dt id="widl-MediaSettingsRange-min"><code>min</code> of type <span class="idlAttrType"><a>any</a></span>, readonly</dt><dd>The minimum value of this setting. The type of value is specific to the setting.</dd><dt id="widl-MediaSettingsRange-initial"><code>initial</code> of type <span class="idlAttrType"><a>any</a></span>, readonly</dt><dd>The initial value of this setting. When the object associated with this setting is first made available
                         to the application, the current value of the setting should be set to the initial value.
                         For example, in a browsing scenario, if one web site changes this setting and a subsequent web site
                         gets access to this same setting, the setting should have been reset back to its initial value.
-                    </dd></dl></section><section><h5 id="methods-4">Methods</h5><dl class="methods"><dt id="widl-MediaSettingsRange-request-void-any-value-boolean-manditory"><code>request</code></dt><dd>Creates an internal constraint based on the setting name with the provided value, adds that constraint
+                    </dd></dl></section><section><h5 id="methods-4">Methods</h5><dl class="methods"><dt id="widl-MediaSettingsRange-request-void-any-value-boolean-mandatory"><code>request</code></dt><dd>Creates an internal constraint based on the setting name with the provided value, adds that constraint
                         into the pending constraint structure (to the MediaTrackConstraint array by default or replaces an entry
-                        in the MediaTrackConstraintSet if the manditory flag is set) and queues a task (if not already queued) to 
+                        in the MediaTrackConstraintSet if the mandatory flag is set) and queues a task (if not already queued) to 
                         process the pending constraint structure at the conclusion of this task.
-                        <p>The manditory parameter defaults to false.</p>
-                    <table class="parameters"><tr><th>Parameter</th><th>Type</th><th>Nullable</th><th>Optional</th><th>Description</th></tr><tr><td class="prmName">value</td><td class="prmType"><code><a>any</a></code></td><td class="prmNullFalse">✘</td><td class="prmOptFalse">✘</td><td class="prmDesc"></td></tr><tr><td class="prmName">manditory</td><td class="prmType"><code><a>boolean</a></code></td><td class="prmNullFalse">✘</td><td class="prmOptTrue">✔</td><td class="prmDesc"></td></tr></table><div><em>Return type: </em><code><a>void</a></code></div></dd></dl></section>
+                        <p>The mandatory parameter defaults to false.</p>
+                    <table class="parameters"><tr><th>Parameter</th><th>Type</th><th>Nullable</th><th>Optional</th><th>Description</th></tr><tr><td class="prmName">value</td><td class="prmType"><code><a>any</a></code></td><td class="prmNullFalse">✘</td><td class="prmOptFalse">✘</td><td class="prmDesc"></td></tr><tr><td class="prmName">mandatory</td><td class="prmType"><code><a>boolean</a></code></td><td class="prmNullFalse">✘</td><td class="prmOptTrue">✔</td><td class="prmDesc"></td></tr></table><div><em>Return type: </em><code><a>void</a></code></div></dd></dl></section>
             </section>
 
             <section id="mediasettingslist-interface">
@@ -764,17 +764,17 @@ interface <span class="idlInterfaceID">PictureEvent</span> : <span class="idlSup
 <span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>unsigned long</a></span> <span class="idlAttrName"><a href="#widl-MediaSettingsList-length">length</a></span>;</span>
 <span class="idlMethod">    <span class="idlMethType"><a>getter any</a></span> <span class="idlMethName"><a href="#widl-MediaSettingsList-item-getter-any-unsigned-long-index">item</a></span> (<span class="idlParam"><span class="idlParamType"><a>unsigned long</a></span> <span class="idlParamName">index</span></span>);</span>
 <span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>any</a></span>           <span class="idlAttrName"><a href="#widl-MediaSettingsList-initial">initial</a></span>;</span>
-<span class="idlMethod">    <span class="idlMethType"><a>void</a></span>       <span class="idlMethName"><a href="#widl-MediaSettingsList-request-void-any-value-boolean-manditory">request</a></span> (<span class="idlParam"><span class="idlParamType"><a>any</a></span> <span class="idlParamName">value</span></span>, <span class="idlParam">optional <span class="idlParamType"><a>boolean</a></span> <span class="idlParamName">manditory</span></span>);</span>
-};</span></pre><section><h5 id="attributes-9">Attributes</h5><dl class="attributes"><dt id="widl-MediaSettingsList-length"><code>length</code> of type <span class="idlAttrType"><a>unsigned long</a></span>, readonly</dt><dd>The length of the enuerated values that this setting may assume.</dd><dt id="widl-MediaSettingsList-initial"><code>initial</code> of type <span class="idlAttrType"><a>any</a></span>, readonly</dt><dd>The initial value of this setting. When the object associated with this setting is first made available
+<span class="idlMethod">    <span class="idlMethType"><a>void</a></span>       <span class="idlMethName"><a href="#widl-MediaSettingsList-request-void-any-value-boolean-mandatory">request</a></span> (<span class="idlParam"><span class="idlParamType"><a>any</a></span> <span class="idlParamName">value</span></span>, <span class="idlParam">optional <span class="idlParamType"><a>boolean</a></span> <span class="idlParamName">mandatory</span></span>);</span>
+};</span></pre><section><h5 id="attributes-9">Attributes</h5><dl class="attributes"><dt id="widl-MediaSettingsList-length"><code>length</code> of type <span class="idlAttrType"><a>unsigned long</a></span>, readonly</dt><dd>The length of the enumerated values that this setting may assume.</dd><dt id="widl-MediaSettingsList-initial"><code>initial</code> of type <span class="idlAttrType"><a>any</a></span>, readonly</dt><dd>The initial value of this setting. When the object associated with this setting is first made available
                         to the application, the current value of the setting should be set to the initial value.
                         For example, in a browsing scenario, if one web site changes this setting and a subsequent web site
                         gets access to this same setting, the setting should have been reset back to its initial value.
-                    </dd></dl></section><section><h5 id="methods-5">Methods</h5><dl class="methods"><dt id="widl-MediaSettingsList-item-getter-any-unsigned-long-index"><code>item</code></dt><dd>Retrieves the value of the <code>index</code>ed enumerated item of this setting.<table class="parameters"><tr><th>Parameter</th><th>Type</th><th>Nullable</th><th>Optional</th><th>Description</th></tr><tr><td class="prmName">index</td><td class="prmType"><code><a>unsigned long</a></code></td><td class="prmNullFalse">✘</td><td class="prmOptFalse">✘</td><td class="prmDesc"></td></tr></table><div><em>Return type: </em><code><a>getter any</a></code></div></dd><dt id="widl-MediaSettingsList-request-void-any-value-boolean-manditory"><code>request</code></dt><dd>Creates an internal constraint based on the setting name with the provided value, adds that constraint
+                    </dd></dl></section><section><h5 id="methods-5">Methods</h5><dl class="methods"><dt id="widl-MediaSettingsList-item-getter-any-unsigned-long-index"><code>item</code></dt><dd>Retrieves the value of the <code>index</code>ed enumerated item of this setting.<table class="parameters"><tr><th>Parameter</th><th>Type</th><th>Nullable</th><th>Optional</th><th>Description</th></tr><tr><td class="prmName">index</td><td class="prmType"><code><a>unsigned long</a></code></td><td class="prmNullFalse">✘</td><td class="prmOptFalse">✘</td><td class="prmDesc"></td></tr></table><div><em>Return type: </em><code><a>getter any</a></code></div></dd><dt id="widl-MediaSettingsList-request-void-any-value-boolean-mandatory"><code>request</code></dt><dd>Creates an internal constraint based on the setting name with the provided value, adds that constraint
                         into the pending constraint structure (to the MediaTrackConstraint array by default or replaces an entry
-                        in the MediaTrackConstraintSet if the manditory flag is set) and queues a task (if not already queued) to 
+                        in the MediaTrackConstraintSet if the mandatory flag is set) and queues a task (if not already queued) to 
                         process the pending constraint structure at the conclusion of this task.
-                        <p>The manditory parameter defaults to false.</p>
-                    <table class="parameters"><tr><th>Parameter</th><th>Type</th><th>Nullable</th><th>Optional</th><th>Description</th></tr><tr><td class="prmName">value</td><td class="prmType"><code><a>any</a></code></td><td class="prmNullFalse">✘</td><td class="prmOptFalse">✘</td><td class="prmDesc"></td></tr><tr><td class="prmName">manditory</td><td class="prmType"><code><a>boolean</a></code></td><td class="prmNullFalse">✘</td><td class="prmOptTrue">✔</td><td class="prmDesc"></td></tr></table><div><em>Return type: </em><code><a>void</a></code></div></dd></dl></section>
+                        <p>The mandatory parameter defaults to false.</p>
+                    <table class="parameters"><tr><th>Parameter</th><th>Type</th><th>Nullable</th><th>Optional</th><th>Description</th></tr><tr><td class="prmName">value</td><td class="prmType"><code><a>any</a></code></td><td class="prmNullFalse">✘</td><td class="prmOptFalse">✘</td><td class="prmDesc"></td></tr><tr><td class="prmName">mandatory</td><td class="prmType"><code><a>boolean</a></code></td><td class="prmNullFalse">✘</td><td class="prmOptTrue">✔</td><td class="prmDesc"></td></tr></table><div><em>Return type: </em><code><a>void</a></code></div></dd></dl></section>
             </section>            
         </section>
 
@@ -791,10 +791,10 @@ interface <span class="idlInterfaceID">PictureEvent</span> : <span class="idlSup
                 <li>Some read-only settings have no corresponding read/write version (for example "facing" cannot be changed).</li>
                 <li>Some read/write settings have no (or do not really require) a similar read-only value (for example, dimensions
                 is already reported separately as width/height).</li>
-                <li>Simple to access read-only settings are more convenient (versus accessing an object to then get the propery).</li>
+                <li>Simple to access read-only settings are more convenient (versus accessing an object to then get the property).</li>
             </ul>
     
-            <div class="note"><div class="note-title"><span>Note</span></div><p>These are pluralized for compatness and easy identification as a "setting". The more verbose
+            <div class="note"><div class="note-title"><span>Note</span></div><p>These are pluralized for compactness and easy identification as a "setting". The more verbose
                 "widthSettings", "horizontalAspectRatioSettings", "orientationSettings", etc., were considered (and may still be 
                 considered).
             </p></div>
@@ -808,7 +808,7 @@ interface <span class="idlInterfaceID">PictureEvent</span> : <span class="idlSup
                     <li>are settings found in nearly all devices (common)</li>
                     <li>can be easily tested for conformance</li>
                 </ol>
-                Each setting also includes a brief explanitory rationale for why it's not included:
+                Each setting also includes a brief explanatory rationale for why it's not included:
                 <ol>
                     <li><code>width</code> - I've used "dimension" for the setting instead, since resolutions of the camera are nearly 
                         always in step-wise pairs of width/height combinations. These are thus an enumerated type rather than
@@ -824,7 +824,7 @@ interface <span class="idlInterfaceID">PictureEvent</span> : <span class="idlSup
                     <li><code>denoise</code> - may require specification of the algorithm processing or related image processing filter required
                         to implement.
                     </li>
-                    <li><code>effects</code> - sounds like a v2 or indpendent feature (depending on the effect).</li>
+                    <li><code>effects</code> - sounds like a v2 or independent feature (depending on the effect).</li>
                     <li><code>faceDetection</code> - sounds like a v2 feature. Can also be done using post-processing techniques (though
                         perhaps not as fast...)
                     </li>
@@ -1001,16 +1001,16 @@ interface <span class="idlInterfaceID">MediaConstraintResultEventHandlers</span>
                 <pre class="idl"><span class="idlInterface" id="idl-def-ConstraintErrorEvent">[<span class="extAttr">Constructor(DOMString type, optional ConstraintErrorEventInit eventInitDict)</span>]
 interface <span class="idlInterfaceID">ConstraintErrorEvent</span> : <span class="idlSuperclass"><a>Event</a></span> {
 <span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>DOMString</a>[]</span> <span class="idlAttrName"><a href="#widl-ConstraintErrorEvent-optionalConstraints">optionalConstraints</a></span>;</span>
-<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>DOMString</a>[]</span> <span class="idlAttrName"><a href="#widl-ConstraintErrorEvent-manditoryConstraints">manditoryConstraints</a></span>;</span>
-};</span></pre><section><h5 id="attributes-14">Attributes</h5><dl class="attributes"><dt id="widl-ConstraintErrorEvent-optionalConstraints"><code>optionalConstraints</code> of type array of <span class="idlAttrType"><a>DOMString</a></span>, readonly</dt><dd>A list of optional contraints that failed or succeeded (depending on the event type).</dd><dt id="widl-ConstraintErrorEvent-manditoryConstraints"><code>manditoryConstraints</code> of type array of <span class="idlAttrType"><a>DOMString</a></span>, readonly</dt><dd></dd></dl></section>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>DOMString</a>[]</span> <span class="idlAttrName"><a href="#widl-ConstraintErrorEvent-mandatoryConstraints">mandatoryConstraints</a></span>;</span>
+};</span></pre><section><h5 id="attributes-14">Attributes</h5><dl class="attributes"><dt id="widl-ConstraintErrorEvent-optionalConstraints"><code>optionalConstraints</code> of type array of <span class="idlAttrType"><a>DOMString</a></span>, readonly</dt><dd>A list of optional constraints that failed or succeeded (depending on the event type).</dd><dt id="widl-ConstraintErrorEvent-mandatoryConstraints"><code>mandatoryConstraints</code> of type array of <span class="idlAttrType"><a>DOMString</a></span>, readonly</dt><dd></dd></dl></section>
             </section>
 
             <section id="constrainterroreventinit-dictionary">
                 <h4><span class="secno">3.5.3 </span><code>ConstraintErrorEventInit</code> dictionary</h4>
                 <pre class="idl"><span class="idlDictionary" id="idl-def-ConstraintErrorEventInit">dictionary <span class="idlDictionaryID">ConstraintErrorEventInit</span> : <span class="idlSuperclass"><a>EventInit</a></span> {
 <span class="idlMember">    <span class="idlMemberType">sequence&lt;<a>'DOMString</a>&gt;</span> <span class="idlMemberName"><a href="#widl-ConstraintErrorEventInit-optionalConstraints">optionalConstraints</a></span>;</span>
-<span class="idlMember">    <span class="idlMemberType">sequence&lt;<a>'DOMString</a>&gt;</span> <span class="idlMemberName"><a href="#widl-ConstraintErrorEventInit-manditoryConstraints">manditoryConstraints</a></span>;</span>
-};</span></pre><section><h5 id="dictionary-constrainterroreventinit-members">Dictionary <a class="idlType" href="#idl-def-ConstraintErrorEventInit"><code>ConstraintErrorEventInit</code></a> Members</h5><dl class="dictionary-members"><dt id="widl-ConstraintErrorEventInit-optionalConstraints"><code>optionalConstraints</code> of type <span class="idlMemberType">sequence&lt;<a>'DOMString</a>&gt;</span></dt><dd>List of optional constraints to populate into the ConstraintErrorEvent object's optionalConstraints readonly attribute.</dd><dt id="widl-ConstraintErrorEventInit-manditoryConstraints"><code>manditoryConstraints</code> of type <span class="idlMemberType">sequence&lt;<a>'DOMString</a>&gt;</span></dt><dd>List of manditory constraints to populate into the ConstraintErrorEvent object's manditoryConstraints readonly attribute.</dd></dl></section>
+<span class="idlMember">    <span class="idlMemberType">sequence&lt;<a>'DOMString</a>&gt;</span> <span class="idlMemberName"><a href="#widl-ConstraintErrorEventInit-mandatoryConstraints">mandatoryConstraints</a></span>;</span>
+};</span></pre><section><h5 id="dictionary-constrainterroreventinit-members">Dictionary <a class="idlType" href="#idl-def-ConstraintErrorEventInit"><code>ConstraintErrorEventInit</code></a> Members</h5><dl class="dictionary-members"><dt id="widl-ConstraintErrorEventInit-optionalConstraints"><code>optionalConstraints</code> of type <span class="idlMemberType">sequence&lt;<a>'DOMString</a>&gt;</span></dt><dd>List of optional constraints to populate into the ConstraintErrorEvent object's optionalConstraints readonly attribute.</dd><dt id="widl-ConstraintErrorEventInit-mandatoryConstraints"><code>mandatoryConstraints</code> of type <span class="idlMemberType">sequence&lt;<a>'DOMString</a>&gt;</span></dt><dd>List of mandatory constraints to populate into the ConstraintErrorEvent object's mandatoryConstraints readonly attribute.</dd></dl></section>
             </section>
         </section>
     </section>
@@ -1030,7 +1030,7 @@ interface <span class="idlInterfaceID">ConstraintErrorEvent</span> : <span class
             previously approved), would be cause for an implementation to ask the user for approval.
         </p>
 
-        <p>Second, it ensure privacy by not leaking any information about additional devices until the code has sucessfully requested a device.</p>
+        <p>Second, it ensure privacy by not leaking any information about additional devices until the code has successfully requested a device.</p>
 
         <p>Unfortunately, this model does not provide a means for discovery of additional devices. Such a discovery mechanism could be 
             trivially added to this proposal in the form of a device-specific "totalDevices" property, but there's an opportunity for 
@@ -1077,12 +1077,12 @@ interface <span class="idlInterfaceID">ConstraintErrorEvent</span> : <span class
 <span class="idlAttribute">             attribute <span class="idlAttrType"><a>EventHandler</a></span>  <span class="idlAttrName"><a href="#widl-MediaDeviceList-ondeviceremoved">ondeviceremoved</a></span>;</span>
 };</span></pre><section id="attributes"><h4><span class="secno">4.1.1 </span>Attributes</h4><dl class="attributes"><dt id="widl-MediaDeviceList-length"><code>length</code> of type <span class="idlAttrType"><a>unsigned long</a></span>, readonly</dt><dd>The number of devices in this list (including those that are <code>MUTED</code> and <code>LIVE</code>.</dd><dt id="widl-MediaDeviceList-totalEnabled"><code>totalEnabled</code> of type <span class="idlAttrType"><a>unsigned long</a></span>, readonly</dt><dd>The number of devices in this list that whose <code>readyState</code> is in the <code>LIVE</code> state.</dd><dt id="widl-MediaDeviceList-ondeviceadded"><code>ondeviceadded</code> of type <span class="idlAttrType"><a>EventHandler</a></span></dt><dd>Register/unregister for "deviceadded" events. The handler should expect to get a DeviceEvent object as its first
                     parameter. The event is fired whenever a new video device (or audio device, depending on the device list) becomes available for use.
-                    This can happen when a new device is plugged in, for example. Prevoiusly ended device tracks are not re-used, and if the user agent 
+                    This can happen when a new device is plugged in, for example. Previously ended device tracks are not re-used, and if the user agent 
                     is able to re-purpose a physical device for use in the application, it fires the "deviceadded" event providing a new device track 
                     object (in its default initial state).</dd><dt id="widl-MediaDeviceList-ondeviceremoved"><code>ondeviceremoved</code> of type <span class="idlAttrType"><a>EventHandler</a></span></dt><dd>Register/unregister for "deviceremoved" events. The handler should expect to get a DeviceEvent object as its first
                     parameter. The event is fired whenever an existing video device (or audio device, depending on the device list) moves into the 
                     <code>ENDED</code> state. Note that before dispatching this event, the device in question is removed from the device list.
-                </dd></dl></section><section id="methods"><h4><span class="secno">4.1.2 </span>Methods</h4><dl class="methods"><dt id="widl-MediaDeviceList-item-getter-any-unsigned-long-index"><code>item</code></dt><dd>Retrieves a device object (an AudioDeviceTrack if this is the audio devices list or a VideoDeviceTrack if this is the video devices list).<table class="parameters"><tr><th>Parameter</th><th>Type</th><th>Nullable</th><th>Optional</th><th>Description</th></tr><tr><td class="prmName">index</td><td class="prmType"><code><a>unsigned long</a></code></td><td class="prmNullFalse">✘</td><td class="prmOptFalse">✘</td><td class="prmDesc"></td></tr></table><div><em>Return type: </em><code><a>getter any</a></code></div></dd><dt id="widl-MediaDeviceList-select-void-MediaTrackConstraints-constraints"><code>select</code></dt><dd>Apply a set of optional and/or manditory constraints to the set of devices in the device list, with the goal of 
+                </dd></dl></section><section id="methods"><h4><span class="secno">4.1.2 </span>Methods</h4><dl class="methods"><dt id="widl-MediaDeviceList-item-getter-any-unsigned-long-index"><code>item</code></dt><dd>Retrieves a device object (an AudioDeviceTrack if this is the audio devices list or a VideoDeviceTrack if this is the video devices list).<table class="parameters"><tr><th>Parameter</th><th>Type</th><th>Nullable</th><th>Optional</th><th>Description</th></tr><tr><td class="prmName">index</td><td class="prmType"><code><a>unsigned long</a></code></td><td class="prmNullFalse">✘</td><td class="prmOptFalse">✘</td><td class="prmDesc"></td></tr></table><div><em>Return type: </em><code><a>getter any</a></code></div></dd><dt id="widl-MediaDeviceList-select-void-MediaTrackConstraints-constraints"><code>select</code></dt><dd>Apply a set of optional and/or mandatory constraints to the set of devices in the device list, with the goal of 
                     selecting a single device. This will queue a task to fire either a "constrainterror" or "constraintsuccess" event 
                     depending on the result. The "constraintsuccess" event includes the selected device on the DeviceEvent object's device
                     attribute.
@@ -1106,7 +1106,7 @@ interface <span class="idlInterfaceID">DeviceEvent</span> : <span class="idlSupe
 
         <p>Device lists are only accessible from an existing device track object. In other words, the device list itself can only be accessed from 
             one of the devices contained within it (this is an inside-to-outside reference). To help orient the traversal of the list, each device
-            track object includes a (dynaimcally updated) device index property. If a given device track transitions to the <coded>ENDED</coded>
+            track object includes a (dynamically updated) device index property. If a given device track transitions to the <coded>ENDED</coded>
             state, then it will not belong to the device list any longer and its device index property becomes invalid (null); however, the device
             list itself will still be accessible from that object.
         </p>
