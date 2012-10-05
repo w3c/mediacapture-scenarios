@@ -373,7 +373,8 @@ table.exceptions table {
   </p>
   <h1 class="title" id="title">Proposal: Settings API Version 4</h1>
   
-  <dl>    
+  <h2 id="w3c-editor-s-draft-05-october-2012">Updated: 05 October 2012 (<a href="http://dvcs.w3.org/hg/dap/raw-file/79d50d0d9582/media-stream-capture/proposals/SettingsAPI_proposal_v4.html">previous revision</a>)</h2>
+  <dl>
     <dt>Author:</dt>
     <dd><span>Travis Leithead</span>, <a href="http://www.microsoft.com/">Microsoft</a></dd>
   </dl>
@@ -403,9 +404,8 @@ table.exceptions table {
         [<a href="http://lists.w3.org/Archives/Public/public-media-capture/2012Aug/0066.html">v2</a>]
         [<a href="http://lists.w3.org/Archives/Public/public-media-capture/2012Jul/0069.html">v1</a>].
     </p></section>
-   
-  
-<section id="toc"><h2 class="introductory">Table of Contents</h2><ul class="toc"><li class="tocline"><a class="tocxref" href="#remove-localmediastream-interface"><span class="secno">1. </span>Remove <code>LocalMediaStream</code> interface</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#rationale"><span class="secno">1.1 </span>Rationale</a></li></ul></li><li class="tocline"><a class="tocxref" href="#new-mediastreamtrack-derived-types"><span class="secno">2. </span>New <code>MediaStreamTrack</code> (derived) types</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#local-and-remote-video-tracks"><span class="secno">2.1 </span>Local and remote video tracks</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#videostreamtrack-interface"><span class="secno">2.1.1 </span><code>VideoStreamTrack</code> interface</a></li></ul></li><li class="tocline"><a class="tocxref" href="#local-and-remote-audio-tracks"><span class="secno">2.2 </span>Local and remote audio tracks</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#audiostreamtrack-interface"><span class="secno">2.2.1 </span><code>AudioStreamTrack</code> interface</a></li></ul></li><li class="tocline"><a class="tocxref" href="#camera-device-tracks"><span class="secno">2.3 </span>Camera device tracks</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#videodevicetrack-interface"><span class="secno">2.3.1 </span><code>VideoDeviceTrack</code> interface</a></li><li class="tocline"><a class="tocxref" href="#videofacingenum-enumeration"><span class="secno">2.3.2 </span><code>VideoFacingEnum</code> enumeration</a></li></ul></li><li class="tocline"><a class="tocxref" href="#cameras-with-high-resolution-picture-modes"><span class="secno">2.4 </span>Cameras with "high-resolution picture" modes</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#picturedevicetrack-interface"><span class="secno">2.4.1 </span><code>PictureDeviceTrack</code> interface</a></li><li class="tocline"><a class="tocxref" href="#pictureevent-interface"><span class="secno">2.4.2 </span><code>PictureEvent</code> interface</a></li></ul></li><li class="tocline"><a class="tocxref" href="#microphone-device-tracks"><span class="secno">2.5 </span>Microphone device tracks</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#audiodevicetrack-interface"><span class="secno">2.5.1 </span><code>AudioDeviceTrack</code> interface</a></li></ul></li></ul></li><li class="tocline"><a class="tocxref" href="#settings-retrieval-application"><span class="secno">3. </span>Settings Retrieval/Application</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#grouping-setting-features"><span class="secno">3.1 </span>Grouping setting features</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#mediasettingsrange-interface"><span class="secno">3.1.1 </span><code>MediaSettingsRange</code> interface</a></li><li class="tocline"><a class="tocxref" href="#mediasettingslist-interface"><span class="secno">3.1.2 </span><code>MediaSettingsList</code> interface</a></li></ul></li><li class="tocline"><a class="tocxref" href="#basic-settings-for-pictures-and-video-devices"><span class="secno">3.2 </span>Basic settings for pictures and video devices</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#pictureandvideosettings-mix-in-interface"><span class="secno">3.2.1 </span><code>PictureAndVideoSettings</code> mix-in interface</a></li><li class="tocline"><a class="tocxref" href="#videodimensiondict-dictionary"><span class="secno">3.2.2 </span><code>VideoDimensionDict</code> dictionary</a></li><li class="tocline"><a class="tocxref" href="#videofocusmodeenum-enumeration"><span class="secno">3.2.3 </span><code>VideoFocusModeEnum</code> enumeration</a></li><li class="tocline"><a class="tocxref" href="#videofilllightmodeenum-enumeration"><span class="secno">3.2.4 </span><code>VideoFillLightModeEnum</code> enumeration</a></li></ul></li><li class="tocline"><a class="tocxref" href="#expanded-settings-for-video-devices"><span class="secno">3.3 </span>Expanded settings for video devices</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#videodevicetrack-partial-interface"><span class="secno">3.3.1 </span><code>VideoDeviceTrack</code> partial interface</a></li></ul></li><li class="tocline"><a class="tocxref" href="#settings-for-audio-devices"><span class="secno">3.4 </span>Settings for audio devices</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#audiodevicetrack-partial-interface"><span class="secno">3.4.1 </span><code>AudioDeviceTrack</code> partial interface</a></li></ul></li><li class="tocline"><a class="tocxref" href="#tracking-the-result-of-constraint-application"><span class="secno">3.5 </span>Tracking the result of constraint application</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#mediaconstraintresulteventhandlers-mix-in-interface"><span class="secno">3.5.1 </span><code>MediaConstraintResultEventHandlers</code> mix-in interface</a></li><li class="tocline"><a class="tocxref" href="#constrainterrorevent-interface"><span class="secno">3.5.2 </span><code>ConstraintErrorEvent</code> interface</a></li><li class="tocline"><a class="tocxref" href="#constrainterroreventinit-dictionary"><span class="secno">3.5.3 </span><code>ConstraintErrorEventInit</code> dictionary</a></li></ul></li></ul></li><li class="tocline"><a class="tocxref" href="#device-lists"><span class="secno">4. </span>Device Lists</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#mediadevicelist-interface"><span class="secno">4.1 </span><code>MediaDeviceList</code> interface</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#attributes"><span class="secno">4.1.1 </span>Attributes</a></li><li class="tocline"><a class="tocxref" href="#methods"><span class="secno">4.1.2 </span>Methods</a></li></ul></li><li class="tocline"><a class="tocxref" href="#deviceevent-interface"><span class="secno">4.2 </span><code>DeviceEvent</code> interface</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#attributes-1"><span class="secno">4.2.1 </span>Attributes</a></li></ul></li><li class="tocline"><a class="tocxref" href="#deviceeventinit-dictionary"><span class="secno">4.3 </span><code>DeviceEventInit</code> dictionary</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#dictionary-deviceeventinit-members"><span class="secno">4.3.1 </span>Dictionary <span class="formerLink"><code>DeviceEventInit</code></span> Members</a></li></ul></li><li class="tocline"><a class="tocxref" href="#devicelistaccess-mix-in-interface"><span class="secno">4.4 </span><code>DeviceListAccess</code> mix-in interface</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#attributes-2"><span class="secno">4.4.1 </span>Attributes</a></li></ul></li></ul></li><li class="tocline"><a class="tocxref" href="#constraints-for-navigator.getusermedia-mediadevicelist.select"><span class="secno">5. </span>Constraints for navigator.getUserMedia/MediaDeviceList.select</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#video-constraints"><span class="secno">5.1 </span>Video Constraints</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#videoconstraints-dictionary"><span class="secno">5.1.1 </span><code>VideoConstraints</code> dictionary</a></li></ul></li><li class="tocline"><a class="tocxref" href="#audio-constraints"><span class="secno">5.2 </span>Audio Constraints</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#audioconstraints-dictionary"><span class="secno">5.2.1 </span><code>AudioConstraints</code> dictionary</a></li></ul></li><li class="tocline"><a class="tocxref" href="#common-sub-constraint-structures"><span class="secno">5.3 </span>Common sub-constraint structures</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#minmaxulongsubconstraint-dictionary"><span class="secno">5.3.1 </span><code>MinMaxULongSubConstraint</code> dictionary</a></li><li class="tocline"><a class="tocxref" href="#minmaxfloatsubconstraint-dictionary"><span class="secno">5.3.2 </span><code>MinMaxFloatSubConstraint</code> dictionary</a></li><li class="tocline"><a class="tocxref" href="#videoorientationenum-enumeration"><span class="secno">5.3.3 </span><code>VideoOrientationEnum</code> enumeration</a></li></ul></li></ul></li></ul></section>
+	
+	<section id="toc"><h2 class="introductory">Table of Contents</h2><ul class="toc"><li class="tocline"><a class="tocxref" href="#remove-localmediastream-interface"><span class="secno">1. </span>Remove <code>LocalMediaStream</code> interface</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#rationale"><span class="secno">1.1 </span>Rationale</a></li></ul></li><li class="tocline"><a class="tocxref" href="#new-mediastreamtrack-derived-types"><span class="secno">2. </span>New <code>MediaStreamTrack</code> (derived) types</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#local-and-remote-video-tracks"><span class="secno">2.1 </span>Local and remote video tracks</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#videostreamtrack-interface"><span class="secno">2.1.1 </span><code>VideoStreamTrack</code> interface</a></li></ul></li><li class="tocline"><a class="tocxref" href="#local-and-remote-audio-tracks"><span class="secno">2.2 </span>Local and remote audio tracks</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#audiostreamtrack-interface"><span class="secno">2.2.1 </span><code>AudioStreamTrack</code> interface</a></li></ul></li><li class="tocline"><a class="tocxref" href="#camera-device-tracks"><span class="secno">2.3 </span>Camera device tracks</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#videodevicetrack-interface"><span class="secno">2.3.1 </span><code>VideoDeviceTrack</code> interface</a></li><li class="tocline"><a class="tocxref" href="#videofacingenum-enumeration"><span class="secno">2.3.2 </span><code>VideoFacingEnum</code> enumeration</a></li></ul></li><li class="tocline"><a class="tocxref" href="#cameras-with-high-resolution-picture-modes"><span class="secno">2.4 </span>Cameras with "high-resolution picture" modes</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#picturedevicetrack-interface"><span class="secno">2.4.1 </span><code>PictureDeviceTrack</code> interface</a></li><li class="tocline"><a class="tocxref" href="#pictureevent-interface"><span class="secno">2.4.2 </span><code>PictureEvent</code> interface</a></li></ul></li><li class="tocline"><a class="tocxref" href="#microphone-device-tracks"><span class="secno">2.5 </span>Microphone device tracks</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#audiodevicetrack-interface"><span class="secno">2.5.1 </span><code>AudioDeviceTrack</code> interface</a></li></ul></li></ul></li><li class="tocline"><a class="tocxref" href="#settings-retrieval-application"><span class="secno">3. </span>Settings Retrieval/Application</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#grouping-setting-features"><span class="secno">3.1 </span>Grouping setting features</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#mediasettingsrange-interface"><span class="secno">3.1.1 </span><code>MediaSettingsRange</code> interface</a></li><li class="tocline"><a class="tocxref" href="#mediasettingslist-interface"><span class="secno">3.1.2 </span><code>MediaSettingsList</code> interface</a></li></ul></li><li class="tocline"><a class="tocxref" href="#basic-settings-for-pictures-and-video-devices"><span class="secno">3.2 </span>Basic settings for pictures and video devices</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#pictureandvideosettings-mix-in-interface"><span class="secno">3.2.1 </span><code>PictureAndVideoSettings</code> mix-in interface</a></li><li class="tocline"><a class="tocxref" href="#videodimensiondict-dictionary"><span class="secno">3.2.2 </span><code>VideoDimensionDict</code> dictionary</a></li><li class="tocline"><a class="tocxref" href="#videofocusmodeenum-enumeration"><span class="secno">3.2.3 </span><code>VideoFocusModeEnum</code> enumeration</a></li><li class="tocline"><a class="tocxref" href="#videofilllightmodeenum-enumeration"><span class="secno">3.2.4 </span><code>VideoFillLightModeEnum</code> enumeration</a></li></ul></li><li class="tocline"><a class="tocxref" href="#expanded-settings-for-video-devices"><span class="secno">3.3 </span>Expanded settings for video devices</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#videodevicetrack-partial-interface"><span class="secno">3.3.1 </span><code>VideoDeviceTrack</code> partial interface</a></li></ul></li><li class="tocline"><a class="tocxref" href="#settings-for-audio-devices"><span class="secno">3.4 </span>Settings for audio devices</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#audiodevicetrack-partial-interface"><span class="secno">3.4.1 </span><code>AudioDeviceTrack</code> partial interface</a></li></ul></li><li class="tocline"><a class="tocxref" href="#tracking-the-result-of-constraint-application"><span class="secno">3.5 </span>Tracking the result of constraint application</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#mediaconstraintresulteventhandlers-mix-in-interface"><span class="secno">3.5.1 </span><code>MediaConstraintResultEventHandlers</code> mix-in interface</a></li><li class="tocline"><a class="tocxref" href="#constrainterrorevent-interface"><span class="secno">3.5.2 </span><code>ConstraintErrorEvent</code> interface</a></li><li class="tocline"><a class="tocxref" href="#constrainterroreventinit-dictionary"><span class="secno">3.5.3 </span><code>ConstraintErrorEventInit</code> dictionary</a></li></ul></li></ul></li><li class="tocline"><a class="tocxref" href="#device-lists"><span class="secno">4. </span>Device Lists</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#mediadevicelist-interface"><span class="secno">4.1 </span><code>MediaDeviceList</code> interface</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#attributes"><span class="secno">4.1.1 </span>Attributes</a></li><li class="tocline"><a class="tocxref" href="#methods"><span class="secno">4.1.2 </span>Methods</a></li></ul></li><li class="tocline"><a class="tocxref" href="#deviceevent-interface"><span class="secno">4.2 </span><code>DeviceEvent</code> interface</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#attributes-1"><span class="secno">4.2.1 </span>Attributes</a></li></ul></li><li class="tocline"><a class="tocxref" href="#deviceeventinit-dictionary"><span class="secno">4.3 </span><code>DeviceEventInit</code> dictionary</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#dictionary-deviceeventinit-members"><span class="secno">4.3.1 </span>Dictionary <span class="formerLink"><code>DeviceEventInit</code></span> Members</a></li></ul></li><li class="tocline"><a class="tocxref" href="#devicelistaccess-mix-in-interface"><span class="secno">4.4 </span><code>DeviceListAccess</code> mix-in interface</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#attributes-2"><span class="secno">4.4.1 </span>Attributes</a></li></ul></li></ul></li><li class="tocline"><a class="tocxref" href="#constraints-for-navigator.getusermedia-mediadevicelist.select"><span class="secno">5. </span>Constraints for navigator.getUserMedia/MediaDeviceList.select</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#video-constraints"><span class="secno">5.1 </span>Video Constraints</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#videoconstraints-dictionary"><span class="secno">5.1.1 </span><code>VideoConstraints</code> dictionary</a></li></ul></li><li class="tocline"><a class="tocxref" href="#audio-constraints"><span class="secno">5.2 </span>Audio Constraints</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#audioconstraints-dictionary"><span class="secno">5.2.1 </span><code>AudioConstraints</code> dictionary</a></li></ul></li><li class="tocline"><a class="tocxref" href="#common-sub-constraint-structures"><span class="secno">5.3 </span>Common sub-constraint structures</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#minmaxulongsubconstraint-dictionary"><span class="secno">5.3.1 </span><code>MinMaxULongSubConstraint</code> dictionary</a></li><li class="tocline"><a class="tocxref" href="#minmaxfloatsubconstraint-dictionary"><span class="secno">5.3.2 </span><code>MinMaxFloatSubConstraint</code> dictionary</a></li><li class="tocline"><a class="tocxref" href="#videoorientationenum-enumeration"><span class="secno">5.3.3 </span><code>VideoOrientationEnum</code> enumeration</a></li></ul></li></ul></li><li class="tocline"><a class="tocxref" href="#example-usage-scenarios"><span class="secno">6. </span>Example usage scenarios</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#getting-access-to-a-video-and-or-audio-device-if-available----scenario-unchanged"><span class="secno">6.1 </span>Getting access to a video and/or audio device (if available) -- scenario unchanged</a></li><li class="tocline"><a class="tocxref" href="#previewing-the-local-video-audio-in-html5-video-tag----scenario-is-unchanged"><span class="secno">6.2 </span>Previewing the local video/audio in HTML5 video tag -- scenario is unchanged</a></li><li class="tocline"><a class="tocxref" href="#applying-resolution-constraints"><span class="secno">6.3 </span>Applying resolution constraints</a></li><li class="tocline"><a class="tocxref" href="#changing-zoom-in-response-to-user-input"><span class="secno">6.4 </span>Changing zoom in response to user input:</a></li><li class="tocline"><a class="tocxref" href="#adding-the-local-media-tracks-into-a-new-media-stream----scenario-is-unchanged"><span class="secno">6.5 </span>Adding the local media tracks into a new media stream -- scenario is unchanged</a></li><li class="tocline"><a class="tocxref" href="#take-a-picture-show-the-picture-in-an-image-tag"><span class="secno">6.6 </span>Take a picture, show the picture in an image tag</a></li><li class="tocline"><a class="tocxref" href="#show-a-newly-available-device"><span class="secno">6.7 </span>Show a newly available device</a></li><li class="tocline"><a class="tocxref" href="#show-all-available-video-devices"><span class="secno">6.8 </span>Show all available video devices</a></li></ul></li></ul></section>
 
     <section id="remove-localmediastream-interface">
         <!--OddPage--><h2><span class="secno">1. </span>Remove <code>LocalMediaStream</code> interface</h2>
@@ -418,7 +418,7 @@ table.exceptions table {
             <h3><span class="secno">1.1 </span>Rationale</h3>
 
             The LocalMediaStream object currently extends MediaStream by adding a single method "stop()". In my prior proposals, this
-            object was radically altered in order to facilite several goals:
+            object was radically altered in order to facilitate several goals:
             <dl>
                 <dt>Provide a predictable home for developers to find and modify device settings</dt>
                 <dd>A previous proposal went out of its way to strongly associate LocalMediaStream objects with devices. This 
@@ -426,7 +426,7 @@ table.exceptions table {
                     for a stable, dependable API surface for all local media stream instances (no guesswork).
                 </dd>
                 <dt>Prevent track-list mutations</dt>
-                <dd>A previous proposal also removed the track lists on local media streams (resulting in some dramatic inheritence
+                <dd>A previous proposal also removed the track lists on local media streams (resulting in some dramatic inheritance
                     changes). Mutable tracks lists on LocalMediaStream objects seemed like the wrong design considering the current 
                     thinking that a getUserMedia request would only ever produce a LocalMediaStream with at most one audio or video 
                     track. 
@@ -739,6 +739,10 @@ interface <span class="idlInterfaceID">PictureEvent</span> : <span class="idlSup
                 value to 3 should be rounded down to the closest supported setting (0). 
             </p></div>
 
+            <p>MediaSettingsList objects should order their enumerated values from minimum to maximum where it makes sense, or in 
+                the order defined by the enumerated type where applicable.
+            </p>
+
             <section id="mediasettingsrange-interface">
                 <h4><span class="secno">3.1.1 </span><code>MediaSettingsRange</code> interface</h4>
                 <pre class="idl"><span class="idlInterface" id="idl-def-MediaSettingsRange">interface <span class="idlInterfaceID">MediaSettingsRange</span> {
@@ -746,15 +750,27 @@ interface <span class="idlInterfaceID">PictureEvent</span> : <span class="idlSup
 <span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>any</a></span> <span class="idlAttrName"><a href="#widl-MediaSettingsRange-min">min</a></span>;</span>
 <span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>any</a></span> <span class="idlAttrName"><a href="#widl-MediaSettingsRange-initial">initial</a></span>;</span>
 <span class="idlMethod">    <span class="idlMethType"><a>void</a></span> <span class="idlMethName"><a href="#widl-MediaSettingsRange-request-void-any-value-boolean-mandatory">request</a></span> (<span class="idlParam"><span class="idlParamType"><a>any</a></span> <span class="idlParamName">value</span></span>, <span class="idlParam">optional <span class="idlParamType"><a>boolean</a></span> <span class="idlParamName">mandatory</span></span>);</span>
-};</span></pre><section><h5 id="attributes-8">Attributes</h5><dl class="attributes"><dt id="widl-MediaSettingsRange-max"><code>max</code> of type <span class="idlAttrType"><a>any</a></span>, readonly</dt><dd>The maximum value of this setting. The type of value is specific to the setting.</dd><dt id="widl-MediaSettingsRange-min"><code>min</code> of type <span class="idlAttrType"><a>any</a></span>, readonly</dt><dd>The minimum value of this setting. The type of value is specific to the setting.</dd><dt id="widl-MediaSettingsRange-initial"><code>initial</code> of type <span class="idlAttrType"><a>any</a></span>, readonly</dt><dd>The initial value of this setting. When the object associated with this setting is first made available
+};</span></pre><section><h5 id="attributes-8">Attributes</h5><dl class="attributes"><dt id="widl-MediaSettingsRange-max"><code>max</code> of type <span class="idlAttrType"><a>any</a></span>, readonly</dt><dd>The maximum value of this setting. 
+                        <p>The type of this value is specific to the setting. Each setting will 
+                        describe a specific type. That type must be returned for this attribute.</p>
+                    </dd><dt id="widl-MediaSettingsRange-min"><code>min</code> of type <span class="idlAttrType"><a>any</a></span>, readonly</dt><dd>The minimum value of this setting. 
+                        <p>The type of this value is specific to the setting. Each setting will 
+                        describe a specific type. That type must be returned for this attribute.</p>
+                    </dd><dt id="widl-MediaSettingsRange-initial"><code>initial</code> of type <span class="idlAttrType"><a>any</a></span>, readonly</dt><dd>The initial value of this setting. When the object associated with this setting is first made available
                         to the application, the current value of the setting should be set to the initial value.
                         For example, in a browsing scenario, if one web site changes this setting and a subsequent web site
-                        gets access to this same setting, the setting should have been reset back to its initial value.
+                        gets access to this same setting, the setting should have been reset back to its initial value. 
+                        <p>The type of this value is specific to the setting. Each setting will describe a specific type. That 
+                            type must be returned for this attribute.</p>
                     </dd></dl></section><section><h5 id="methods-4">Methods</h5><dl class="methods"><dt id="widl-MediaSettingsRange-request-void-any-value-boolean-mandatory"><code>request</code></dt><dd>Creates an internal constraint based on the setting name with the provided value, adds that constraint
                         into the pending constraint structure (to the MediaTrackConstraint array by default or replaces an entry
                         in the MediaTrackConstraintSet if the mandatory flag is set) and queues a task (if not already queued) to 
                         process the pending constraint structure at the conclusion of this task.
                         <p>The mandatory parameter defaults to false.</p>
+                        <p>The value parameter type of this method is specific to the setting. Each setting will describe a specific 
+                            type. That type must be provided for this paramter. If the type does align, then the implementation
+                            should throw a <code>TypeError</code> exception.
+                        </p>
                     <table class="parameters"><tr><th>Parameter</th><th>Type</th><th>Nullable</th><th>Optional</th><th>Description</th></tr><tr><td class="prmName">value</td><td class="prmType"><code><a>any</a></code></td><td class="prmNullFalse">✘</td><td class="prmOptFalse">✘</td><td class="prmDesc"></td></tr><tr><td class="prmName">mandatory</td><td class="prmType"><code><a>boolean</a></code></td><td class="prmNullFalse">✘</td><td class="prmOptTrue">✔</td><td class="prmDesc"></td></tr></table><div><em>Return type: </em><code><a>void</a></code></div></dd></dl></section>
             </section>
 
@@ -769,11 +785,21 @@ interface <span class="idlInterfaceID">PictureEvent</span> : <span class="idlSup
                         to the application, the current value of the setting should be set to the initial value.
                         For example, in a browsing scenario, if one web site changes this setting and a subsequent web site
                         gets access to this same setting, the setting should have been reset back to its initial value.
-                    </dd></dl></section><section><h5 id="methods-5">Methods</h5><dl class="methods"><dt id="widl-MediaSettingsList-item-getter-any-unsigned-long-index"><code>item</code></dt><dd>Retrieves the value of the <code>index</code>ed enumerated item of this setting.<table class="parameters"><tr><th>Parameter</th><th>Type</th><th>Nullable</th><th>Optional</th><th>Description</th></tr><tr><td class="prmName">index</td><td class="prmType"><code><a>unsigned long</a></code></td><td class="prmNullFalse">✘</td><td class="prmOptFalse">✘</td><td class="prmDesc"></td></tr></table><div><em>Return type: </em><code><a>getter any</a></code></div></dd><dt id="widl-MediaSettingsList-request-void-any-value-boolean-mandatory"><code>request</code></dt><dd>Creates an internal constraint based on the setting name with the provided value, adds that constraint
+                        <p>The type of this value is specific to the setting. Each setting will describe a specific type. That 
+                            type must be returned for this attribute.</p>
+                    </dd></dl></section><section><h5 id="methods-5">Methods</h5><dl class="methods"><dt id="widl-MediaSettingsList-item-getter-any-unsigned-long-index"><code>item</code></dt><dd>Retrieves the value of the <code>index</code>ed enumerated item of this setting. Items should be sorted
+                        from min (at index 0) to max where applicable, or in the order listed in the enumerated type otherwise.
+                        <p>The type of this value is specific to the setting. Each setting will describe a specific type. That 
+                            type must be returned for this attribute.</p>
+                    <table class="parameters"><tr><th>Parameter</th><th>Type</th><th>Nullable</th><th>Optional</th><th>Description</th></tr><tr><td class="prmName">index</td><td class="prmType"><code><a>unsigned long</a></code></td><td class="prmNullFalse">✘</td><td class="prmOptFalse">✘</td><td class="prmDesc"></td></tr></table><div><em>Return type: </em><code><a>getter any</a></code></div></dd><dt id="widl-MediaSettingsList-request-void-any-value-boolean-mandatory"><code>request</code></dt><dd>Creates an internal constraint based on the setting name with the provided value, adds that constraint
                         into the pending constraint structure (to the MediaTrackConstraint array by default or replaces an entry
                         in the MediaTrackConstraintSet if the mandatory flag is set) and queues a task (if not already queued) to 
                         process the pending constraint structure at the conclusion of this task.
                         <p>The mandatory parameter defaults to false.</p>
+                        <p>The value parameter type of this method is specific to the setting. Each setting will describe a specific 
+                            type. That type must be provided for this paramter. If the type does align, then the implementation
+                            should throw a <code>TypeError</code> exception.
+                        </p>
                     <table class="parameters"><tr><th>Parameter</th><th>Type</th><th>Nullable</th><th>Optional</th><th>Description</th></tr><tr><td class="prmName">value</td><td class="prmType"><code><a>any</a></code></td><td class="prmNullFalse">✘</td><td class="prmOptFalse">✘</td><td class="prmDesc"></td></tr><tr><td class="prmName">mandatory</td><td class="prmType"><code><a>boolean</a></code></td><td class="prmNullFalse">✘</td><td class="prmOptTrue">✔</td><td class="prmDesc"></td></tr></table><div><em>Return type: </em><code><a>void</a></code></div></dd></dl></section>
             </section>            
         </section>
@@ -886,7 +912,10 @@ interface <span class="idlInterfaceID">PictureAndVideoSettings</span> {
 <span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a class="idlType" href="#idl-def-VideoFillLightModeEnum"><code>VideoFillLightModeEnum</code></a></span> <span class="idlAttrName"><a href="#widl-PictureAndVideoSettings-fillLightMode">fillLightMode</a></span>;</span>
 <span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a class="idlType" href="#idl-def-MediaSettingsList"><code>MediaSettingsList</code></a>?</span>     <span class="idlAttrName"><a href="#widl-PictureAndVideoSettings-fillLightModes">fillLightModes</a></span>;</span>
 };</span></pre><section><h5 id="attributes-10">Attributes</h5><dl class="attributes"><dt id="widl-PictureAndVideoSettings-dimensions"><code>dimensions</code> of type <span class="idlAttrType"><a class="idlType" href="#idl-def-MediaSettingsList"><code>MediaSettingsList</code></a></span>, readonly</dt><dd>The MediaSettingsList reports values of type VideoDimensionDict. The width/height reported are of the 
-                        camera's sensor, not reflecting a particular orientation.</dd><dt id="widl-PictureAndVideoSettings-rotation"><code>rotation</code> of type <span class="idlAttrType"><a>unsigned long</a></span>, readonly</dt><dd>The current rotation value in use by the camera. If not supported, the property returns the 
+                        camera's sensor, not reflecting a particular orientation. VideoDimensionDict items in the 
+                        MediaSettingsList list must be primarily sorted by width (smallest to largest), and then sub-sorted by 
+                        height (smallest to largest).
+                    </dd><dt id="widl-PictureAndVideoSettings-rotation"><code>rotation</code> of type <span class="idlAttrType"><a>unsigned long</a></span>, readonly</dt><dd>The current rotation value in use by the camera. If not supported, the property returns the 
                         value 0.</dd><dt id="widl-PictureAndVideoSettings-rotations"><code>rotations</code> of type <span class="idlAttrType"><a class="idlType" href="#idl-def-MediaSettingsList"><code>MediaSettingsList</code></a></span>, readonly, nullable</dt><dd>The MediaSettingsList reports values of type unsigned long. (0-90-180-270) degrees).
                         <div class="issue"><div class="issue-title"><span>Issue 3</span></div><p>Rotation makes me think I could set this to 45 degrees or some such. Maybe there's a 
                             better setting name for this. I only want to support right-angles.
@@ -1082,10 +1111,16 @@ interface <span class="idlInterfaceID">ConstraintErrorEvent</span> : <span class
                     object (in its default initial state).</dd><dt id="widl-MediaDeviceList-ondeviceremoved"><code>ondeviceremoved</code> of type <span class="idlAttrType"><a>EventHandler</a></span></dt><dd>Register/unregister for "deviceremoved" events. The handler should expect to get a DeviceEvent object as its first
                     parameter. The event is fired whenever an existing video device (or audio device, depending on the device list) moves into the 
                     <code>ENDED</code> state. Note that before dispatching this event, the device in question is removed from the device list.
-                </dd></dl></section><section id="methods"><h4><span class="secno">4.1.2 </span>Methods</h4><dl class="methods"><dt id="widl-MediaDeviceList-item-getter-any-unsigned-long-index"><code>item</code></dt><dd>Retrieves a device object (an AudioDeviceTrack if this is the audio devices list or a VideoDeviceTrack if this is the video devices list).<table class="parameters"><tr><th>Parameter</th><th>Type</th><th>Nullable</th><th>Optional</th><th>Description</th></tr><tr><td class="prmName">index</td><td class="prmType"><code><a>unsigned long</a></code></td><td class="prmNullFalse">✘</td><td class="prmOptFalse">✘</td><td class="prmDesc"></td></tr></table><div><em>Return type: </em><code><a>getter any</a></code></div></dd><dt id="widl-MediaDeviceList-select-void-MediaTrackConstraints-constraints"><code>select</code></dt><dd>Apply a set of optional and/or mandatory constraints to the set of devices in the device list, with the goal of 
+                </dd></dl></section><section id="methods"><h4><span class="secno">4.1.2 </span>Methods</h4><dl class="methods"><dt id="widl-MediaDeviceList-item-getter-any-unsigned-long-index"><code>item</code></dt><dd>Retrieves a device object (an AudioDeviceTrack if this is the audio devices list or a VideoDeviceTrack if this is the 
+                    video devices list).
+                <table class="parameters"><tr><th>Parameter</th><th>Type</th><th>Nullable</th><th>Optional</th><th>Description</th></tr><tr><td class="prmName">index</td><td class="prmType"><code><a>unsigned long</a></code></td><td class="prmNullFalse">✘</td><td class="prmOptFalse">✘</td><td class="prmDesc"></td></tr></table><div><em>Return type: </em><code><a>getter any</a></code></div></dd><dt id="widl-MediaDeviceList-select-void-MediaTrackConstraints-constraints"><code>select</code></dt><dd>Test a set of optional and/or mandatory constraints across the set of devices in the device list, with the goal of 
                     selecting a single device. This will queue a task to fire either a "constrainterror" or "constraintsuccess" event 
                     depending on the result. The "constraintsuccess" event includes the selected device on the DeviceEvent object's device
                     attribute.
+                    <p>No devices (or their settings) are modified by this API. This API only tests the provided constraints against all the 
+                        device's capabilities and reports a matching device via the "constraintsuccess" event, or no matches via 
+                        "constrainterror" event.
+                    </p>
                 <table class="parameters"><tr><th>Parameter</th><th>Type</th><th>Nullable</th><th>Optional</th><th>Description</th></tr><tr><td class="prmName">constraints</td><td class="prmType"><code><a>MediaTrackConstraints</a></code></td><td class="prmNullFalse">✘</td><td class="prmOptFalse">✘</td><td class="prmDesc"></td></tr></table><div><em>Return type: </em><code><a>void</a></code></div></dd></dl></section>
         </section>
 
@@ -1093,15 +1128,18 @@ interface <span class="idlInterfaceID">ConstraintErrorEvent</span> : <span class
             <h3><span class="secno">4.2 </span><code>DeviceEvent</code> interface</h3>
             <pre class="idl"><span class="idlInterface" id="idl-def-DeviceEvent">[<span class="extAttr">Constructor(DOMString type, optional DeviceEventInit eventInitDict)</span>]
 interface <span class="idlInterfaceID">DeviceEvent</span> : <span class="idlSuperclass"><a>Event</a></span> {
-<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>any</a></span> <span class="idlAttrName"><a href="#widl-DeviceEvent-device">device</a></span>;</span>
-};</span></pre><section id="attributes-1"><h4><span class="secno">4.2.1 </span>Attributes</h4><dl class="attributes"><dt id="widl-DeviceEvent-device"><code>device</code> of type <span class="idlAttrType"><a>any</a></span>, readonly</dt><dd>Contains a reference to the relevant device.</dd></dl></section>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>MediaStreamTrack</a></span> <span class="idlAttrName"><a href="#widl-DeviceEvent-device">device</a></span>;</span>
+};</span></pre><section id="attributes-1"><h4><span class="secno">4.2.1 </span>Attributes</h4><dl class="attributes"><dt id="widl-DeviceEvent-device"><code>device</code> of type <span class="idlAttrType"><a>MediaStreamTrack</a></span>, readonly</dt><dd>Contains a reference to the relevant device.
+                    <p>The actual object referenced by the device attribute will be a derived device track object such as
+                        an AudioDeviceTrack, VideoDeviceTrack or PictureDeviceTrack.</p>
+                </dd></dl></section>
         </section>
 
         <section id="deviceeventinit-dictionary">
             <h3><span class="secno">4.3 </span><code>DeviceEventInit</code> dictionary</h3>
             <pre class="idl"><span class="idlDictionary" id="idl-def-DeviceEventInit">dictionary <span class="idlDictionaryID">DeviceEventInit</span> : <span class="idlSuperclass"><a>EventInit</a></span> {
-<span class="idlMember">    <span class="idlMemberType"><a>any</a></span> <span class="idlMemberName"><a href="#widl-DeviceEventInit-device">device</a></span>;</span>
-};</span></pre><section id="dictionary-deviceeventinit-members"><h4><span class="secno">4.3.1 </span>Dictionary <a class="idlType" href="#idl-def-DeviceEventInit"><code>DeviceEventInit</code></a> Members</h4><dl class="dictionary-members"><dt id="widl-DeviceEventInit-device"><code>device</code> of type <span class="idlMemberType"><a>any</a></span></dt><dd>Video or Audio device track used to initialize the "device" property on the DeviceEvent.</dd></dl></section>
+<span class="idlMember">    <span class="idlMemberType"><a>MediaStreamTrack</a></span> <span class="idlMemberName"><a href="#widl-DeviceEventInit-device">device</a></span>;</span>
+};</span></pre><section id="dictionary-deviceeventinit-members"><h4><span class="secno">4.3.1 </span>Dictionary <a class="idlType" href="#idl-def-DeviceEventInit"><code>DeviceEventInit</code></a> Members</h4><dl class="dictionary-members"><dt id="widl-DeviceEventInit-device"><code>device</code> of type <span class="idlMemberType"><a>MediaStreamTrack</a></span></dt><dd>Video, Audio, or Picture device track used to initialize the "device" property on the DeviceEvent.</dd></dl></section>
         </section>
 
         <p>Device lists are only accessible from an existing device track object. In other words, the device list itself can only be accessed from 
@@ -1200,7 +1238,162 @@ interface <span class="idlInterfaceID">DeviceListAccess</span> {
         </section>
     </section>
 
+    <section id="example-usage-scenarios">
+        <!--OddPage--><h2><span class="secno">6. </span>Example usage scenarios</h2>
 
+        <p>As provided in the 3rd version of this proposal, the following JavaScript examples demonstrate how the Settings 
+            APIs defined in this proposal could be used.
+        </p>
 
+        <section id="getting-access-to-a-video-and-or-audio-device-if-available----scenario-unchanged">
+            <h3><span class="secno">6.1 </span>Getting access to a video and/or audio device (if available) -- scenario unchanged</h3>
+
+            <pre>navigator.getUserMedia({audio: true, video: true}, gotMedia, failedToGetMedia);
+
+function gotMedia(mediastream) {
+   // The recieved mediastream is using its initial settings (it's clean)
+}
+</pre>
+        </section>
+
+        <section id="previewing-the-local-video-audio-in-html5-video-tag----scenario-is-unchanged">
+            <h3><span class="secno">6.2 </span>Previewing the local video/audio in HTML5 video tag -- scenario is unchanged</h3>
+
+            <pre>function gotMedia(mediastream) {
+   // objectURL technique
+   document.querySelector("video").src = URL.createObjectURL(mediastream, { autoRevoke: true }); // autoRevoke is the default
+   // direct-assign technique
+   document.querySelector("video").srcObject = mediastream; // Proposed API at this time
+}
+</pre>
+        </section>
+
+        <section id="applying-resolution-constraints">
+            <h3><span class="secno">6.3 </span>Applying resolution constraints</h3>
+
+            <pre>function gotMedia(mediastream) {
+   var videoDevice = mediastream.videoTracks[0];
+   var maxDimensions = videoDevice.dimensions[videoDevice.dimensions.length - 1];
+   // Check for 1080p+ support
+   if ((maxDimensions.width &gt;= 1920) &amp;&amp; (maxDimensions.height &gt;= 1080)) {
+      // See if I need to change the current settings...
+      if ((videoDevice.width &lt; 1920) &amp;&amp; (videoDevice.height &lt; 1080)) {
+         videoDevice.dimensions.request(maxDimensions, true);
+         videoDevice.onconstrainterror = failureToComply;
+      }
+   }
+   else
+      failureToComply();
+}
+
+function failureToComply(e) {
+   if (e)
+      console.error("Device failed to change " + e.mandatoryConstraints[0]); // 'dimension'
+   else
+      console.error("Device doesn't support at least 1080p");
+}
+</pre>
+        </section>
+
+        <section id="changing-zoom-in-response-to-user-input">
+            <h3><span class="secno">6.4 </span>Changing zoom in response to user input:</h3>
+
+            <pre>function gotMedia(mediastream) {
+   setupRange( mediastream.videoTracks[0] );
+}
+
+function setupRange(videoDevice) {
+   // Check to see if the device supports zooming...
+   if (videoDevice.zooms) {
+      // Set HTML5 range control to min/max values of zoom
+      var zoomControl = document.querySelector("input[type=range]");
+      zoomControl.min = videoDevice.zooms.min;
+      zoomControl.max = videoDevice.zooms.max;
+      zoomControl.value = videoDevice.zoom;
+      zoomControl.zoomController = videoDevice.zooms; // Store the setting
+      zoomControl.onchange = applySettingChanges;
+   }
+}
+
+function applySettingChanges(e) {
+   e.target.zoomController.request(parseFloat(e.target.value), true);
+}
+</pre>
+        </section>
+
+        <section id="adding-the-local-media-tracks-into-a-new-media-stream----scenario-is-unchanged">
+            <h3><span class="secno">6.5 </span>Adding the local media tracks into a new media stream -- scenario is unchanged</h3>
+
+            <pre>function gotMedia(mediastream) {
+   return new MediaStream( [ mediastream.videoTracks[0], mediastream.audioTracks[0] ]);
+}
+</pre>
+        </section>
+
+        <section id="take-a-picture-show-the-picture-in-an-image-tag">
+            <h3><span class="secno">6.6 </span>Take a picture, show the picture in an image tag</h3>
+
+            <pre>function gotMedia(mediastream) {
+   var videoDevice = mediastream.videoTracks[0];
+   // Check if this device supports a picture mode...
+   var pictureDevice = videoDevice.pictureTrack;
+   if (pictureDevice) {
+       pictureDevice.onpicture = showPicture;
+       // Turn on flash only for the snapshot...if available
+       if (pictureDevice.fillLightModes) { // If there's an object here, then the flash is supported
+          pictureDevice.fillLightModes.request("on", true);
+       }
+       else
+          console.info("Flash not available");
+       pictureDevice.takePicture();
+   }
+}
+
+function showPicture(e) {
+   var img = document.querySelector("img");
+   img.src = URL.createObjectURL(e.data);
+}
+</pre>
+        </section>
+
+        <section id="show-a-newly-available-device">
+            <h3><span class="secno">6.7 </span>Show a newly available device</h3>
+
+            <div class="note"><div class="note-title"><span>Note</span></div><p>A newly available device occurs whenever an existing device that was being used by
+                another application (with exclusive access) is relinquished and becomes available for this
+                application to use. Of course, plugging-in a new device also causes a device to become available.
+            </p></div>
+
+            <pre>function gotMedia(mediastream) {
+   mediastream.videoTracks[0].devices.addEventListener("deviceadded", enableAndShowNewDevice);
+}
+
+function enableAndShowNewDevice(e) {
+   // Show the new video device as soon as it's available
+   // New device is muted when it first becomes available
+   e.device.enabled = true;
+   var mStream = new MediaStream(e.device);
+   document.querySelector("video").srcObject = mStream; // Using the proposed direct-assignment API
+}
+</pre>
+        </section>
+
+        <section id="show-all-available-video-devices">
+            <h3><span class="secno">6.8 </span>Show all available video devices</h3>
+
+            <pre>function gotMedia(mediastream) {
+   var deviceList = mediastream.videoTracks[0].devices;
+   for (var i = 0; i &lt; deviceList.length; i++) {
+      var videoDevice = deviceList[i];
+      videoDevice.enabled = true;
+      // Create a video element and add it to the UI
+      var videoTag = document.createElement('video');
+      videoTag.srcObject = new MediaStream([videoDevice]);
+      document.body.appendChild(videoTag);
+   }
+}
+</pre>
+        </section>
+    </section>
 
 </body></html>

@@ -14,7 +14,7 @@
             // previousPublishDate:  "2009-03-15",
             // previousURI : "http://dev.w3.org/2009/dap/ReSpec.js/documentation.html",
             copyrightStart: "2012",
-            edDraftURI: "blah",
+            edDraftURI: "http://dvcs.w3.org/hg/dap/raw-file/tip/media-stream-capture/proposals/SettingsAPI_proposal_v4.html",
             // lcEnd:  "2010-08-06",
 
 
@@ -24,12 +24,13 @@
                     name: "Travis Leithead", company: "Microsoft", companyURL: "http://www.microsoft.com/"
                 }
             ],
+            prevED: "http://dvcs.w3.org/hg/dap/raw-file/79d50d0d9582/media-stream-capture/proposals/SettingsAPI_proposal_v4.html",
 
             // WG
-            wg: "Media Capture TF",
-            wgURI: "http://blah.com/",
+            wg: ["Device APIs Working Group", "Web Real-Time Communications Working Group"],
+            wgURI: ["http://www.w3.org/2009/dap/", "http://www.w3.org/2011/04/webrtc/"],
             wgPublicList: "public-media-capture",
-            wgPatentURI: "",
+            wgPatentURI: ["http://www.w3.org/2004/01/pp-impl/43696/status", "http://www.w3.org/2004/01/pp-impl/47318/status"],
             noIDLSorting: true,
             maxTocLevel: 3
         };
@@ -201,7 +202,7 @@
             </p>
 
             <section>
-                <h2><code>AudioStreamTrack</code> interface</h2>
+                <h3><code>AudioStreamTrack</code> interface</h3>
                 <dl class="idl" title="interface AudioStreamTrack : MediaStreamTrack">
                 </dl>
             </section>
@@ -213,7 +214,7 @@
             <p>VideoDeviceTracks are created by the user agent to represent a camera device that provides local video.</p>
 
             <section>
-                <h2><code>VideoDeviceTrack</code> interface</h2>
+                <h3><code>VideoDeviceTrack</code> interface</h3>
                 <dl class="idl" title="interface VideoDeviceTrack : VideoStreamTrack">
                     <dt>readonly attribute PictureDeviceTrack? pictureTrack</dt>
                     <dd>If the device providing this VideoDeviceTrack supports a "high-resolution picture mode", this 
@@ -263,7 +264,7 @@
             </p>
 
             <section>
-                <h2><code>PictureDeviceTrack</code> interface</h2>
+                <h3><code>PictureDeviceTrack</code> interface</h3>
                 <dl class="idl" title="interface PictureDeviceTrack : VideoStreamTrack">
                     <dt>void takePicture()</dt>
                     <dd>Temporarily mutes the owning VideoDeviceTrack's stream, then asynchronously switches the camera into "high 
@@ -286,7 +287,7 @@
             </p>
 
             <section>
-                <h2><code>PictureEvent</code> interface</h2>
+                <h3><code>PictureEvent</code> interface</h3>
                 <dl class="idl" title="[Constructor(DOMString type, optional PictureEventInit eventInitDict)] interface PictureEvent : Event">
                     <dt>readonly attribute Blob data</dt>
                     <dd>Returns a Blob object whose type attribute indicates the encoding of the picture data. An implementation must
@@ -390,18 +391,30 @@
                 value to 3 should be rounded down to the closest supported setting (0). 
             </p>
 
+            <p>MediaSettingsList objects should order their enumerated values from minimum to maximum where it makes sense, or in 
+                the order defined by the enumerated type where applicable.
+            </p>
+
             <section>
                 <h3><code>MediaSettingsRange</code> interface</h3>
                 <dl class="idl" title="interface MediaSettingsRange">
                     <dt>readonly attribute any max</dt>
-                    <dd>The maximum value of this setting. The type of value is specific to the setting.</dd>
+                    <dd>The maximum value of this setting. 
+                        <p>The type of this value is specific to the setting. Each setting will 
+                        describe a specific type. That type must be returned for this attribute.</p>
+                    </dd>
                     <dt>readonly attribute any min</dt>
-                    <dd>The minimum value of this setting. The type of value is specific to the setting.</dd>
+                    <dd>The minimum value of this setting. 
+                        <p>The type of this value is specific to the setting. Each setting will 
+                        describe a specific type. That type must be returned for this attribute.</p>
+                    </dd>
                     <dt>readonly attribute any initial</dt>
                     <dd>The initial value of this setting. When the object associated with this setting is first made available
                         to the application, the current value of the setting should be set to the initial value.
                         For example, in a browsing scenario, if one web site changes this setting and a subsequent web site
-                        gets access to this same setting, the setting should have been reset back to its initial value.
+                        gets access to this same setting, the setting should have been reset back to its initial value. 
+                        <p>The type of this value is specific to the setting. Each setting will describe a specific type. That 
+                            type must be returned for this attribute.</p>
                     </dd>
                     <dt>void request(any value, optional boolean mandatory)</dt>
                     <dd>Creates an internal constraint based on the setting name with the provided value, adds that constraint
@@ -409,6 +422,10 @@
                         in the MediaTrackConstraintSet if the mandatory flag is set) and queues a task (if not already queued) to 
                         process the pending constraint structure at the conclusion of this task.
                         <p>The mandatory parameter defaults to false.</p>
+                        <p>The value parameter type of this method is specific to the setting. Each setting will describe a specific 
+                            type. That type must be provided for this paramter. If the type does align, then the implementation
+                            should throw a <code>TypeError</code> exception.
+                        </p>
                     </dd>
                 </dl>
             </section>
@@ -419,12 +436,18 @@
                     <dt>readonly attribute unsigned long length</dt>
                     <dd>The length of the enumerated values that this setting may assume.</dd>
                     <dt>getter any item(unsigned long index)</dt>
-                    <dd>Retrieves the value of the <code>index</code>ed enumerated item of this setting.</dd>
+                    <dd>Retrieves the value of the <code>index</code>ed enumerated item of this setting. Items should be sorted
+                        from min (at index 0) to max where applicable, or in the order listed in the enumerated type otherwise.
+                        <p>The type of this value is specific to the setting. Each setting will describe a specific type. That 
+                            type must be returned for this attribute.</p>
+                    </dd>
                     <dt>readonly attribute any initial</dt>
                     <dd>The initial value of this setting. When the object associated with this setting is first made available
                         to the application, the current value of the setting should be set to the initial value.
                         For example, in a browsing scenario, if one web site changes this setting and a subsequent web site
                         gets access to this same setting, the setting should have been reset back to its initial value.
+                        <p>The type of this value is specific to the setting. Each setting will describe a specific type. That 
+                            type must be returned for this attribute.</p>
                     </dd>
                     <dt>void request(any value, optional boolean mandatory)</dt>
                     <dd>Creates an internal constraint based on the setting name with the provided value, adds that constraint
@@ -432,6 +455,10 @@
                         in the MediaTrackConstraintSet if the mandatory flag is set) and queues a task (if not already queued) to 
                         process the pending constraint structure at the conclusion of this task.
                         <p>The mandatory parameter defaults to false.</p>
+                        <p>The value parameter type of this method is specific to the setting. Each setting will describe a specific 
+                            type. That type must be provided for this paramter. If the type does align, then the implementation
+                            should throw a <code>TypeError</code> exception.
+                        </p>
                     </dd>
                 </dl>
             </section>            
@@ -536,7 +563,10 @@
                 <dl class="idl" title="[NoInterfaceObject] interface PictureAndVideoSettings">
                     <dt>readonly attribute MediaSettingsList dimensions</dt>
                     <dd>The MediaSettingsList reports values of type VideoDimensionDict. The width/height reported are of the 
-                        camera's sensor, not reflecting a particular orientation.</dd>
+                        camera's sensor, not reflecting a particular orientation. VideoDimensionDict items in the 
+                        MediaSettingsList list must be primarily sorted by width (smallest to largest), and then sub-sorted by 
+                        height (smallest to largest).
+                    </dd>
                     <dt>readonly attribute unsigned long rotation</dt>
                     <dd>The current rotation value in use by the camera. If not supported, the property returns the 
                         value 0.</dd>
@@ -754,14 +784,20 @@
                 <dt>readonly attribute unsigned long length</dt>
                 <dd>The number of devices in this list (including those that are <code>MUTED</code> and <code>LIVE</code>.</dd>
                 <dt>getter any item(unsigned long index)</dt>
-                <dd>Retrieves a device object (an AudioDeviceTrack if this is the audio devices list or a VideoDeviceTrack if this is the video devices list).</dd>
+                <dd>Retrieves a device object (an AudioDeviceTrack if this is the audio devices list or a VideoDeviceTrack if this is the 
+                    video devices list).
+                </dd>
                 <dt>readonly attribute unsigned long totalEnabled</dt>
                 <dd>The number of devices in this list that whose <code>readyState</code> is in the <code>LIVE</code> state.</dd>
                 <dt>void select(MediaTrackConstraints constraints)</dt>
-                <dd>Apply a set of optional and/or mandatory constraints to the set of devices in the device list, with the goal of 
+                <dd>Test a set of optional and/or mandatory constraints across the set of devices in the device list, with the goal of 
                     selecting a single device. This will queue a task to fire either a "constrainterror" or "constraintsuccess" event 
                     depending on the result. The "constraintsuccess" event includes the selected device on the DeviceEvent object's device
                     attribute.
+                    <p>No devices (or their settings) are modified by this API. This API only tests the provided constraints against all the 
+                        device's capabilities and reports a matching device via the "constraintsuccess" event, or no matches via 
+                        "constrainterror" event.
+                    </p>
                 </dd>
                 <dt>attribute EventHandler ondeviceadded</dt>
                 <dd>Register/unregister for "deviceadded" events. The handler should expect to get a DeviceEvent object as its first
@@ -780,16 +816,19 @@
         <section>
             <h3><code>DeviceEvent</code> interface</h3>
             <dl class="idl" title="[Constructor(DOMString type, optional DeviceEventInit eventInitDict)] interface DeviceEvent : Event">
-                <dt>readonly attribute any device</dt>
-                <dd>Contains a reference to the relevant device.</dd>
+                <dt>readonly attribute MediaStreamTrack device</dt>
+                <dd>Contains a reference to the relevant device.
+                    <p>The actual object referenced by the device attribute will be a derived device track object such as
+                        an AudioDeviceTrack, VideoDeviceTrack or PictureDeviceTrack.</p>
+                </dd>
             </dl>
         </section>
 
         <section>
             <h3><code>DeviceEventInit</code> dictionary</h3>
             <dl class="idl" title="dictionary DeviceEventInit : EventInit">
-                <dt>any device</dt>
-                <dd>Video or Audio device track used to initialize the "device" property on the DeviceEvent.</dd>
+                <dt>MediaStreamTrack device</dt>
+                <dd>Video, Audio, or Picture device track used to initialize the "device" property on the DeviceEvent.</dd>
             </dl>
         </section>
 
@@ -801,7 +840,7 @@
         </p>
 
         <section>
-            <h2><code>DeviceListAccess</code> mix-in interface</h2>
+            <h3><code>DeviceListAccess</code> mix-in interface</h3>
             <pre><code>AudioDeviceTrack</code> implements <code>DeviceListAccess</code>;</pre>
             <pre><code>VideoDeviceTrack</code> implements <code>DeviceListAccess</code>;</pre>
             <dl class="idl" title="[NoInterfaceObject] interface DeviceListAccess">
@@ -903,7 +942,169 @@
     </section>
 
     <section>
-        <h1></h1>
+        <h1>Example usage scenarios</h1>
+
+        <p>As provided in the 3rd version of this proposal, the following JavaScript examples demonstrate how the Settings 
+            APIs defined in this proposal could be used.
+        </p>
+
+        <section>
+            <h2>Getting access to a video and/or audio device (if available) -- scenario unchanged</h2>
+
+            <pre>
+navigator.getUserMedia({audio: true, video: true}, gotMedia, failedToGetMedia);
+
+function gotMedia(mediastream) {
+   // The recieved mediastream is using its initial settings (it's clean)
+}
+</pre>
+        </section>
+
+        <section>
+            <h2>Previewing the local video/audio in HTML5 video tag -- scenario is unchanged</h2>
+
+            <pre>
+function gotMedia(mediastream) {
+   // objectURL technique
+   document.querySelector("video").src = URL.createObjectURL(mediastream, { autoRevoke: true }); // autoRevoke is the default
+   // direct-assign technique
+   document.querySelector("video").srcObject = mediastream; // Proposed API at this time
+}
+</pre>
+        </section>
+
+        <section>
+            <h2>Applying resolution constraints</h2>
+
+            <pre>
+function gotMedia(mediastream) {
+   var videoDevice = mediastream.videoTracks[0];
+   var maxDimensions = videoDevice.dimensions[videoDevice.dimensions.length - 1];
+   // Check for 1080p+ support
+   if ((maxDimensions.width >= 1920) && (maxDimensions.height >= 1080)) {
+      // See if I need to change the current settings...
+      if ((videoDevice.width < 1920) && (videoDevice.height < 1080)) {
+         videoDevice.dimensions.request(maxDimensions, true);
+         videoDevice.onconstrainterror = failureToComply;
+      }
+   }
+   else
+      failureToComply();
+}
+
+function failureToComply(e) {
+   if (e)
+      console.error("Device failed to change " + e.mandatoryConstraints[0]); // 'dimension'
+   else
+      console.error("Device doesn't support at least 1080p");
+}
+</pre>
+        </section>
+
+        <section>
+            <h2>Changing zoom in response to user input:</h2>
+
+            <pre>
+function gotMedia(mediastream) {
+   setupRange( mediastream.videoTracks[0] );
+}
+
+function setupRange(videoDevice) {
+   // Check to see if the device supports zooming...
+   if (videoDevice.zooms) {
+      // Set HTML5 range control to min/max values of zoom
+      var zoomControl = document.querySelector("input[type=range]");
+      zoomControl.min = videoDevice.zooms.min;
+      zoomControl.max = videoDevice.zooms.max;
+      zoomControl.value = videoDevice.zoom;
+      zoomControl.zoomController = videoDevice.zooms; // Store the setting
+      zoomControl.onchange = applySettingChanges;
+   }
+}
+
+function applySettingChanges(e) {
+   e.target.zoomController.request(parseFloat(e.target.value), true);
+}
+</pre>
+        </section>
+
+        <section>
+            <h2>Adding the local media tracks into a new media stream -- scenario is unchanged</h2>
+
+            <pre>
+function gotMedia(mediastream) {
+   return new MediaStream( [ mediastream.videoTracks[0], mediastream.audioTracks[0] ]);
+}
+</pre>
+        </section>
+
+        <section>
+            <h2>Take a picture, show the picture in an image tag</h2>
+
+            <pre>
+function gotMedia(mediastream) {
+   var videoDevice = mediastream.videoTracks[0];
+   // Check if this device supports a picture mode...
+   var pictureDevice = videoDevice.pictureTrack;
+   if (pictureDevice) {
+       pictureDevice.onpicture = showPicture;
+       // Turn on flash only for the snapshot...if available
+       if (pictureDevice.fillLightModes) { // If there's an object here, then the flash is supported
+          pictureDevice.fillLightModes.request("on", true);
+       }
+       else
+          console.info("Flash not available");
+       pictureDevice.takePicture();
+   }
+}
+
+function showPicture(e) {
+   var img = document.querySelector("img");
+   img.src = URL.createObjectURL(e.data);
+}
+</pre>
+        </section>
+
+        <section>
+            <h2>Show a newly available device</h2>
+
+            <p class="note">A newly available device occurs whenever an existing device that was being used by
+                another application (with exclusive access) is relinquished and becomes available for this
+                application to use. Of course, plugging-in a new device also causes a device to become available.
+            </p>
+
+            <pre>
+function gotMedia(mediastream) {
+   mediastream.videoTracks[0].devices.addEventListener("deviceadded", enableAndShowNewDevice);
+}
+
+function enableAndShowNewDevice(e) {
+   // Show the new video device as soon as it's available
+   // New device is muted when it first becomes available
+   e.device.enabled = true;
+   var mStream = new MediaStream(e.device);
+   document.querySelector("video").srcObject = mStream; // Using the proposed direct-assignment API
+}
+</pre>
+        </section>
+
+        <section>
+            <h2>Show all available video devices</h2>
+
+            <pre>
+function gotMedia(mediastream) {
+   var deviceList = mediastream.videoTracks[0].devices;
+   for (var i = 0; i < deviceList.length; i++) {
+      var videoDevice = deviceList[i];
+      videoDevice.enabled = true;
+      // Create a video element and add it to the UI
+      var videoTag = document.createElement('video');
+      videoTag.srcObject = new MediaStream([videoDevice]);
+      document.body.appendChild(videoTag);
+   }
+}
+</pre>
+        </section>
     </section>
   </body>
 </html>
