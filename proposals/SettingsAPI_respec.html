@@ -778,7 +778,7 @@
                 <dt>(MediaSettingsRange or MediaSettingsList) getRange(DOMString settingName)</dt>
                 <dd>
 				    <dl class="parameters">
-						<dt>settingName</dt><dd>The name of the setting for which the range of expected values should be returned</dd>
+						<dt>DOMString settingName</dt><dd>The name of the setting for which the range of expected values should be returned</dd>
 					</dl>
                     <p>Each setting has an appropriate range of values. These may be either value ranges (a continuum of values) or 
                         enumerated values but not both. Value ranges include a min and max value, while enumerated values are provided 
@@ -911,17 +911,17 @@
                 <dt>any get(DOMString settingName)</dt>
                 <dd>
 					<dl class="parameters">
-						<dt>settingName</dt><dd>The name of the setting for which the current value of that setting should be returned</dd>
+						<dt>DOMString settingName</dt><dd>The name of the setting for which the current value of that setting should be returned</dd>
 					</dl>
                     Returns the current value of a given setting. This is equivalent to reading the IDL attribute of the same name on the source object.
                 </dd>
                 <dt>void set(MediaTrackConstraint setting, optional boolean isMandatory = false)</dt>
                 <dd>
 					<dl class="parameters">
-						<dt>setting</dt><dd>A JavaScript object (dictionary) consisting of a single property which is the setting name to change,
+						<dt>MediaTrackConstraint setting</dt><dd>A JavaScript object (dictionary) consisting of a single property which is the setting name to change,
 						and whose value is either a primitive value (float/DOMString/etc), or another dictionary consisting of a <code>min</code>
 						and/or <code>max</code> property and associated values.</dd>
-						<dt>isMandatory</dt><dd>A flag indicating whether this settings change request should be considered mandatory. If a value
+						<dt>optional boolean isMandatory = false</dt><dd>A flag indicating whether this settings change request should be considered mandatory. If a value
 						of <code>true</code> is provided, then should the settings change fail for some reason, a <code><a>settingserror</a></code>
 						event will be raised. Otherwise, only <code><a>settingschanged</a></code> event will be dispatched for the settings
 						that were successfully changed. The default, if this flag is not provided, is <code>false</code></dd>
