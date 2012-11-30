@@ -91,7 +91,7 @@
                     which then ultimately brought back a use-case for having mutable track lists for MediaStream objects. (It did not
                     bring back a need for LocalMediaStream objects themselves though.)
                 </dd>
-                <dt>Workflow for access to additional device streams</dt>
+                <dt>Work flow for access to additional device streams</dt>
                 <dd>It is now understood that to request additional streams for different devices (e.g., the second camera on a 
                     dual-camera mobile phone), one must invoke getUserMedia a second time. In my prior proposal, this would result 
                     in a separate LocalMediaStream instance. At this point there are two LocalMediaStream objects each with their 
@@ -136,8 +136,8 @@
     <section>
         <h1>Media Stream Tracks</h1>
 
-        <p>With changes to <code>getUserMedia</code> to support a synchronus API, this proposal enables developer code to 
-            directly create Media Stream Tracks. It also introduces the concept of the <code>"placeholder"</code> readyState for tracks,
+        <p>With changes to <code>getUserMedia</code> to support a synchronous API, this proposal enables developer code to 
+            directly create Media Stream Tracks. It also introduces the concept of the <code>"new"</code> readyState for tracks,
             a state which signals that the specified track is not connected to a source.
         </p>
 
@@ -148,7 +148,7 @@
             in the next section.
         </p>
 
-        <p>Below is the new track hiearchy. It is somewhat simplified due to the exclusion of source objects:
+        <p>Below is the new track hierarchy. It is somewhat simplified due to the exclusion of source objects:
         </p>
         
         <ul>
@@ -163,7 +163,7 @@
         <section>
             <h2>Updating MediaStreamTrack</h2>
 
-            <p>This section defines <dfn>MediaStreamTrack</dfn> in order to add the new <code>"placeholder"</code> state and associated
+            <p>This section defines <dfn>MediaStreamTrack</dfn> in order to add the new <code>"new"</code> state and associated
                 event handlers. The definition is otherwise 
                 identical to the current definition except that the defined constants are replaced by strings (using an enumerated type).
             </p>
@@ -182,11 +182,11 @@
                     <dt>attribute boolean enabled</dt>
                     <dd>See <a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html#widl-MediaStreamTrack-enabled">enabled</a> definition in the current editor's draft.</dd>
                     <dt>readonly attribute TrackReadyStateEnum readyState</dt>
-                    <dd>The track's current state. Tracks start off in the <code>placeholder</code> state after being instantiated.
+                    <dd>The track's current state. Tracks start off in the <code>"new"</code> state after being instantiated.
                         <p>State transitions are as follows:</p>
                         <ul>
-                            <li><strong>placeholder -> live</strong> The user has approved access to this track and a media device source is now attached and streaming data.</li>
-                            <li><strong>placeholder -> ended</strong> The user rejected this track (did not approve its use).</li>
+                            <li><strong>new -> live</strong> The user has approved access to this track and a media device source is now attached and streaming data.</li>
+                            <li><strong>new -> ended</strong> The user rejected this track (did not approve its use).</li>
                             <li><strong>live -> muted</strong> The source is temporarily suspended (cannot provide streaming data).</li>
                             <li><strong>live -> ended</strong> The stream has ended (for various reasons).</li>
                             <li><strong>muted -> live</strong> The stream has resumed.</li>
@@ -195,24 +195,20 @@
                     </dd>
                     <dt>attribute EventHandler onstart</dt>
                     <dd>Event handler for the <code>start</code> event. The <code>start</code> event is fired when this track transitions
-                        from the <code>"placeholder"</code> state to the <code>"live"</code> state.
-                        <p class="issue"><strong>Issue: </strong> When working with multiple placecholder tracks, I found that I wanted to have a more centralized
+                        from the <code>"new"</code> state to the <code>"live"</code> state.
+                        <p class="issue"><strong>Issue: </strong> When working with multiple <code>"new"</code> tracks, I found that I wanted to have a more centralized
                             place to be notified when getUserMedia would activate all the tracks in a media stream. Perhaps there's a convenience handler 
-                            somewhere else? There's some workflows to consider here before landing a final design...
+                            somewhere else, for example on the MediaStream? There's some work flows to consider here before landing a final design...
                         </p>
-                        <p class="issue"><strong>Issue: </strong> Should we just consolidate all these event handlers into a readystatechange event?</p>
                     </dd>
                     <dt>attribute EventHandler onmute</dt>
                     <dd>See <a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html#widl-MediaStreamTrack-onmute">onmute</a> definition in the current editor's draft.
-                        <p class="issue"><strong>Issue: </strong> Should we just consolidate all these event handlers into a readystatechange event?</p>
                     </dd>
                     <dt>attribute EventHandler onunmute</dt>
                     <dd>See <a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html#widl-MediaStreamTrack-onunmute">onunmute</a> definition in the current editor's draft.
-                        <p class="issue"><strong>Issue: </strong> Should we just consolidate all these event handlers into a readystatechange event?</p>
                     </dd>
                     <dt>attribute EventHandler onended</dt>
                     <dd>See <a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html#widl-MediaStreamTrack-onended">onended</a> definition in the current editor's draft.
-                        <p class="issue"><strong>Issue: </strong> Should we just consolidate all these event handlers into a readystatechange event?</p>
                     </dd>
                 </dl>
             </section>
@@ -220,7 +216,7 @@
             <section>
                 <h3>TrackReadyStateEnum enumeration</h3>
                 <dl class="idl" title="enum TrackReadyStateEnum">
-                    <dt>placeholder</dt>
+                    <dt>new</dt>
                     <dd>The track type is new and has not been initialized (connected to a source of any kind). This state implies that 
                         the track's label will be the empty string.</dd>
                     <dt>live</dt>
@@ -248,7 +244,7 @@
 
             <p>It's important to note that the camera's <q>green light</q> doesn't come on when a new track is created; nor does the user get 
                 prompted to enable the camera/microphone. Those actions only happen after the developer has requested that a media stream containing 
-                placeholder tracks be bound to a source via <code>getUserMedia</code>. Until that point tracks are inert.
+                <code>"new"</code> tracks be bound to a source via <code>getUserMedia</code>. Until that point tracks are inert.
             </p>
 
             <section>
@@ -269,14 +265,14 @@
                     <dt>readonly attribute VideoFacingEnum facing</dt>
                     <dd>From the user's perspective, this attribute describes whether this camera is pointed toward the 
                         user ("user") or away from the user ("environment"). If this information cannot be reliably obtained, 
-                        for example from a USB external camera, or if the VideoStreamTrack's <code>readyState</code> is <code>"placeholder"</code>,
+                        for example from a USB external camera, or if the VideoStreamTrack's <code>readyState</code> is <code>"new"</code>,
                         the value <code>"unknown"</code> is returned.
                     </dd>
                     <dt>readonly attribute VideoStreamSource? source</dt>
                     <dd>Returns the <a>VideoStreamSource</a> object providing the source for this track (if available). A <a>VideoStreamSource</a> may be 
                         a camera, a peer connection, or a local image or video file. Some <a>VideoStreamTrack</a> sources may not expose a 
                         <a>VideoStreamSource</a> object, in which case this property must return <code>null</code>. When a <a>VideoStreamTrack</a> is first 
-                        created, and while it remains in the <code>"placeholder"</code> state, the <code>source</code> attribute must return <code>null</code>.
+                        created, and while it remains in the <code>"new"</code> state, the <code>source</code> attribute must return <code>null</code>.
                     </dd>
                 </dl>
             </section>
@@ -294,14 +290,14 @@
                     <dt>readonly attribute unsigned long level</dt>
                     <dd>The current level of audio that the microphone is picking up at this moment (if this is an AudioDeviceTrack),
                         or the current level of audio flowing through the track (generally) otherwise. Will return 0 if this track is
-                        a placeholder. The relative strength (amplitude) of the level is proportional to the <code>gain</code> of the 
+                        in the <code>"new"</code> state. The relative strength (amplitude) of the level is proportional to the <code>gain</code> of the 
                         audio source device (e.g., to increase the pick-up of the microphone, increase the gain setting).
                     </dd>
                     <dt>readonly attribute AudioStreamSource? source</dt>
                     <dd>Returns the <a>AudioStreamSource</a> object providing the source for this track (if available). An <a>AudioStreamSource</a> 
                         may be provided by a microphone, a peer connection, or a local audio file. Some <a>AudioStreamTrack</a> sources may not expose 
                         an <a>AudioStreamSource</a> object, in which case this property must return <code>null</code>. When an <a>AudioStreamTrack</a>
-                        is first created, and while it remains in the <code>"placeholder"</code> state, the <code>source</code> attribute must return <code>null</code>.
+                        is first created, and while it remains in the <code>"new"</code> state, the <code>source</code> attribute must return <code>null</code>.
                     </dd>
                 </dl>
             </section>
@@ -377,7 +373,7 @@
                             this data as it seems important for determining whether multiple devices of this type are available.
                         </p>
                         <p class="issue"><strong>Issue: </strong> The ability to be notified when new devices become available has been dropped from this proposal
-                            (it was availble in v4 via the DeviceList object).
+                            (it was available in v4 via the DeviceList object).
                         </p>
                     </dd>
                 </dl>
@@ -483,7 +479,7 @@
                             whether multiple devices of this type are available.
                         </p>
                         <p class="issue"><strong>Issue: </strong> The ability to be notified when new devices become available has been dropped from this proposal
-                            (it was availble in v4 via the DeviceList object).
+                            (it was available in v4 via the DeviceList object).
                         </p>
                     </dd>
                 </dl>
@@ -520,7 +516,7 @@
                     <dd>Register/unregister for "picture" events. The handler should expect to get a BlobEvent object as its first
                         parameter.
                         <p class="note">The BlobEvent returns a picture (as a Blob) in a compressed format (for example: PNG/JPEG) rather than a 
-                            raw ImageData object due to the expected large, un-compressed size of the resulting pictures.</p>
+                            raw ImageData object due to the expected large, uncompressed size of the resulting pictures.</p>
                         <p class="issue">This Event type (BlobEvent) should be the same thing used in the recording proposal.</p>
                     </dd>
                     <dt>attribute EventHandler onpictureerror</dt>
@@ -671,7 +667,7 @@
         <p>Reading the current settings are as simple as reading the readonly attribute of the same name. Each setting also has 
             a range of appropriate values (its capabilities), either enumerated values or a range continuum--these are the same ranges/enumerated
             values that may be used when expressing constraints for the given setting. Retrieving the capabilities of a given setting
-            is done via a <code>getRange</code> API on each source object. Similarly, reqeusting a change to a setting is done via a
+            is done via a <code>getRange</code> API on each source object. Similarly, requesting a change to a setting is done via a
             <code>set</code> API on each source object. Finally, for symmetry a <code>get</code> method is also defined which reports
             the current value of any setting.
         </p>
@@ -684,15 +680,23 @@
         <section>
             <h2>Expectations around changing settings</h2>
 
-            <p>There are sources and there are sinks. With tranditional web page elements such as <code>&lt;img></code> and <code>&lt;video></code> the source attributes of 
-                some particular content is relatively static. For example, the dimensions of an image or video downloaded from the internet will not
-                change. The sink that displays these sources to the user (the actual tags themselves) have a variety of controls for manipulating
-                the source content. For example, an <code>&lt;img></code> tag can scale down a huge source image of 1600x1200 pixels to fit in a rectangle defined
-                with <code>width="400"</code> and <code>height="300"</code>.
-            </p>
+            <p>Browsers provide a media pipeline from sources to sinks.  In a browser, sinks are the &lt;img>, &lt;video> and &lt;audio> tags. Traditional sources 
+				include streamed content, files and web resources.  The media produced by these sources typically does not change over time - these sources can be 
+				considered to be static.</p>
+	
+			<p>The sinks that display these sources to the user (the actual tags themselves) have a variety of controls for manipulating the source content.  For 
+				example, an &lt;img> tag scales down a huge source image of 1600x1200 pixels to fit in a rectangle defined with <code>width="400"</code> and 
+				<code>height="300"</code>.</p>
+
+			<p>The getUserMedia API adds dynamic sources such as microphones and cameras - the characteristics of these sources can change in response to application 
+				needs. These sources can be considered to be dynamic in nature. A &lt;video> element that displays media from a dynamic source can either perform 
+				scaling or it can feed back information along the media pipeline and have the source produce content more suitable for display.</p>
+
+			<p class="note"><strong>Note: </strong> This sort of feedback loop is obviously just enabling an "optimization", but it's a non-trivial gain. This 
+				optimization can save battery, allow for less network congestion, etc...</p>
 
             <p>This proposal assumes that <code>MediaStream</code> sinks (such as <code>&lt;video></code>, <code>&lt;audio></code>, 
-                and even <code>RTCPeerConnection</code>) will continue to have menchanisms to further transform the source stream beyond that
+                and even <code>RTCPeerConnection</code>) will continue to have mechanisms to further transform the source stream beyond that
                 which the settings described in this proposal offer. (The sink transformation options, including those of <code>RTCPeerConnection</code> 
                 are outside the scope of this proposal.)</p>
 
@@ -736,11 +740,32 @@
                 client in order to alter the transformation that it is applying to the home client's video source. Such a change <strong>would not</strong> change anything
                 related to sink A or B or the home client's video source.
             </p>
-
-            <p class="note"><strong>Note: </strong> This proposal does not define nor encourage a mechanism by which a change to the away client's video source could
-                automatically trigger a change to the home client's video source. Such change negotiations should be carried out on a secondary out-of-band channel (one
-                devised by the application layer).
+			
+			<p class="note"><strong>Note: </strong> This proposal does not define a mechanism by which a change to the away client's video source could
+                automatically trigger a change to the home client's video source. Implementations may choose to make such source-to-sink optimizations as long as they only
+				do so within the constraints established by the application, as the next example describes.
             </p>
+			
+			<p>It is fairly obvious that changes to a given source will impact sink consumers. However, in some situations changes to a given sink may also be cause for 
+				implementations to adjust the characteristics of a source's stream. This is illustrated in the following figures. In the first figure below, the home 
+				client's video source is sending a video stream sized at 1920 by 1200 pixels. The video source is also unconstrained, such that the exact source dimensions 
+				are flexible as far as the application is concerned. Two <code>MediaStream</code> objects contain tracks that use this same source, and those 
+				<code>MediaStream</code>s are connected to two different <code>&lt;video></code> element sinks A and B. Sink A has been sized to <code>width="1920"</code> and 
+				<code>height="1200"</code> and is displaying the sources video without any transformations. Sink B has been sized smaller and as a result, is scaling the 
+				video down to fit its rectangle of 320 pixels across by 200 pixels down.
+			</p>
+
+			<img src="change_settings_before2.png" title="Changing media stream sinks may affect sources: before the requested change">
+			
+			<p>When the application changes sink A to a smaller dimension (from 1920 to 1024 pixels wide and from 1200 to 768 pixels tall), the browser's media pipeline may 
+				recognize that none of its sinks require the higher source resolution, and needless work is being done both on the part of the source and on sink A. In 
+				such a case and without any other constraints forcing the source to continue producing the higher resolution video, the media pipeline may change the source
+				resolution:</p>
+				
+			<img src="change_settings_after2.png" title="Changing media stream sinks may affect sources: after the requested change">
+            
+			<p>In the above figure, the home client's video source resolution was changed to the max(sinkA, sinkB) in order to optimize playback. While not shown above, the
+				same behavior could apply to peer connections and other sinks.</p>
         </section>
 
         <section>
@@ -752,6 +777,9 @@
             <dl class="idl" title="[NoInterfaceObject] interface StreamSourceSettings">
                 <dt>(MediaSettingsRange or MediaSettingsList) getRange(DOMString settingName)</dt>
                 <dd>
+				    <dl class="parameters">
+						<dt>settingName</dt><dd>The name of the setting for which the range of expected values should be returned</dd>
+					</dl>
                     <p>Each setting has an appropriate range of values. These may be either value ranges (a continuum of values) or 
                         enumerated values but not both. Value ranges include a min and max value, while enumerated values are provided 
                         as a list of values. Both types of setting ranges include an "initial" value, which is the value that is expected 
@@ -882,10 +910,22 @@
                 </dd>
                 <dt>any get(DOMString settingName)</dt>
                 <dd>
-                    Returns the current value of a given setting. This is equavalent to reading the IDL attribute of the same name on the source object.
+					<dl class="parameters">
+						<dt>settingName</dt><dd>The name of the setting for which the current value of that setting should be returned</dd>
+					</dl>
+                    Returns the current value of a given setting. This is equivalent to reading the IDL attribute of the same name on the source object.
                 </dd>
                 <dt>void set(MediaTrackConstraint setting, optional boolean isMandatory = false)</dt>
                 <dd>
+					<dl class="parameters">
+						<dt>setting</dt><dd>A JavaScript object (dictionary) consisting of a single property which is the setting name to change,
+						and whose value is either a primitive value (float/DOMString/etc), or another dictionary consisting of a <code>min</code>
+						and/or <code>max</code> property and associated values.</dd>
+						<dt>isMandatory</dt><dd>A flag indicating whether this settings change request should be considered mandatory. If a value
+						of <code>true</code> is provided, then should the settings change fail for some reason, a <code><a>settingserror</a></code>
+						event will be raised. Otherwise, only <code><a>settingschanged</a></code> event will be dispatched for the settings
+						that were successfully changed. The default, if this flag is not provided, is <code>false</code></dd>
+					</dl>
                     <p>The <code>set</code> API is the mechanism for asynchronously requesting that the source device change the value 
                         of a given setting. The API mirrors the syntax used for applying constraints. Generally, the <code>set</code> API
                         will be used to apply specific values to a setting (such as setting the <code>flashMode</code> setting to a specific 
@@ -901,7 +941,7 @@
                     </p>
 
                     <p>For all of the given settings that were changed as a result of a sequence of calls to the <code>set</code> API during a 
-                        microtask, one single <a>settingschanged</a> event will be generated containing the names of the settings that
+                        micro-task, one single <a>settingschanged</a> event will be generated containing the names of the settings that
                         changed.</p>
 
                     <p class="note"><strong>Example: </strong>To change the video source's dimensions to any aspect ratio where the height 
@@ -913,7 +953,7 @@
                         the value onto the nearest supported value of the source device unless the mandatory flag is provided. In the case of
                         mandatory requests, if the setting cannot be exactly supported as requested, then the setting must fail and generate
                         a settingserror event. Regarding width/height values--if an implementation is able to scale the source video to 
-                        match the requested mandatory constraints, this need not cause a constraintfailure (but the result may be weirdly proportioned video).
+                        match the requested mandatory constraints, this need not cause a <a>settingserror</a> (but the result may be weirdly proportioned video).
                     </p>
                 </dd>
             </dl>
@@ -1267,6 +1307,12 @@ for (var i = 0; i &lt; totalVideoDevices; i++) {
             <li>The rotation setting was changed to an enumerated type.</li>
         </ol>
     </section>
+	
+	<section>
+		<h1>Acknowledgements</h1>
+		<p>I'd like to specially thank Anant Narayanan of Mozilla for collaborating on the new settings design, and EKR for his 2c. Also, thanks to
+		Martin Thomson (Microsoft) for his comments and review.
+	</section>
   </body>
 </html>
 
