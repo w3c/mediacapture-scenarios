@@ -1,20 +1,20 @@
 ﻿<!DOCTYPE html>
 <html>
   <head>
-    <title>Proposal: Media Capture and Streams Settings API v5</title>
+    <title>Proposal: Media Capture and Streams Settings API v6</title>
     <meta http-equiv='Content-Type' content='text/html;charset=utf-8' />
     <script src='http://darobin.github.com/respec/builds/respec-w3c-common.js' class='remove'></script>
     <script class='remove'>
         var respecConfig = {
             // document info
             specStatus: "ED",
-            shortName: "settingsv5",
+            shortName: "settingsv6",
             // publishDate:   "2009-08-06",
             // previousMaturity: "WD",
             // previousPublishDate:  "2009-03-15",
             // previousURI : "http://dev.w3.org/2009/dap/ReSpec.js/documentation.html",
             copyrightStart: "2012",
-            edDraftURI: "http://dvcs.w3.org/hg/dap/raw-file/tip/media-stream-capture/proposals/SettingsAPI_proposal_v5.html",
+            edDraftURI: "http://dvcs.w3.org/hg/dap/raw-file/tip/media-stream-capture/proposals/SettingsAPI_proposal_v6.html",
             // lcEnd:  "2010-08-06",
 
             // editors
@@ -23,7 +23,7 @@
                     name: "Travis Leithead", company: "Microsoft", companyURL: "http://www.microsoft.com/"
                 }
             ],
-            prevED: "http://dvcs.w3.org/hg/dap/raw-file/79d50d0d9582/media-stream-capture/proposals/SettingsAPI_proposal_v5.html",
+            prevED: "http://dvcs.w3.org/hg/dap/raw-file/79d50d0d9582/media-stream-capture/proposals/SettingsAPI_proposal_v6.html",
 
             // WG
             wg: ["Device APIs Working Group", "Web Real-Time Communications Working Group"],
@@ -39,8 +39,8 @@
     <section id='abstract'>
       This proposal describes additions and suggested changes to the 
         <a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html">Media Capture and Streams</a>
-        specification in order to support the goal of device settings retrieval and modification. This proposal incorporates 
-        feedback from the W3C TPAC 2012 event and builds on four prior proposals with the same goal
+        specification in order to support the goal of device settings retrieval and modification. This proposal (v6) incorporates 
+        feedback from the public-media-capture mailing list on the <a href="http://dvcs.w3.org/hg/dap/raw-file/999605452b3b/media-stream-capture/proposals/SettingsAPI_proposal_v5.html">Settings v5</a> proposal. The v5 proposal builds on four prior proposals with the same goal
         [<a href="http://dvcs.w3.org/hg/dap/raw-file/999605452b3b/media-stream-capture/proposals/SettingsAPI_proposal_v4.html">v4</a>]
         [<a href="http://lists.w3.org/Archives/Public/public-media-capture/2012Aug/0143.html">v3</a>]
         [<a href="http://lists.w3.org/Archives/Public/public-media-capture/2012Aug/0066.html">v2</a>]
@@ -48,107 +48,171 @@
     </section>
 
     <section>
-        <h1>Remove <code>LocalMediaStream</code> interface</h1>
-        <p>In this proposal, the derived LocalMediaStream interface is removed. Rather than returning a LocalMediaStream
-            instance in the NavigatorUserMediaSuccessCallback, a vanilla MediaStream object is returned. The primary difference
-            is in the tracks contained in that MediaStream object.
+        <h1>Evolution from V5</h1>
+        <p>For those of you who have been following along, this section introduces you to some of the changes from the last version.</p>
+        <p>For any of you just joining us, feel free to skip on down to the next section.</p>
+        <p>As I was looking at source objects in V5, and starting to rationalize what properties of the source should go on the
+            track, vs. on the source object, I got the notion that the source object really wasn't providing much value aside from 
+            a logical separation for properties of the track vs. stream. From our last telecon, it was apparent that most settings
+            needed to be on the tracks as state-full information about the track. So, then what was left on the source?
         </p>
-
-        <section>
-            <h2>Rationale</h2>
-
-            The LocalMediaStream object currently extends MediaStream by adding a single method "stop()". In my prior proposals, this
-            object was radically altered in order to facilitate several goals:
-            <dl>
-                <dt>Provide a predictable home for developers to find and modify device settings</dt>
-                <dd>A previous proposal went out of its way to strongly associate LocalMediaStream objects with devices. This 
-                    seemed like a good design because local device configuration is always on the local media stream. This made
-                    for a stable, dependable API surface for all local media stream instances (no guesswork).
-                </dd>
-                <dt>Prevent track-list mutations</dt>
-                <dd>A previous proposal also removed the track lists on local media streams (resulting in some dramatic inheritance
-                    changes). Mutable tracks lists on LocalMediaStream objects seemed like the wrong design considering the current 
-                    thinking that a getUserMedia request would only ever produce a LocalMediaStream with at most one audio or video 
-                    track. 
-                </dd>
-            </dl>
-        
-            <p>Some feedback even suggested re-considering the "at most one video/audio track per request to getUserMedia".</p>
-        
-            <p>While thinking about these goals and the feedback, I began to consider a few things:</p>
-
-            <dl>
-                <dt>Device-centric tracks</dt>
-                <dd>With tracks supplemented with device-characteristics (duck-typing), the LocalMediaStream's stop() API was a 
-                    convenience feature for stopping all tracks backed by a device on the LocalMediaStream object. With device-
-                    centric tracks a stop() API should be present on the tracks themselves.
-                </dd>
-                <dt>Mutable track lists</dt>
-                <dd>Mutable track lists were not a desirable feature while I was locked into considering the LocalMediaStream 
-                    as strongly associated with device-control. What is actually necessary, is that there is a something immutable
-                    associated with devices--that "something" doesn't necessarily need to be a LocalMediaStream or any MediaStream-like
-                    object at all! Once I unlocked that line of thinking, I began to experiment with the notion of a device list
-                    which then ultimately brought back a use-case for having mutable track lists for MediaStream objects. (It did not
-                    bring back a need for LocalMediaStream objects themselves though.)
-                </dd>
-                <dt>Work flow for access to additional device streams</dt>
-                <dd>It is now understood that to request additional streams for different devices (e.g., the second camera on a 
-                    dual-camera mobile phone), one must invoke getUserMedia a second time. In my prior proposal, this would result 
-                    in a separate LocalMediaStream instance. At this point there are two LocalMediaStream objects each with their 
-                    own devices. While this was nice for consistency of process, it was a challenge in terms of use of the objects 
-                    with a MediaStream consumer like the Video tag.
-                
-                    <p>To illustrate this challenge, consider how my prior proposal required a re-hookup of the MediaStream 
-                        to a video tag consumer:</p>
-                
-                    <ol>
-                        <li>First request to getUserMedia</li>
-                        <li>LocalMediaStream (1) obtained from success callback</li>
-                        <li>createObjectURL and preview in a video tag</li>
-                        <li>Second call to getUserMedia</li>
-                        <li>LocalMediaStream (2) obtained from success callback</li>
-                        <li>createObjectURL and preview in same video tag</li>
-                    </ol>
-                
-                    <p>Note that this process has to bind a completely new LocalMediaStream to the video tag a second time (if 
-                        re-using the same video tag) only because the second LocalMediaStream object was different than the 
-                        first.</p>
-                
-                    <p>It is much more efficient for developer code to simply add/remove tracks to a MediaStream that are 
-                        relevant, without needing to change the consumer of the MediaStream.</p>
-                </dd>
-                <dt>Usage of getUserMedia for permission rather than for additional device access</dt>
-                <dd>The getUserMedia method is the gateway for permission to media. This proposal does not suggest 
-                    changing that concept. It <em>does</em> suggest, however, that more information can be made available for 
-                    discovery of additional devices within the approved "category" or "type" of media, and provide a way to 
-                    obtain those additional devices without needing to go through the "permissions" route (i.e., getUserMedia).
-                </dd>
-                <dt>Importance of restricting control to LocalMediaStream</dt>
-                <dd>Upon reflection of the feedback around the prior proposal, the relative importance of restricting control
-                    of the devices associated with tracks on the LocalMediaStream to <em>only</em> the LocalMediaStream did not
-                    seem as vital, insofar as the device-level access via the track is not directly available through a 
-                    PeerConnection to a remote browser.
-                </dd>
-            </dl>
-        </section>
+        <p>EKR's comments about wondering what happens when multiple apps (or tabs within a browser) go to access and manipulate
+            a source also resonated with me. He proposed that this either be not allowed (exclusive locks on devices by apps), or 
+            that this be better defined somehow.</p>
+        <p>In thinking about this and wanting to have a better answer than the exclusive lock route, it occured to me that when choosing 
+            to grant a second app access to the same device, we might offer more than one choice. One choice that we've assumed so far, 
+            is to share one device among two apps with either app having the ability to modify the devices' settings. Another option
+            that I explore in this proposal is the concept of granting a read-only version of the device. There may be a primary owner
+            in another app, or simply in another track instance that can change the settings, and the other track(s) can see and observe
+            the changes, but cannot apply any changes of their own.
+        </p>
+        <p>In also thinking about allowing media other than strictly cameras and microphones with getUserMedia, such as a video from the
+            user's hard drive, or an audio file, or even just a static image, it was apparent that sometimes the source for a track might
+            be read-only anyway--you wouldn't be allowed to adjust the meta-data of a video streaming from the user's hard drive anyway.
+        </p>
+        <p>So the "read-only" media source concept was born.</p>
+        <p>The set of source objects was now starting to grow. I could forsee it being difficult to rationalize/manage these objects, their
+            purpose and/or properties into the future, and I as thought about all of these points together, it became clear that having 
+            an explicit object defined for various source devices/things was unnecessary overhead and complication.
+        </p>
+        <p>As such, the source objects that came into existance in the v4 proposal as track sub-types, and were changed in v5 to be objects
+            tied to tracks, are now gone. Instead, track sources have been simplified into a sigle string itentifier on a track, which allows 
+            the app to understand how access to various things about a track behave given a certain type of source (or no source).
+        </p>
+        <p>In order to clarify the track's behavior under various source types, I also had to get crisp about the things called "settings" 
+            and the things called "constraints" and how they all work together. I think this proposal gets it right, and provides the right
+            set of controls that ensure that devices can optimize where needed but still be constrained, and how these concepts relate to
+            "settings" and state of the track.
+        </p>
     </section>
 
     <section>
-        <h1>Media Stream Tracks</h1>
+        <h1>Definitions</h1>
+        <p>This proposal establishes the following definitions that I hope are used consistently throughout. (If not please let me know...)</p>
+        <dl>
+            <dt><dfn>Application</dfn></dt>
+            <dd>The code that uses the APIs and interface defined in this specification. On the web, the application is authored in JavaScript and 
+                tied to a particular domain, and typically runs inside of a single tab in browsers that offer tabbed browsing. In a browser it is 
+                possible to be running multiple applications at one time in different domains/tabs. It is also possible that another application 
+                outside of the browser and one inside of the browser may want to share media resources.
+            </dd>
+            <dt><dfn title="source">Source</dfn></dt>
+            <dd>Sources are the "thing" providing the source of a media stream track. The source is the broadcaster of the media itself. A source
+                can be a physical webcam, microphone, local video or audio file from the user's hard drive, or even a static image.
+                <p>Individual sources have five basic <dfn title="mode">modes</dfn> that are not directly exposed to an application via any 
+                    API defined in this spec. The modes are described in this spec for clarification purposes only:</p>
+                <table class="simple">
+                    <thead>
+                        <tr><th>Source's Mode</th><th>Details</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>unknown-authorization</td><td>The source hasn't yet been authorized for use by the 
+                            application. (Authorization occurs via the getUserMedia API.) All sources start out in this mode at the start of the
+                            application. Sources that are attached cameras or microphones make their existence known to the application in this 
+                            mode. Others like files on the local file system do not.</td></tr>
+                        <tr><td>armed</td><td>the source has been granted use by the application and is on/ready, but not actively broadcasting 
+                            any media. This can be the case if a camera source has been authorized, but there are no sinks connected to this 
+                            source (so no reason to be emitting media yet). Implementations of this specification are advised to include some 
+                            indicator that a device is armed in their UI so that users are aware that an application may start the source at any 
+                            time. A conservative user agent would enable some form of UI to show the source as "on" in ths mode.</td></tr>
+                        <tr><td>streaming</td><td>The source has been granted use by the application and is actively streaming media. User agents 
+                            should provide an indicator to the user that the source is on and streaming in this mode.</td></tr>
+                        <tr><td>not-authorized</td><td>This source has been forbidden/rejected by the user.</td></tr>
+                        <tr><td>off</td><td>The source has been turned off, but is still detectable (its existance can still be confirmed) by the 
+                            application.</td></tr>
+                    </tbody>
+                </table>
+                <p>In addition to these modes, a source can be removed (physically in the case camera/microphone sources, or deleted in the case
+                    of a file from the local file system), in which case it is no longer detectable by the application.</p>
+                <p>The user should remain in control of the source at all times and can cause any state-machine mode transition.</p>
+                <p>Some sources have an identifier which MUST be unique to the application (un-guessable by another application) and persistent between
+                    application sessions (e.g., the identifier for a given source device/application must stay the same, but not be guessable by another
+                    application). Sources that must have an identifier are camera and microphone sources; local file sources are not required to have 
+                    an identifier. Source identifiers let the application save, identify the availability of, and directly request specific sources.
+                </p>
+                <p>Other than the identifier, sources are <strong>never</strong> directly available to the application until the user-agent connects a 
+                    source to a track. Once a source has been "released" to the application (either via a permissions UI, pre-configured allow-list, or 
+                    some other release mechanism) the application will be able discover additional source-specific capabilities about the source.
+                </p> 
+                <p>Sources have <a>capabilities</a> and <a>state</a>. The capabilities and state are "owned" by the source and are common to any [multiple] tracks 
+                    that happen to be using the same source (e.g., if two different tracks objects bound to the same source ask for the same capability 
+                    or state information, they will get back the same answer).
+                </p>
+                <p>Sources <strong>do not</strong> have constraints--tracks have constraints. When a source is connected to a track, it must conform 
+                    to the constraints present on that track (or set of tracks).
+                </p>
+                <p>Sources will be released (un-attached) from a track when the track is ended for any reason.</p>
+                <p>On the track object, sources are represented by a <code><a>sourceType</a></code> attribute. The behavior of APIs associated with the 
+                    source's capabilities and state change depending on the source type.
+                </p>
+            </dd>
+            <dt><dfn title="state">State</dfn></dt>
+            <dt>Source State</dt>
+            <dd>State refers to the immediate, current value of the source's [optionally constrained] capabilities. State is always read-only.
+                <p>A source's state can change dynamically over time due to envirnmental conditions, sink configurations, or constraint changes. A source's 
+                    state must always conform to the current set of mandatory constraints that [each of] the tracks it is bound to have defined, and 
+                    should do its best to conform to the set of optional constraints specified.
+                </p>
+                <p>A source's state is directly exposed to audio and video track objects through individual read-only attributes. These attributes share
+                    the same name as their corresponding constraints.
+                </p>
+                <p>Events are available that signal to the application that source state has changed.</p>
+                <p>A conforming user-agent MUST support all the state names defined in this spec.</p>
+            </dd>
+            <dt><dfn title="capabilities">Capabilities</dfn></dt>
+            <dd>
+                Source capabilities are the intrinsic "features" of a source object. For each source state, there is a corresponding capability that describes
+                whether the it is supported by the source and if so, what the range of supported values are. Capability are expressed as either
+                a series of states (for enumerated-type capabilities) or as a min/max range.
+                <p>The values of the supported capabilities must be normalized to the ranges and enumerated types defined in this specification.</p>
+                <p>Capability requests should return the same underlying per-source capabilities, regardless of any user-supplied constraints 
+                    present on the source (capabilities are independent of constraints).</p>
+                <p>Source capabilities are effectively constant. Applications should be able to depend on a specific source having the same capabilities
+                    for any session.
+                </p>
+            </dd>
+            <dt><dfn title="constraints">Constraints</dfn></dt>
+            <dd>
+                Constraints are an optional feature for restricting the range of allowed variability on a source. Without provided constraints, implementations
+                are free to select a source's state from the full range of its supported capabilities, and to adjust that state at any time for any reason.
+                <p>Constraints may be optional or mandatory. Optional constraints are represented by an ordered list, mandatory constraints are an unordered
+                    set. The order of the optional constraints is from most important (at the head of the list) to least important (at the tail of the list).
+                </p>
+                <p>Constraints are stored on the track object, not the source. Each track can be optionally initialized with constraints, or constraints can
+                    be added afterward through the constraint APIs defined in this spec.
+                </p>
+                <p>Applying track level contraints to a source is conditional based on the type of source. For example, read-only sources
+                    will ignore any specified constraints on the track.
+                </p>
+                <p>It is possible for two tracks that share a unique source to apply contradictory constraints. Under such contraditions, the implementation 
+                    may be forced to transition to the source to the "armed" state until the conflict is resolved.
+                </p>
+                <p>Events are available that allow the application to know when constraints cannot be met by the user agent. These typically occur when
+                    the application applies constraints beyond the capability of a source, contradictory constraints, or in some cases when a source 
+                    cannot sustain itself in over-constrained scenarios (overheating, etc.). 
+                </p>
+                <p>Constraints that are intended for video sources will be ignored by audio sources and vice-versa. Similarly, constraints that are not
+                    recognized will be preserved in the constraint structure, but ignored by the application. This will allow future constraints to be
+                    defined in a backward compatible manner.
+                </p>
+                <p>A correspondingly-named constraint exists for each corresponding source state name and capability name.</p>
+                <p>In general, user agents will have more flexibility to optimize the media streaming experience the fewer constraints are applied.</p>
+            </dd>
+        </dl>
+    </section>
 
-        <p>With changes to <code>getUserMedia</code> to support a synchronous API, this proposal enables developer code to 
-            directly create Media Stream Tracks. It also introduces the concept of the <code>"new"</code> readyState for tracks,
-            a state which signals that the specified track is not connected to a source.
+    <section>
+        <h1>Tracks</h1>
+
+        <p>With <a href="http://lists.w3.org/Archives/Public/public-media-capture/2012Dec/0027.html">proposed changes</a> to 
+            <code>getUserMedia</code> to support a synchronous API, this proposal enables developer code to 
+            directly create [derived] <code>MediaStreamTrack</code>s and initialize them with [optional] constraints. It also 
+            adds the concept of the <code>"new"</code> readyState for tracks, a state which signifies that the track 
+            is not connected to a source [yet].
         </p>
 
-        <p>All tracks now have a <code>source</code> attribute, which is used to access a source object. The source object can be 
-            used to read additional settings about the source (content) of a track and to alter the source (content) of the track. 
-            This proposal describes local media device sources (cameras and microphones), and a skeleton description for a
-            remote media device source (tracks that originate from a peer connection). Media device source objects are described 
-            in the next section.
-        </p>
-
-        <p>Below is the new track hierarchy. It is somewhat simplified due to the exclusion of source objects:
+        <p>Below is the track hierarchy: new video and audio media streams are defined to inherit from <code>MediaStreamTrack</code>. The factoring into
+            derived track types allows for <a>state</a> to be conveniently split onto the objects for which they make sense.
         </p>
         
         <ul>
@@ -163,17 +227,17 @@
         <section>
             <h2>Updating MediaStreamTrack</h2>
 
-            <p>This section defines <dfn>MediaStreamTrack</dfn> in order to add the new <code>"new"</code> state and associated
-                event handlers. The definition is otherwise 
-                identical to the current definition except that the defined constants are replaced by strings (using an enumerated type).
+            <p>This section describes the <dfn>MediaStreamTrack</dfn> interface (currently in the Media Capture and Streams document), but makes targetted changes in order 
+                to add the <code>"new"</code> state and associated event handlers. The definition is otherwise identical to the current definition except that the defined 
+                constants are replaced by strings (using an enumerated type).
             </p>
 
             <section>
                 <h3><code>MediaStreamTrack</code> interface</h3>
                 <dl class="idl" title="interface MediaStreamTrack : EventTarget">
                     <dt>attribute DOMString id</dt>
-                    <dd>Provides a mechanism for developers to identify this track and to reference it by <code>getTrackById</code>. (This is a preliminary definition, but is 
-                        expected in the latest editor's draft soon.)
+                    <dd>Provides a mechanism for developers to assign and read-back the identify this track and to reference it using <code>MediaStream</code>'s 
+                        <code>getTrackById</code>. (This is a preliminary definition, but is expected in the latest editor's draft soon.)
                     </dd>
                     <dt>readonly attribute DOMString kind</dt>
                     <dd>See <a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html#widl-MediaStreamTrack-kind">kind</a> definition in the current editor's draft.</dd>
@@ -185,20 +249,20 @@
                     <dd>The track's current state. Tracks start off in the <code>"new"</code> state after being instantiated.
                         <p>State transitions are as follows:</p>
                         <ul>
-                            <li><strong>new -> live</strong> The user has approved access to this track and a media device source is now attached and streaming data.</li>
-                            <li><strong>new -> ended</strong> The user rejected this track (did not approve its use).</li>
-                            <li><strong>live -> muted</strong> The source is temporarily suspended (cannot provide streaming data).</li>
-                            <li><strong>live -> ended</strong> The stream has ended (for various reasons).</li>
-                            <li><strong>muted -> live</strong> The stream has resumed.</li>
-                            <li><strong>muted -> ended</strong> The stream was suspended and will no longer be able to provide any further data.</li>
-                        </ul>
+                            <li><strong>new -> live</strong> The user has approved access to this track and the attached <a>source</a> is in the "streaming" <a>mode</a>.</li>
+                            <li><strong>new -> ended</strong> The user rejected this track (did not approve its use). No <a>source</a> is attached.</li>
+                            <li><strong>live -> muted</strong> The <a>source</a> transitioned from the "streaming" to the "armed" <a>mode</a>.</li>
+                            <li><strong>live -> ended</strong> The track has ended (for various reasons, including invoking the <code>stop()</code> API). No source object is attached.</li>
+                            <li><strong>muted -> live</strong> The <a>source</a> transitioned from the "armed" to the "streaming" <a>mode</a>.</li>
+                            <li><strong>muted -> ended</strong> The <a>source</a> was stopped while in the "armed" <a>mode</a>.</li>
+                        </ul> 
                     </dd>
-                    <dt>attribute EventHandler onstart</dt>
-                    <dd>Event handler for the <code>start</code> event. The <code>start</code> event is fired when this track transitions
-                        from the <code>"new"</code> state to the <code>"live"</code> state.
-                        <p class="issue"><strong>Issue: </strong> When working with multiple <code>"new"</code> tracks, I found that I wanted to have a more centralized
-                            place to be notified when getUserMedia would activate all the tracks in a media stream. Perhaps there's a convenience handler 
-                            somewhere else, for example on the MediaStream? There's some work flows to consider here before landing a final design...
+                    <dt>attribute EventHandler onstarted</dt>
+                    <dd>Event handler for the <code>"started"</code> event. The <code>"started"</code> event is fired when this track transitions
+                        from the <code>"new"</code> <code>readyState</code> to any other state. This event fires before any other corresponding events like <code>"ended"</code>.
+                        <p class="issue"><strong>Recommendation: </strong> We should add a convenience API to <code>MediaStream</code> for being notified of various track changes 
+                            like this one. The event would contain a reference to the track, as well as the name of the event that happened. Such a convenience API would 
+                            fire last in the sequence of such events.
                         </p>
                     </dd>
                     <dt>attribute EventHandler onmute</dt>
@@ -212,6 +276,8 @@
                     </dd>
                 </dl>
             </section>
+
+            <p>To support the above readyState changes, the following enumeration is defined:</p>
 
             <section>
                 <h3>TrackReadyStateEnum enumeration</h3>
@@ -230,16 +296,10 @@
         </section>
 
         <section>
-            <h2>Creating Derived Tracks</h2>
+            <h2>Creating and Initializing Tracks</h2>
 
-            <p><a>MediaStreamTrack</a> objects cannot be instantiated directly. To create an instance of a <a>MediaStreamTrack</a>, one of 
-                its derived track types may be instantiated directly. These derived types are defined in this section. Each of these
-                track types has general IDL attributes specific to all tracks of the given type as well as a mechanism to obtain the 
-                device object that is providing the source for this track.
-            </p>
-
-            <p class="note"><strong>Note: </strong> I'm intentionally keeping these interfaces as sparse as possible. Features of the video/audio tracks that
-                are settings (generally mutable) have been moved to the track's device source instead.
+            <p>The <a>MediaStreamTrack</a> object cannot be instantiated directly. To create an instance of a <a>MediaStreamTrack</a>, one of 
+                its derived track types may be instantiated. These derived types are defined in this section.
             </p>
 
             <p>It's important to note that the camera's <q>green light</q> doesn't come on when a new track is created; nor does the user get 
@@ -268,10 +328,10 @@
                         for example from a USB external camera, or if the VideoStreamTrack's <code>readyState</code> is <code>"new"</code>,
                         the value <code>"unknown"</code> is returned.
                     </dd>
-                    <dt>readonly attribute VideoStreamSource? source</dt>
-                    <dd>Returns the <a>VideoStreamSource</a> object providing the source for this track (if available). A <a>VideoStreamSource</a> may be 
+                    <dt>readonly attribute VideoDeviceSource? source</dt>
+                    <dd>Returns the <a>VideoDeviceSource</a> object providing the source for this track (if available). A <a>VideoDeviceSource</a> may be 
                         a camera, a peer connection, or a local image or video file. Some <a>VideoStreamTrack</a> sources may not expose a 
-                        <a>VideoStreamSource</a> object, in which case this property must return <code>null</code>. When a <a>VideoStreamTrack</a> is first 
+                        <a>VideoDeviceSource</a> object, in which case this property must return <code>null</code>. When a <a>VideoStreamTrack</a> is first 
                         created, and while it remains in the <code>"new"</code> state, the <code>source</code> attribute must return <code>null</code>.
                     </dd>
                 </dl>
@@ -293,10 +353,10 @@
                         in the <code>"new"</code> state. The relative strength (amplitude) of the level is proportional to the <code>gain</code> of the 
                         audio source device (e.g., to increase the pick-up of the microphone, increase the gain setting).
                     </dd>
-                    <dt>readonly attribute AudioStreamSource? source</dt>
-                    <dd>Returns the <a>AudioStreamSource</a> object providing the source for this track (if available). An <a>AudioStreamSource</a> 
+                    <dt>readonly attribute AudioDeviceSource? source</dt>
+                    <dd>Returns the <a>AudioDeviceSource</a> object providing the source for this track (if available). An <a>AudioDeviceSource</a> 
                         may be provided by a microphone, a peer connection, or a local audio file. Some <a>AudioStreamTrack</a> sources may not expose 
-                        an <a>AudioStreamSource</a> object, in which case this property must return <code>null</code>. When an <a>AudioStreamTrack</a>
+                        an <a>AudioDeviceSource</a> object, in which case this property must return <code>null</code>. When an <a>AudioStreamTrack</a>
                         is first created, and while it remains in the <code>"new"</code> state, the <code>source</code> attribute must return <code>null</code>.
                     </dd>
                 </dl>
@@ -305,34 +365,41 @@
     </section>
         
     <section>
-        <h1>Media Stream Sources</h1>
+        <h1>Sources</h1>
 
-        <p><a>VideoStreamSource</a> and <a>AudioStreamSource</a> objects are instantiated by the user agent to represent a source that is providing the 
+        <p>All tracks now have a <code>source</code> attribute, which is used to access a source object. The source object can be 
+            used to read additional settings about the source (content) of a track and to alter the source (content) of the track. 
+            This proposal describes local media device sources (cameras and microphones), and a skeleton description for a
+            remote media device source (tracks that originate from a peer connection). Media device source objects are described 
+            in the next section.
+        </p>
+
+        <p><a>VideoDeviceSource</a> and <a>AudioDeviceSource</a> objects are instantiated by the user agent to represent a source that is providing the 
             media for a <a>MediaStreamTrack</a>. The association of a source object with a media track occurs asynchronously after
             permission for use of the track has been requested by <code>getUserMedia</code>. When the user agent has attached
             the source of a <a>MediaStreamTrack</a>, the source object can be accessed via that track's <code>source</code> attribute.
+        </p>
+
+        <p>If multiple <a>MediaStreamTrack</a> objects share a common device, then they will also share the same instance of their <code>source</code>
+            object (it is the same object instance relative to the application).
         </p>
 
         <p class="note"><strong>Note: </strong> Some <a>MediaStreamTrack</a>s may not provide a <code>source</code> object; for
             example, if the source is coming from an encrypted media source, or a local file source.
         </p>
 
-        <p class="issue"><strong>Issue: </strong> Need to define whether source objects are singletons. For example, if one track adds an expando
-            property onto a source object, will another track that has that same source see the expando on its source object?
-        </p>
-
         <section>
             <h2>Local Video and Audio Sources</h2>
 
-            <p><a>VideoStreamSource</a> and <a>AudioStreamSource</a> objects are created by the user agent to represent a camera or microphone 
+            <p><a>VideoDeviceSource</a> and <a>AudioDeviceSource</a> objects are created by the user agent to represent a camera or microphone 
                 device/source for which the source attributes can be inspected and/or changed. At the moment these are limited to local cameras,
                 local microphones, and peer connection sources, but additional sources can be defined later (such a local file system sources 
                 for images or audio files).
             </p>
 
             <section>
-                <h3><code><dfn>VideoStreamSource</dfn></code> interface</h3>
-                <dl class="idl" title="interface VideoStreamSource : EventTarget">
+                <h3><code><dfn>VideoDeviceSource</dfn></code> interface</h3>
+                <dl class="idl" title="interface VideoDeviceSource : EventTarget">
                     <dt>readonly attribute unsigned long width</dt>
                     <dd>The "natural" width (in pixels) of the source of the video flowing through the track. For cameras implementing this 
                         interface, this value represents the current setting of the camera's sensor (in terms of number of pixels). This value is 
@@ -367,7 +434,7 @@
                     </dd>
                     <dt>static unsigned long getNumDevices()</dt>
                     <dd>Returns the number of video sources that are currently available in this UA. As a static method, this information can be
-                        queried without instantiating any <a>VideoStreamTrack</a> or <a>VideoStreamSource</a> objects or without calling <code>getUserMedia</code>.
+                        queried without instantiating any <a>VideoStreamTrack</a> or <a>VideoDeviceSource</a> objects or without calling <code>getUserMedia</code>.
                         <p class="issue"><strong>Issue: </strong> This information deliberately adds to the fingerprinting surface of the UA. However, this information 
                             could also be obtained via other round-about techniques using <code>getUserMedia</code>. This editor deems it worthwhile directly providing
                             this data as it seems important for determining whether multiple devices of this type are available.
@@ -458,14 +525,15 @@
             </section>
 
             <section>
-                <h3><code><dfn>AudioStreamSource</dfn></code> interface</h3>
-                <dl class="idl" title="interface AudioStreamSource : EventTarget">
-                    <dt>readonly attribute unsigned long gain</dt>
-                    <dd>The sensitivity of the microphone. This value must be a whole number between 0 and 100 inclusive. 
-                        The gain value establishes the maximum threshold of the the microphone's sensitivity. When set to 0, 
-                        the microphone is essentially off (it will not be able to pick-up any sound). A value of 100 means 
-                        the microphone is configured for it's maximum gain/sensitivity. When first initialized for this 
-                        track, the gain value should be set to 50, the initial value.
+                <h3><code><dfn>AudioDeviceSource</dfn></code> interface</h3>
+                <dl class="idl" title="interface AudioDeviceSource : EventTarget">
+                    <dt>readonly attribute float gain</dt>
+                    <dd>The sensitivity of the microphone. This value must be a positive floating-point number or zero. 
+                        The gain value establishes the maximum threshold of the the microphone's sensitivity. When the gain is 0, 
+                        the microphone is essentially off (it will not be able to pick-up any sound). When first initialized for this 
+                        track, the gain value should be set to 1, the initial value. Values greater than 1 are possible and are clipped
+                        at the maximum value allowed by the capabilities's max value.
+                        <p>If the UA cannot support changing the <code>gain</code> of an audio source, the value of 1 should be returned.</p>
                     </dd>
                     <dt>void stop()</dt>
                     <dd>Causes this track to enter the <code>ended</code> state. Same behavior of the old LocalMediaStream's stop 
@@ -473,7 +541,7 @@
                     </dd>
                     <dt>static unsigned long getNumDevices()</dt>
                     <dd>Returns the number of potential audio sources that are available in this UA. As a static method, this information can be
-                        queried without instantiating any <a>AudioStreamTrack</a> or <a>AudioStreamSource</a> objects or without calling <code>getUserMedia</code>.
+                        queried without instantiating any <a>AudioStreamTrack</a> or <a>AudioDeviceSource</a> objects or without calling <code>getUserMedia</code>.
                         <p class="issue"><strong>Issue: </strong> This information deliberately adds to the fingerprinting surface of the UA. However, this information 
                             can also be obtained by other round-about techniques using <code>getUserMedia</code>, and is important for determining 
                             whether multiple devices of this type are available.
@@ -489,7 +557,7 @@
         <section>
             <h2>Camera sources with "high-resolution picture" modes</h2>
 
-            <p>The PictureStreamSource derived interface is created by the user agent if the camera source providing the VideoStreamSource
+            <p>The PictureStreamSource derived interface is created by the user agent if the camera source providing the VideoDeviceSource
                 supports an optional "high-resolution picture mode" with picture settings that are separate from those of 
                 its basic video source (which is usually considered its <q>preview</q> mode).
             </p>
@@ -500,11 +568,25 @@
 
             <section>
                 <h3><code><dfn>PictureStreamSource</dfn></code> interface</h3>
-                <dl class="idl" title="interface PictureStreamSource : VideoStreamSource">
+                <dl class="idl" title="interface PictureStreamSource : VideoDeviceSource">
                     <dt>readonly attribute unsigned long photoWidth</dt>
                     <dd>The width (in pixels) of the configured high-resolution photo-mode's sensor.</dd>
                     <dt>readonly attribute unsigned long photoHeight</dt>
                     <dd>The height (in pixels) of the configured high-resolution photo-mode's sensor.</dd>
+                    <dt>readonly attribute PictureWhiteBalanceModeEnum whiteBalanceMode</dt>
+                    <dd>The white balance mode setting of the configured high-resolution photo-mode's sensor. The not-supported value is <code>auto</code>.</dd>
+                    <dt>readonly attribute PictureExposureModeEnum exposureMode</dt>
+                    <dd>The current value of the high-resolution photo-mode's light sensor. The not-supported value is <code>auto</code>.</dd>
+                    <dt>readonly attribute PictureISOModeEnum isoMode</dt>
+                    <dd>The high-resolution photo-mode's film-equivalent speed (ISO). The not-supported value is <code>auto</code>.</dd>
+                    <dt>readonly attribute float brightness</dt>
+                    <dd>The currently configured brightness level of the high-resolution photo-mode's sensor. The values of this settings must range from 0 to 1. The not-supported and initial value is <code>0.5</code>.</dd>
+                    <dt>readonly attribute float contrast</dt>
+                    <dd>The currently configured contrast level of the high-resolution photo-mode's sensor. The values of this settings must range from 0 to 1. The not-supported and initial value is <code>0.5</code>.</dd>
+                    <dt>readonly attribute float saturation</dt>
+                    <dd>The currently configured saturation level of the high-resolution photo-mode's sensor. The values of this settings must range from 0 to 1. The not-supported and initial value is <code>0.5</code>.</dd>
+                    <dt>readonly attribute float sharpness</dt>
+                    <dd>The currently configured sharpness level of the high-resolution photo-mode's sensor. The values of this settings must range from 0 to 1. The not-supported and initial value is <code>0.5</code>.</dd>
                     <dt>void takePicture()</dt>
                     <dd>Temporarily (asynchronously) switches the camera into "high resolution picture mode", applies the settings that 
                         are unique to this object to the stream (switches the width/height to those of the photoWidth/photoHeight), and 
@@ -523,6 +605,42 @@
                     <dd>In the event of an error taking the picture, a "pictureerror" event will be dispatched instead of a "picture" event.
                         The "pictureerror" is a simple event of type Event.
                     </dd>
+                </dl>
+            </section>
+
+             <section>
+                <h3><dfn>PictureWhiteBalanceModeEnum</dfn> enumeration</h3>
+                <dl class="idl" title="enum PictureWhiteBalanceModeEnum">
+                    <dt>auto</dt><dd>The white-balance is configured to automatically adjust.</dd>
+                    <dt>incandescent</dt><dd>Adjust the white-balance between 2500 and 3500 Kelvin</dd>
+                    <dt>cool-fluorescent</dt><dd>Adjust the white-balance between 4000 and 5000 Kelvin</dd>
+                    <dt>warm-fluorescent</dt><dd>Adjust the white-balance between 5000 and 6000 Kelvin</dd>
+                    <dt>daylight</dt><dd>Adjust the white-balance between 5000 and 6500 Kelvin</dd>
+                    <dt>cloudy</dt><dd>Adjust the white-balance between 6500 and 8000 Kelvin</dd>
+                    <dt>twilight</dt><dd>Adjust the white-balance between 8000 and 9000 Kelvin</dd>
+                    <dt>shade</dt><dd>Adjust the white-balance between 9000 and 10,000 Kelvin</dd>
+                </dl>
+            </section>
+
+            <section>
+                <h3><dfn>PictureExposureModeEnum</dfn> enumeration</h3>
+                <dl class="idl" title="enum PictureExposureModeEnum">
+                    <dt>auto</dt><dd>The exposure mode is not known or not available on this device.</dd>
+                    <dt>frame-average</dt><dd>The light sensor should average of light information from entire scene.</dd>
+                    <dt>center-weighted</dt><dd>The light sensor should bias sensitivity concentrated towards center of viewfinder.</dd>
+                    <dt>spot-metering</dt><dd>The light sensor should only consider a centered spot area for exposure calculations.</dd>
+                </dl>
+            </section>
+
+            <section>
+                <h3><dfn>PictureISOModeEnum</dfn> enumeration</h3>
+                <dl class="idl" title="enum PictureISOModeEnum">
+                    <dt>auto</dt><dd>The iso value cannot be determined or is automatically selected by the device.</dd>
+                    <dt>100</dt><dd>An ASA rating of 100</dd>
+                    <dt>200</dt><dd>An ASA rating of 200</dd>
+                    <dt>400</dt><dd>An ASA rating of 400</dd>
+                    <dt>800</dt><dd>An ASA rating of 800</dd>
+                    <dt>1250</dt><dd>An ASA rating of 1250</dd>
                 </dl>
             </section>
 
@@ -620,10 +738,6 @@
                 <li><code>redEyeReduction</code> - photo-specific setting. (Could be considered if photo-specific settings
                     are introduced.)
                 </li>
-                <li><code>meteringMode</code> - photo-specific setting. (Could be considered if photo-specific settings
-                    are introduced.)</li>
-                <li><code>iso</code> - photo-specific setting. while more common on digital cameras, not particularly common on webcams (major use-case 
-                    for this feature)</li>
                 <li><code>sceneMode</code> - while more common on digital cameras, not particularly common on webcams (major use-case 
                     for this feature)</li>
                 <li><code>antiFlicker</code> - not a particularly common setting.</li>
@@ -636,15 +750,8 @@
             <p>The following settings may be included by working group decision:</p>
 
             <ol>
-                <li>exposure</li>
                 <li>exposureCompensation (is this the same as exposure?)</li>
-                <li>autoExposureMode</li>
-                <li>brightness</li>
-                <li>contrast</li>
-                <li>saturation</li>
-                <li>sharpness</li>
                 <li>evShift</li>
-                <li>whiteBalance</li>
             </ol>
         </section>
     </section>
@@ -770,8 +877,8 @@
 
         <section>
             <h2><code>StreamSourceSettings</code> mix-in interface</h2>
-            <pre><code><a>VideoStreamSource</a></code> implements <code>StreamSourceSettings</code>;</pre>
-            <pre><code><a>AudioStreamSource</a></code> implements <code>StreamSourceSettings</code>;</pre>
+            <pre><code><a>VideoDeviceSource</a></code> implements <code>StreamSourceSettings</code>;</pre>
+            <pre><code><a>AudioDeviceSource</a></code> implements <code>StreamSourceSettings</code>;</pre>
             <pre><code><a>VideoStreamRemoteSource</a></code> implements <code>StreamSourceSettings</code>;</pre>
             <pre><code><a>AudioStreamRemoteSource</a></code> implements <code>StreamSourceSettings</code>;</pre>
             <dl class="idl" title="[NoInterfaceObject] interface StreamSourceSettings">
@@ -848,6 +955,55 @@
                                 </td>
                             </tr>
                             <tr>
+                                <td>whiteBalanceMode</td>
+                                <td>MediaSettingsList</td>
+                                <td>
+                                    The supported range of frame rates on the device. The type of the initial/values array is <a>PictureWhiteBalanceModeEnum</a> (DOMString).
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>exposureMode</td>
+                                <td>MediaSettingsList</td>
+                                <td>
+                                    The supported range of frame rates on the device. The type of the initial/values array is <a>PictureExposureModeEnum</a> (DOMString).
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>isoMode</td>
+                                <td>MediaSettingsList</td>
+                                <td>
+                                    The supported range of frame rates on the device. The type of the initial/values array is <a>PictureISOModeEnum</a> (DOMString).
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>brightness</td>
+                                <td>MediaSettingsRange</td>
+                                <td>
+                                    The supported range of brightness on the device. The type of the min/max/initial values are float.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>contrast</td>
+                                <td>MediaSettingsRange</td>
+                                <td>
+                                    The supported range of contrast on the device. The type of the min/max/initial values are float.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>saturation</td>
+                                <td>MediaSettingsRange</td>
+                                <td>
+                                    The supported range of saturation on the device. The type of the min/max/initial values are float.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>sharpness</td>
+                                <td>MediaSettingsRange</td>
+                                <td>
+                                    The supported range of sharpness on the device. The type of the min/max/initial values are float.
+                                </td>
+                            </tr>
+                            <tr>
                                 <td>frameRate</td>
                                 <td>MediaSettingsRange</td>
                                 <td>
@@ -895,7 +1051,7 @@
                                 <td>gain</td>
                                 <td>MediaSettingsRange</td>
                                 <td>
-                                    The supported gain range on the device. The type of the min/max/initial values are unsigned long. The initial value is 50. 
+                                    The supported gain range on the device. The type of the min/max/initial values are float. The initial value is 1. 
                                 </td>
                             </tr>
                             <tr>
@@ -984,6 +1140,13 @@
 
             <section>
                 <h2>MediaSettingsList dictionary</h2>
+
+                <p>This dictionary will be populated differently based on the requested setting capabilities. For example, if the requested
+                    setting is <code><q>focusMode</q></code> the returned <code>MediaSettingList</code> 
+                    will be: <code>{ initial: "auto", values: [ "notavailable", "auto", "manual" ] }</code>. The actual value
+                    of the setting can be read using the <code>focusMode</code> attribute.
+                </p>
+
                 <dl class="idl" title="dictionary MediaSettingsList">
                     <dt>sequence&lt;any> values</dt>
                     <dd>An array of the values of the enumerated type for this setting. Items should be sorted
@@ -1008,8 +1171,8 @@
 
             <section>
                 <h3><code>MediaSettingsEventHandlers</code> mix-in interface</h3>
-                <pre><code><a>AudioStreamSource</a></code> implements <code>MediaSettingsEventHandlers</code>;</pre>
-                <pre><code><a>VideoStreamSource</a></code> implements <code>MediaSettingsEventHandlers</code>;</pre>
+                <pre><code><a>AudioDeviceSource</a></code> implements <code>MediaSettingsEventHandlers</code>;</pre>
+                <pre><code><a>VideoDeviceSource</a></code> implements <code>MediaSettingsEventHandlers</code>;</pre>
                 <pre><code><a>AudioStreamRemoteSource</a></code> implements <code>MediaSettingsEventHandlers</code>;</pre>
                 <pre><code><a>VideoStreamRemoteSource</a></code> implements <code>MediaSettingsEventHandlers</code>;</pre>
                 <dl class="idl" title="[NoInterfaceObject] interface MediaSettingsEventHandlers">
@@ -1091,7 +1254,7 @@
             <section>
                 <h3>AudioConstraints dictionary</h3>
                 <dl class="idl" title="dictionary AudioConstraints : MediaTrackConstraintSet">
-                    <dt>(unsigned long or <a>MinMaxULongSubConstraint</a>) gain</dt>
+                    <dt>(float or <a>MinMaxFloatSubConstraint</a>) gain</dt>
                     <dd>A device that supports the desired gain or gain range.</dd>
                 </dl>
             </section>
@@ -1129,12 +1292,12 @@
             <h2>Getting access to a video and/or audio device (if available)</h2>
 
             <pre>
-var audioTrack = (AudioStreamSource.getNumDevices() > 0) ? new AudioStreamTrack() : null;
+var audioTrack = (AudioDeviceSource.getNumDevices() > 0) ? new AudioStreamTrack() : null;
 if (audioTrack)
-   audioTrack.onstart = mediaStarted;
-var videoTrack = (VideoStreamSource.getNumDevices() > 0) ? new VideoStreamTrack() : null;
+   audioTrack.onstarted = mediaStarted;
+var videoTrack = (VideoDeviceSource.getNumDevices() > 0) ? new VideoStreamTrack() : null;
 if (videoTrack)
-   videoTrack.onstart = mediaStarted;
+   videoTrack.onstarted = mediaStarted;
 var MS = new MediaStream();
 MS.addTrack(audioTrack);
 MS.addTrack(videoTrack);
@@ -1268,7 +1431,7 @@ This scenario is not currently possible with this proposal.
             <h2>Show all available video devices:</h2>
 
             <pre>
-var totalVideoDevices = VideoStreamSource.getNumDevices();
+var totalVideoDevices = VideoDeviceSource.getNumDevices();
 var videoTracksList = [];
 for (var i = 0; i &lt; totalVideoDevices; i++) {
    var mediaStream = new MediaStream( new VideoStreamTrack() );
@@ -1288,26 +1451,62 @@ for (var i = 0; i &lt; totalVideoDevices; i++) {
         <p>This section documents the changes from the prior proposal:</p>
 
         <ol>
-            <li>Separated out the Track-type hierarchy from V4 into Track types and Track sources. The sources largely don't use inheritance.</li>
-            <li>Dropped the device list concept. Instead, simplified the ability to simply find out if there are multiple devices (via the 
-                static <code>getNumDevices</code> method).</li>
-            <li>Made Video and AudioStreamTracks constructable (an idea for synchronous <code>getUserMedia</code>).</li>
-            <li><code>PictureDeviceTrack</code> renamed to <code>PictureStreamSource</code> and dropped the semantics of it being a track; it's
-                now just a special type of device source that shares settings with its video source through inheritence.</li>
-            <li><code>PictureEvent</code> renamed to the more generic (and re-usable) <code>BlobEvent</code>. (I considered MessageEvent, but
-                that has too many other unrelated properties, and ProgressEvents didn't have a place to expose the data.)
-            </li>
-            <li>Cleaned up the settings that were previously on Video and AudioStreamTrack. Moved them all to the device sources instead. The only
-                non-settings that remain are AudioStreamTrack's <code>level</code> and VideoStreamTrack's <code>facing</code> values as these
-                have no corresponding settings to change.</li>
-            <li>Added a few new settings: <code>gain</code> to AudioStreamSource; <code>mirror</code>, <code>photoWidth</code>, and
-                <code>photoHeight</code> to VideoStreamSource; <code>bitRate</code> to Audio/VideoStreamRemoteSource. Dropped
-                <code>dimension</code>.
-            </li>
-            <li>The rotation setting was changed to an enumerated type.</li>
+            <li>Removed some outdated arguments in the 1.1 Rationale section for removing the LocalMediaStream.</li>
+            <li>Updated the gain range from 0-100 (unsigned long) to 0-1+ (float) to better match the <a href="https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html#attributes-GainNode">WebAudio definition</a>.</li>
+            <li>Added some of the picture settings suggested by gmandyam at: http://gmandyam.github.com/media-capture/. Limited these to photo settings unless anyone wants to move these up to general video attributes. I specifically excluded the following: exposureCompensation and redEye because I didn't have a clear understanding of the value range for exposure comp. and I don't think redEye is necessary for a v1 settings across a wide range of cameras.</li>
+            <li>Removed the MediaStreamRemoteSource objects. It didn't make sense to be able to changes settings on the source of these tracks (which is always related to a peer-connection). The best thing to do here is allow the remote tracks get a <code>source</code> that is a peer connection. Rather than create a new track type just to return a correct type for <code>source</code>, I'm simply overloading the source's type for both--as well as local resources.</li>
+            <li>Renamed <code>*StreamSource</code> to <code>*DeviceSource</code> to clearly differentiate that this is a "device" providing video/audio and to differentiate that from a img, video, audio sources that are not devices.</li>
+            <li>Added support for changing sources. This support is via the <code>changeSource</code> API on the <a>MediaStreamTrack</a> root-level object.</li>
         </ol>
     </section>
 	
+      <section>
+        <h1>Remove <code>LocalMediaStream</code> interface</h1>
+        <p>This proposal recommends removing the derived <code>LocalMediaStream</code> interface. All relevant "local" information
+            has been moved to the track level, and anything else that offers a convenience API for working with all the set of tracks
+            on a MediaStream should just be added to the vanilla <code>MediaStream</code> interface itself.
+        </p>
+
+        <section>
+            <h2>Rationale</h2>
+
+            The LocalMediaStream object currently extends MediaStream by adding a single method "stop()". In my prior proposals, this
+            object was radically altered in order to facilitate several goals:
+            <dl>
+                <dt>Provide a predictable home for developers to find and modify device settings</dt>
+                <dd>A previous proposal went out of its way to strongly associate LocalMediaStream objects with devices. This 
+                    seemed like a good design because local device configuration is always on the local media stream. This made
+                    for a stable, dependable API surface for all local media stream instances (no guesswork).
+                </dd>
+            </dl>
+        
+            <p>Some feedback even suggested re-considering the "at most one video/audio track per request to getUserMedia".</p>
+        
+            <p>While thinking about these goals and the feedback, I began to consider a few things:</p>
+
+            <dl>
+                <dt>Device-centric tracks</dt>
+                <dd>With tracks supplemented with device-characteristics (duck-typing), the LocalMediaStream's stop() API was a 
+                    convenience feature for stopping all tracks backed by a device on the LocalMediaStream object. With tracks that 
+                    contain a source object, a stop() API should be present on the source objects themselves (stop is logically
+                    a request to stop a source of the track).
+                </dd>
+                <dt>Mutable track lists</dt>
+                <dd>Mutable track lists were not a desirable feature while I was locked into considering the LocalMediaStream 
+                    as strongly associated with device-control. What is actually necessary, is that there is a something immutable
+                    associated with devices--that "something" doesn't necessarily need to be a LocalMediaStream or any MediaStream-like
+                    object at all. In this proposal it is a new <q>source</q> object that supplies the source of a track.
+                </dd>
+                <dt>Importance of restricting control to LocalMediaStream</dt>
+                <dd>Upon reflection of the feedback around the prior proposal, the relative importance of restricting control
+                    of the devices associated with tracks on the LocalMediaStream to <em>only</em> the LocalMediaStream did not
+                    seem as vital, insofar as the device-level access via the track is not directly available through a 
+                    PeerConnection to a remote browser.
+                </dd>
+            </dl>
+        </section>
+    </section>
+
 	<section>
 		<h1>Acknowledgements</h1>
 		<p>I'd like to specially thank Anant Narayanan of Mozilla for collaborating on the new settings design, and EKR for his 2c. Also, thanks to
