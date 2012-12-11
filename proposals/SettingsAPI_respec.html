@@ -225,7 +225,7 @@
         </ul>
 
         <section>
-            <h2>Updating MediaStreamTrack</h2>
+            <h2>Generic Tracks</h2>
 
             <p>This section describes the <dfn>MediaStreamTrack</dfn> interface (currently in the Media Capture and Streams document), but makes targetted changes in order 
                 to add the <code>"new"</code> state and associated event handlers. The definition is otherwise identical to the current definition except that the defined 
@@ -240,7 +240,11 @@
                         <code>getTrackById</code>. (This is a preliminary definition, but is expected in the latest editor's draft soon.)
                     </dd>
                     <dt>readonly attribute DOMString kind</dt>
-                    <dd>See <a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html#widl-MediaStreamTrack-kind">kind</a> definition in the current editor's draft.</dd>
+                    <dd>See <a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html#widl-MediaStreamTrack-kind">kind</a> definition in the current editor's draft.
+                        <p class="issue"><strong>Issue: </strong> Is this attribute really necessary anymore? Perhaps we should drop it since application code will directly
+                            create tracks from derived constructors: VideoStreamTrack and AudioStreamTrack?
+                        </p>
+                    </dd>
                     <dt>readonly attribute DOMString label</dt>
                     <dd>See <a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html#widl-MediaStreamTrack-label">label</a> definition in the current editor's draft.</dd>
                     <dt>attribute boolean enabled</dt>
@@ -250,8 +254,9 @@
                         <p>State transitions are as follows:</p>
                         <ul>
                             <li><strong>new -> live</strong> The user has approved access to this track and the attached <a>source</a> is in the "streaming" <a>mode</a>.</li>
-                            <li><strong>new -> ended</strong> The user rejected this track (did not approve its use). No <a>source</a> is attached.</li>
-                            <li><strong>live -> muted</strong> The <a>source</a> transitioned from the "streaming" to the "armed" <a>mode</a>.</li>
+                            <li><strong>new -> ended</strong> The user rejected this track (did not approve its use). No <a>source</a> is attached in this state.</li>
+                            <li><strong>live -> muted</strong> The <a>source</a> transitioned from the "streaming" to the "armed" <a>mode</a>. This could be a result of applying mandatory 
+                                constraints to a track that cannot be satisfied by the track's <a>source</a>.</li>
                             <li><strong>live -> ended</strong> The track has ended (for various reasons, including invoking the <code>stop()</code> API). No source object is attached.</li>
                             <li><strong>muted -> live</strong> The <a>source</a> transitioned from the "armed" to the "streaming" <a>mode</a>.</li>
                             <li><strong>muted -> ended</strong> The <a>source</a> was stopped while in the "armed" <a>mode</a>.</li>
@@ -296,7 +301,55 @@
         </section>
 
         <section>
-            <h2>Creating and Initializing Tracks</h2>
+            <h2>Track Sources</h2>
+
+            <section>
+                <h3>Source Information Extensions to <a>MediaStreamTrack</a></h3>
+                <dl class="idl" title="partial interface MediaStreamTrack">
+                    <dt>readonly attribute SourceTypeEnum sourceType</dt>
+                    <dd>Returns the type information associated with the currently attached source (if any).</dd>
+                    <dt>readonly attribute DOMString sourceId</dt>
+                    <dd>The application-unique identifier for this source. The same identifier MUST be valid between sessions of this application, but MUST also be different for other 
+                        applications. Some sort of GUID is recommended for the identifier.</dd>
+                    <dt>void stop()</dt>
+                    <dd>Stops the source associated with this track (if any). If no source is attached (e.g., <a>sourceType</a> is "none"), then this call returns immediately (e.g., is a no-op).</dd>
+                    <dt>static sequence&lt;DOMString> getSourceIds()</dt>
+                    <dd>Returns an array of application-unique source identifiers specific to current track-type instance. For example, if this API is invoked from a 
+                        <a>VideoStreamTrack</a> then this returns a list of <a>sourceId</a>s for all the video sources that the user agent can identify at the time the
+                        API is called (the list can grow/shrink over time as sources may be added or removed). As a static method, <a>getSourceIds</a> can be 
+                        queried without instantiating any <a>VideoStreamTrack</a> or <a>AudioStreamTrack</a> objects or without calling <code>getUserMedia</code>.
+                        <p class="issue"><strong>Issue: </strong> This information deliberately adds to the fingerprinting surface of the UA. However, this information 
+                            will not be identifyable outside the scope of this application. could also be obtained via other round-about techniques using <code>getUserMedia</code>. This editor deems it worthwhile directly providing
+                            this data as it seems important for determining whether multiple devices of this type are available.
+                        </p>
+                        <p class="issue"><strong>Issue: </strong> The ability to be notified when new devices become available has been dropped from this proposal
+                            (it was available in v4 via the DeviceList object).
+                        </p>
+                    </dd>
+                </dl>
+            </section>
+
+            <section>
+                <h3>SourceTypeEnum enumeration</h3>
+                <dl class="idl" title="enum SourceTypeEnum">
+                    <dt>none</dt>
+                    <dd>This track has no source. This is the case when the track is in the <code>"new"</code> or <code>"ended"</code> <a>readyState</a>.</dd>
+                    <dt>camera</dt>
+                    <dd>A valid source type only for <a>VideoStreamTrack</a>s. The source is a local video-producing camera source (without special photo-mode support).</dd>
+                    <dt>microphone</dt>
+                    <dd>A valid source type only for <a>AudioStreamTrack</a>s. The source is a local audio-producing microphone source.</dd>
+                    <dt>photo-camera</dt>
+                    <dd>A valid source type only for <a>VideoStreamTrack</a>s. The source is a local video-producing camera source which supports high-resolution photo-mode and its related <a>state</a> attributes.</dd>
+                    <dt>readonly</dt>
+                    <dd>The track (audio or video) is backed by a read-only source such as a file, or the track source is a local microphone or camera, but is shared so that this track cannot modify any of the source's settings.</dd>
+                    <dt>remote</dt>
+                    <dd>The track is sourced by an <code>RTCPeerConnection</code>.</dd>
+                </dl>
+            </section>
+        </section>
+
+        <section>
+            <h2>Video and Audio Tracks</h2>
 
             <p>The <a>MediaStreamTrack</a> object cannot be instantiated directly. To create an instance of a <a>MediaStreamTrack</a>, one of 
                 its derived track types may be instantiated. These derived types are defined in this section.
@@ -310,40 +363,32 @@
             <section>
                 <h3><code><dfn>VideoStreamTrack</dfn></code> interface</h3>
 
-                <p>VideoStreamTrack objects are of <code>kind</code> "video".</p>
+                <p>Video tracks may be instantiated with optional media track constraints. These constraints can be later modified on the track as
+                    needed by the application, or created after-the-fact if the initial constraints are unknown to the application.
+                </p>
 
                 <p class="note"><strong>Example: </strong><a>VideoStreamTrack</a> objects are instantiated in JavaScript using the new operator: <br>
-                    <span style="white-space:pre"><code>new VideoStreamTrack();</code></span>
+                    <tt><b>new</b> <code>VideoStreamTrack</code>();</tt><br>or<br>
+                    <tt><b>new</b> <code>VideoStreamTrack</code>( { optional: [ { <code>sourceId</code>: "20983-20o198-109283-098-09812" }, { <code>width</code>: { min: 800, max: 1200 }}, { <code>height</code>: { min: 600 }}] });</tt>
                 </p>
 
-                <p class="issue"><strong>Issue: </strong> It's been suggested that these track constructors can take optional constraints. Such constraints
-                    could be stored until activated by getUserMedia to help the user select what characteristics to use when pre-configuring a device source 
-                    and attaching it to the track. These are not added in this proposal, but could be added later-on.
-                </p>
-
-                <dl class="idl" title="[Constructor] interface VideoStreamTrack : MediaStreamTrack">
+                <dl class="idl" title="[Constructor(optional MediaTrackConstraints videoConstraints)] interface VideoStreamTrack : MediaStreamTrack">
                     <dt>readonly attribute VideoFacingEnum facing</dt>
                     <dd>From the user's perspective, this attribute describes whether this camera is pointed toward the 
                         user ("user") or away from the user ("environment"). If this information cannot be reliably obtained, 
                         for example from a USB external camera, or if the VideoStreamTrack's <code>readyState</code> is <code>"new"</code>,
                         the value <code>"unknown"</code> is returned.
                     </dd>
-                    <dt>readonly attribute VideoDeviceSource? source</dt>
-                    <dd>Returns the <a>VideoDeviceSource</a> object providing the source for this track (if available). A <a>VideoDeviceSource</a> may be 
-                        a camera, a peer connection, or a local image or video file. Some <a>VideoStreamTrack</a> sources may not expose a 
-                        <a>VideoDeviceSource</a> object, in which case this property must return <code>null</code>. When a <a>VideoStreamTrack</a> is first 
-                        created, and while it remains in the <code>"new"</code> state, the <code>source</code> attribute must return <code>null</code>.
-                    </dd>
+
                 </dl>
             </section>
                     
             <section>
                 <h3><code><dfn>AudioStreamTrack</dfn></code> interface</h3>
                 
-                <p>AudioStreamTrack objects are of <code>kind</code> "audio".</p>
-
                 <p class="note"><strong>Example: </strong><a>AudioStreamTrack</a> objects are instantiated in JavaScript using the new operator: <br>
-                    <span style="white-space:pre"><code>new AudioStreamTrack();</code></span>
+                    <tt><b>new</b> <code>AudioStreamTrack</code>();</tt><br>or<br>
+                    <tt><b>new</b> <code>AudioStreamTrack</code>( { optional: [ { <code>sourceId</code>: "64815-wi3c89-1839dk-x82-392aa" }, { <code>gain</code>: 0.5 }] });</tt>
                 </p>
 
                 <dl class="idl" title="[Constructor] interface AudioStreamTrack : MediaStreamTrack">
@@ -353,49 +398,93 @@
                         in the <code>"new"</code> state. The relative strength (amplitude) of the level is proportional to the <code>gain</code> of the 
                         audio source device (e.g., to increase the pick-up of the microphone, increase the gain setting).
                     </dd>
-                    <dt>readonly attribute AudioDeviceSource? source</dt>
-                    <dd>Returns the <a>AudioDeviceSource</a> object providing the source for this track (if available). An <a>AudioDeviceSource</a> 
-                        may be provided by a microphone, a peer connection, or a local audio file. Some <a>AudioStreamTrack</a> sources may not expose 
-                        an <a>AudioDeviceSource</a> object, in which case this property must return <code>null</code>. When an <a>AudioStreamTrack</a>
-                        is first created, and while it remains in the <code>"new"</code> state, the <code>source</code> attribute must return <code>null</code>.
-                    </dd>
                 </dl>
             </section>
         </section>
     </section>
         
     <section>
-        <h1>Sources</h1>
+        <h1>Source States</h1>
 
-        <p>All tracks now have a <code>source</code> attribute, which is used to access a source object. The source object can be 
-            used to read additional settings about the source (content) of a track and to alter the source (content) of the track. 
-            This proposal describes local media device sources (cameras and microphones), and a skeleton description for a
-            remote media device source (tracks that originate from a peer connection). Media device source objects are described 
-            in the next section.
+        <p>Source states (the current states of the media in a track) are observable by the attributes defined in this section. They are divided by 
+            track type: video and audio.
         </p>
-
-        <p><a>VideoDeviceSource</a> and <a>AudioDeviceSource</a> objects are instantiated by the user agent to represent a source that is providing the 
-            media for a <a>MediaStreamTrack</a>. The association of a source object with a media track occurs asynchronously after
-            permission for use of the track has been requested by <code>getUserMedia</code>. When the user agent has attached
-            the source of a <a>MediaStreamTrack</a>, the source object can be accessed via that track's <code>source</code> attribute.
-        </p>
-
-        <p>If multiple <a>MediaStreamTrack</a> objects share a common device, then they will also share the same instance of their <code>source</code>
-            object (it is the same object instance relative to the application).
-        </p>
-
-        <p class="note"><strong>Note: </strong> Some <a>MediaStreamTrack</a>s may not provide a <code>source</code> object; for
-            example, if the source is coming from an encrypted media source, or a local file source.
-        </p>
-
+      
         <section>
-            <h2>Local Video and Audio Sources</h2>
+            <h2>Video Source State</h2>
 
-            <p><a>VideoDeviceSource</a> and <a>AudioDeviceSource</a> objects are created by the user agent to represent a camera or microphone 
-                device/source for which the source attributes can be inspected and/or changed. At the moment these are limited to local cameras,
-                local microphones, and peer connection sources, but additional sources can be defined later (such a local file system sources 
-                for images or audio files).
-            </p>
+            <p>This table summarizes the expected values of the video source state attributes for each of the <code><a>sourceType</a></code>s defined earlier:</p>
+
+            <table class="simple">
+                <thead>
+                    <tr>
+                        <th><code>sourceType</code></th>
+                        <th>"none"</th>
+                        <th>"camera"</th>
+                        <th>"photo-camera"</th>
+                        <th>"readonly"</th>
+                        <th>"remote"</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>width</code></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><code>width</code></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><code>width</code></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><code>width</code></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><code>width</code></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><code>width</code></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><code>width</code></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
 
             <section>
                 <h3><code><dfn>VideoDeviceSource</dfn></code> interface</h3>
@@ -428,21 +517,7 @@
                     <dt>readonly attribute VideoFillLightModeEnum fillLightMode</dt>
                     <dd>The camera's current fill light/flash mode.</dd>
 
-                    <dt>void stop()</dt>
-                    <dd>Stops this source, which will cause the related track to enter the <code>ended</code> state. Same behavior of the old LocalMediaStream's 
-                        stop API, but only affects this track source.
-                    </dd>
-                    <dt>static unsigned long getNumDevices()</dt>
-                    <dd>Returns the number of video sources that are currently available in this UA. As a static method, this information can be
-                        queried without instantiating any <a>VideoStreamTrack</a> or <a>VideoDeviceSource</a> objects or without calling <code>getUserMedia</code>.
-                        <p class="issue"><strong>Issue: </strong> This information deliberately adds to the fingerprinting surface of the UA. However, this information 
-                            could also be obtained via other round-about techniques using <code>getUserMedia</code>. This editor deems it worthwhile directly providing
-                            this data as it seems important for determining whether multiple devices of this type are available.
-                        </p>
-                        <p class="issue"><strong>Issue: </strong> The ability to be notified when new devices become available has been dropped from this proposal
-                            (it was available in v4 via the DeviceList object).
-                        </p>
-                    </dd>
+                    
                 </dl>
             </section>
 
