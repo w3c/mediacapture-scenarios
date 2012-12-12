@@ -304,7 +304,7 @@
             <h2>Track Sources</h2>
 
             <section>
-                <h3>Source Information Extensions to <a>MediaStreamTrack</a></h3>
+                <h3>Track Source Extensions to <a>MediaStreamTrack</a></h3>
                 <dl class="idl" title="partial interface MediaStreamTrack">
                     <dt>readonly attribute SourceTypeEnum sourceType</dt>
                     <dd>Returns the type information associated with the currently attached source (if any).</dd>
@@ -313,24 +313,12 @@
                         applications. Some sort of GUID is recommended for the identifier.</dd>
                     <dt>void stop()</dt>
                     <dd>Stops the source associated with this track (if any). If no source is attached (e.g., <a>sourceType</a> is "none"), then this call returns immediately (e.g., is a no-op).</dd>
-                    <dt>static sequence&lt;DOMString> getSourceIds()</dt>
-                    <dd>Returns an array of application-unique source identifiers specific to current track-type instance. For example, if this API is invoked from a 
-                        <a>VideoStreamTrack</a> then this returns a list of <a>sourceId</a>s for all the video sources that the user agent can identify at the time the
-                        API is called (the list can grow/shrink over time as sources may be added or removed). As a static method, <a>getSourceIds</a> can be 
-                        queried without instantiating any <a>VideoStreamTrack</a> or <a>AudioStreamTrack</a> objects or without calling <code>getUserMedia</code>.
-                        <p class="issue"><strong>Issue: </strong> This information deliberately adds to the fingerprinting surface of the UA. However, this information 
-                            will not be identifyable outside the scope of this application. could also be obtained via other round-about techniques using <code>getUserMedia</code>. This editor deems it worthwhile directly providing
-                            this data as it seems important for determining whether multiple devices of this type are available.
-                        </p>
-                        <p class="issue"><strong>Issue: </strong> The ability to be notified when new devices become available has been dropped from this proposal
-                            (it was available in v4 via the DeviceList object).
-                        </p>
-                    </dd>
                 </dl>
             </section>
 
             <section>
-                <h3>SourceTypeEnum enumeration</h3>
+                <h3>Track Source Types</h3>
+                <p>The <dfn>sourceType</dfn> attribute may have the following states:</p>
                 <dl class="idl" title="enum SourceTypeEnum">
                     <dt>none</dt>
                     <dd>This track has no source. This is the case when the track is in the <code>"new"</code> or <code>"ended"</code> <a>readyState</a>.</dd>
@@ -373,13 +361,57 @@
                 </p>
 
                 <dl class="idl" title="[Constructor(optional MediaTrackConstraints videoConstraints)] interface VideoStreamTrack : MediaStreamTrack">
-                    <dt>readonly attribute VideoFacingEnum facing</dt>
-                    <dd>From the user's perspective, this attribute describes whether this camera is pointed toward the 
-                        user ("user") or away from the user ("environment"). If this information cannot be reliably obtained, 
-                        for example from a USB external camera, or if the VideoStreamTrack's <code>readyState</code> is <code>"new"</code>,
-                        the value <code>"unknown"</code> is returned.
+                    <dt>static sequence&lt;DOMString> getSourceIds()</dt>
+                    <dd>Returns an array of application-unique source identifiers. This list will be populated only with local sources whose <a>sourceType</a> is <code>"camera"</code>, 
+                        <code>"photo-camera"</code>, and if allowed by the user-agent, <code>"readonly"</code> variants of the former two types. The video source ids returned in the 
+                        list constitute those sources that the user agent can identify at the time the API is called (the list can grow/shrink over time as sources may be added or 
+                        removed). As a static method, <a>getSourceIds</a> can be queried without instantiating any <a>VideoStreamTrack</a> objects or without calling <code>getUserMedia</code>.
+                        <p class="issue"><strong>Issue: </strong> This information deliberately adds to the fingerprinting surface of the UA. However, this information 
+                            will not be identifyable outside the scope of this application. could also be obtained via other round-about techniques using <code>getUserMedia</code>. This editor deems it worthwhile directly providing
+                            this data as it seems important for determining whether multiple devices of this type are available.
+                        </p>
+                        <p class="issue"><strong>Issue: </strong> The ability to be notified when new devices become available has been dropped from this proposal
+                            (it was available in v4 via the DeviceList object).
+                        </p>
                     </dd>
+                    <dt>void takePhoto()</dt>
+                    <dd>If the <a>sourceType</a>'s value is anything other than <code>"photo-camera"</code>, this method returns immediately and does nothing.
+                        If the <a>sourceType</a> is <code>"photo-camera"</code>, then this method temporarily (asynchronously) switches the source into "high 
+                        resolution photo mode", applies the configured <a>photoWidth</a>, <a>photoHeight</a>, <a>exposureMode</a>, and <a>isoMode</a> <a>state</a>
+                        to the stream, and records/encodes an image (using a user-agent determined format) into a <code>Blob</code> object. Finally, a task is
+                        queued to fire a "photo" event with the resulting recorded/encoded data. In case of a failure for any reason, a "photoerror" event
+                        is queued instead and no "photo" event is dispatched.
+                        <p class="issue"><strong>Issue: </strong> We could consider providing a hint or setting for the desired photo format?</p>
+                    </dd>
+                    <dt>attribute EventHandler onphoto</dt>
+                    <dd>Register/unregister for "photo" events. The handler should expect to get a BlobEvent object as its first
+                        parameter.
+                        <p class="note">The BlobEvent returns a photo (as a Blob) in a compressed format (for example: PNG/JPEG) rather than a 
+                            raw ImageData object due to the expected large, uncompressed size of the resulting photos.</p>
+                        <p class="issue">This Event type (BlobEvent) should be the same thing used in the recording proposal.</p>
+                    </dd>
+                    <dt>attribute EventHandler onphotoerror</dt>
+                    <dd>In the event of an error taking the photo, a "photoerror" event will be dispatched instead of a "photo" event.
+                        The "photoerror" is a simple event of type Event.
+                    </dd>
+                </dl>
+            </section>
 
+            <section>
+                <h3>Photo-related Event Definitions</h3>
+
+                <p><dfn>BlobEvent</dfn> interface</p>
+                <dl class="idl" title="[Constructor(DOMString type, optional BlobEventInit blobInitDict)] interface BlobEvent : Event">
+                    <dt>readonly attribute Blob data</dt>
+                    <dd>Returns a Blob object whose type attribute indicates the encoding of the blob data. An implementation must
+                        return a Blob in a format that is capable of being viewed in an HTML <code>&lt;img></code> tag.
+                    </dd>
+                </dl>
+            
+                <p>BlobEventInit dictionary</p>
+                <dl class="idl" title="dictionary BlobEventInit : EventInit">
+                    <dt>Blob data</dt>
+                    <dd>A Blob object containing the data to deliver via this event.</dd>
                 </dl>
             </section>
                     
@@ -392,11 +424,9 @@
                 </p>
 
                 <dl class="idl" title="[Constructor] interface AudioStreamTrack : MediaStreamTrack">
-                    <dt>readonly attribute unsigned long level</dt>
-                    <dd>The current level of audio that the microphone is picking up at this moment (if this is an AudioDeviceTrack),
-                        or the current level of audio flowing through the track (generally) otherwise. Will return 0 if this track is
-                        in the <code>"new"</code> state. The relative strength (amplitude) of the level is proportional to the <code>gain</code> of the 
-                        audio source device (e.g., to increase the pick-up of the microphone, increase the gain setting).
+                    <dt>static sequence&lt;DOMString> getSourceIds()</dt>
+                    <dd>See definition of <code>getSourceIds</code> on the <a>VideoStreamTrack</a> object. Note, that the list of source ids for <a>AudioStreamTrack</a> will be populated 
+                        only with local sources whose <a>sourceType</a> is <code>"microphone"</code>, and if allowed by the user-agent, <code>"readonly"</code> microphone variants.
                     </dd>
                 </dl>
             </section>
@@ -406,7 +436,7 @@
     <section>
         <h1>Source States</h1>
 
-        <p>Source states (the current states of the media in a track) are observable by the attributes defined in this section. They are divided by 
+        <p>Source states (the current states of the source media flowing through a track) are observable by the attributes defined in this section. They are divided by 
             track type: video and audio.
         </p>
       
@@ -429,263 +459,225 @@
                 <tbody>
                     <tr>
                         <td><code>width</code></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td>null</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
                     </tr>
                     <tr>
-                        <td><code>width</code></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td><code>height</code></td>
+                        <td>null</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
                     </tr>
                     <tr>
-                        <td><code>width</code></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td><code>frameRate</code></td>
+                        <td>null</td>
+                        <td>current <code>float</code> value</td>
+                        <td>current <code>float</code> value</td>
+                        <td>current <code>float</code> value</td>
+                        <td>current <code>float</code> value</td>
                     </tr>
                     <tr>
-                        <td><code>width</code></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td><code>facingMode</code></td>
+                        <td>null</td>
+                        <td>current <a>VideoFacingModeEnum</a> value</td>
+                        <td>current <a>VideoFacingModeEnum</a> value</td>
+                        <td>current <a>VideoFacingModeEnum</a> value</td>
+                        <td>null</td>
                     </tr>
                     <tr>
-                        <td><code>width</code></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td><code>zoom</code></td>
+                        <td>null</td>
+                        <td>current <code>float</code> value</td>
+                        <td>current <code>float</code> value</td>
+                        <td>current <code>float</code> value</td>
+                        <td>null</td>
                     </tr>
                     <tr>
-                        <td><code>width</code></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td><code>focusMode</code></td>
+                        <td>null</td>
+                        <td>current <a>VideoFocusModeEnum</a> value</td>
+                        <td>current <a>VideoFocusModeEnum</a> value</td>
+                        <td>current <a>VideoFocusModeEnum</a> value</td>
+                        <td>null</td>
                     </tr>
                     <tr>
-                        <td><code>width</code></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td><code>fillLightMode</code></td>
+                        <td>null</td>
+                        <td>current <a>VideoFillLightModeEnum</a> value</td>
+                        <td>current <a>VideoFillLightModeEnum</a> value</td>
+                        <td>current <a>VideoFillLightModeEnum</a> value</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>whiteBalanceMode</code></td>
+                        <td>null</td>
+                        <td>current <a>VideoWhiteBalanceModeEnum</a> value</td>
+                        <td>current <a>VideoWhiteBalanceModeEnum</a> value</td>
+                        <td>current <a>VideoWhiteBalanceModeEnum</a> value</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>brightness</code></td>
+                        <td>null</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>contrast</code></td>
+                        <td>null</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>saturation</code></td>
+                        <td>null</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>sharpness</code></td>
+                        <td>null</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>photoWidth</code></td>
+                        <td>null</td>
+                        <td>null</td>
+                        <td>configured <code>unsigned long</code> value</td>
+                        <td>configured <code>unsigned long</code> value (if readonly <a>source</a> is a photo-camera), <code>null</code> otherwise.</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>photoHeight</code></td>
+                        <td>null</td>
+                        <td>null</td>
+                        <td>configured <code>unsigned long</code> value</td>
+                        <td>configured <code>unsigned long</code> value (if readonly <a>source</a> is a photo-camera), <code>null</code> otherwise.</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>exposureMode</code></td>
+                        <td>null</td>
+                        <td>null</td>
+                        <td>configured <a>PhotoExposureModeEnum</a> value</td>
+                        <td>configured <a>PhotoExposureModeEnum</a> value (if readonly <a>source</a> is a photo-camera), <code>null</code> otherwise.</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>isoMode</code></td>
+                        <td>null</td>
+                        <td>null</td>
+                        <td>configured <a>PhotoISOModeEnum</a> value</td>
+                        <td>configured <a>PhotoISOModeEnum</a> value (if readonly <a>source</a> is a photo-camera), <code>null</code> otherwise.</td>
+                        <td>null</td>
                     </tr>
                 </tbody>
             </table>
 
             <section>
-                <h3><code><dfn>VideoDeviceSource</dfn></code> interface</h3>
-                <dl class="idl" title="interface VideoDeviceSource : EventTarget">
-                    <dt>readonly attribute unsigned long width</dt>
-                    <dd>The "natural" width (in pixels) of the source of the video flowing through the track. For cameras implementing this 
-                        interface, this value represents the current setting of the camera's sensor (in terms of number of pixels). This value is 
-                        independent of the camera's rotation (if the camera's rotation setting is changed, it does not impact this value).
-                        For example, consider a camera setting with width of 1024 pixels and height of 768 pixels. If the camera's rotation
-                        setting is changed by 90 degrees, the width is still reported as 1024 pixels. However, a <code>&lt;video></code> element sink used
-                        to preview this track would report a width of 768 pixels (the effective width with rotation factored in).
+                <h3>Source State Extensions to VideoStreamTrack</h3>
+                <dl class="idl" title="partial interface VideoStreamTrack">
+                    <dt>readonly attribute unsigned long? width</dt>
+                    <dd>The width (in pixels) of the source of the video flowing through the track.</dd>
+                    <dt>readonly attribute unsigned long? height</dt>
+                    <dd>The height (in pixels) of the source of the video flowing through the track.</dd>
+                    <dt>readonly attribute float? frameRate</dt>
+                    <dd>The current frames per second rate of video provided by this source.</dd>
+                    <dt>readonly attribute VideoFacingModeEnum? facingMode</dt>
+                    <dd>From the user's perspective, this attribute describes whether this camera is pointed toward the 
+                        user ("user") or away from the user ("environment"). If the <a>sourceType</a> is a <code>"camera"</code> or <code>"photo-camera"</code>, 
+                        or a <code>"readonly"</code> variant of those, and the user agent cannot reliable obtain facing information from the source (e.g., 
+                        from a USB external camera), then the value <code>"notavailable"</code> is returned.
                     </dd>
-                    <dt>readonly attribute unsigned long height</dt>
-                    <dd>The "natural" height (in pixels) of the video provided by this source. See the "width" attribute for additional info.</dd>
-                    <dt>readonly attribute float frameRate</dt>
-                    <dd>The expected frames per second rate of video provided by this source.</dd>
-                    
-                    <dt>readonly attribute VideoRotationEnum rotation</dt>
-                    <dd>The current rotation value in use by the camera. If not supported, the property must be initialized to "0".</dd>
-                    
-                    <dt>readonly attribute VideoMirrorEnum mirror</dt>
-                    <dd>The current image mirroring behavior being applied. If not supported, the property must be initialized to "none".</dd>
-                    
-                    <dt>readonly attribute float zoom</dt>
-                    <dd>The current zoom scale value in use by the camera. If not supported this property will always return 1.0.</dd>
-                    
-                    <dt>readonly attribute VideoFocusModeEnum focusMode</dt>
-                    <dd>The camera's current focusMode state. The initial/default value is "auto".</dd>
-                    
-                    <dt>readonly attribute VideoFillLightModeEnum fillLightMode</dt>
-                    <dd>The camera's current fill light/flash mode.</dd>
-
-                    
+                    <dt>readonly attribute float? zoom</dt>
+                    <dd>The current zoom scale value in use by the camera. If the <a>sourceType</a> is a <code>"camera"</code> or <code>"photo-camera"</code>, 
+                        or a <code>"readonly"</code> variant of those, and the source does not support changing the zoom factor, then this property will always return 1.0.</dd>
+                    <dt>readonly attribute VideoFocusModeEnum? focusMode</dt>
+                    <dd>The source's current focusMode state. The initial/default value is "auto".</dd>
+                    <dt>readonly attribute VideoFillLightModeEnum? fillLightMode</dt>
+                    <dd>The source's current fill light/flash mode.</dd>
+                    <dt>readonly attribute VideoWhiteBalanceModeEnum? whiteBalanceMode</dt>
+                    <dd>The source's current white balance mode. The initial/default value is <code>auto</code>.</dd>
+                    <dt>readonly attribute unsigned long? brightness</dt>
+                    <dd>The source's current brightness level. The values of this settings must range from 0 to 100. The initial/default value is <code>50</code>.</dd>
+                    <dt>readonly attribute unsigned long? contrast</dt>
+                    <dd>The source's current contrast level. The values of this settings must range from 0 to 100. The initial/default value is <code>50</code>.</dd>
+                    <dt>readonly attribute unsigned long? saturation</dt>
+                    <dd>The source's current saturation level. The values of this settings must range from 0 to 100. The initial/default value is <code>50</code>.</dd>
+                    <dt>readonly attribute unsigned long? sharpness</dt>
+                    <dd>The source's current sharpness level. The values of this settings must range from 0 to 100. The initial/default value is <code>50</code>.</dd>
+                    <dt>readonly attribute unsigned long? photoWidth</dt>
+                    <dd>The width (in pixels) of the configured <a>sourceType</a>'s <code>"photo-camera"</code> (or <code>"readonly"</code> variant) high-resolution sensor.</dd>
+                    <dt>readonly attribute unsigned long? photoHeight</dt>
+                    <dd>The height (in pixels) of the configured <a>sourceType</a>'s <code>"photo-camera"</code> (or <code>"readonly"</code> variant) high-resolution sensor.</dd>
+                    <dt>readonly attribute PhotoExposureModeEnum? exposureMode</dt>
+                    <dd>The current value of the <a>sourceType</a>'s <code>"photo-camera"</code> (or <code>"readonly"</code> variant) light meter. The default/initial value is <code>auto</code>.</dd>
+                    <dt>readonly attribute PhotoISOModeEnum? isoMode</dt>
+                    <dd>The <a>sourceType</a>'s <code>"photo-camera"</code> (or <code>"readonly"</code> variant) film-equivalent speed (ISO) setting. The default/initial value is <code>auto</code>.</dd>
                 </dl>
             </section>
 
             <section>
-                <h3><dfn>VideoFacingEnum</dfn> enumeration</h3>
-                <dl class="idl" title="enum VideoFacingEnum">
-                    <dt>unknown</dt>
-                    <dd>The relative directionality of the camera cannot be determined by the user agent based on the hardware.</dd>
+                <h3>Video Source State Supporting Enumerations</h3>
+
+                <p><dfn>VideoFacingModeEnum</dfn> enumeration</p>
+                <dl class="idl" title="enum VideoFacingModeEnum">
+                    <dt>notavailable</dt>
+                    <dd>The relative directionality of the source cannot be determined by the user agent based on the hardware.</dd>
                     <dt>user</dt>
-                    <dd>The camera is facing toward the user (a self-view camera).</dd>
+                    <dd>The source is facing toward the user (a self-view camera).</dd>
                     <dt>environment</dt>
-                    <dd>The camera is facing away from the user (viewing the environment).</dd>
+                    <dd>The source is facing away from the user (viewing the environment).</dd>
                 </dl>
-            </section>
-
-            <section>
-                <h3><dfn>VideoRotationEnum</dfn> enumeration</h3>
-                <dl class="idl" title="enum VideoRotationEnum">
-                    <dt>0</dt>
-                    <dd>No effective rotation applied (default value if no rotation is supported by the device software).</dd>
-                    <dt>90</dt>
-                    <dd>A rotation of 90 degrees counter-clockwise (270 degrees in a clockwise rotation).</dd>
-                    <dt>180</dt>
-                    <dd>A rotation of 180 degrees.</dd>
-                    <dt>270</dt>
-                    <dd>A rotation of 270 degrees counter-clockwise (90 degrees in a clockwise rotation).</dd>
-                </dl>
-            </section>
-
-            <section>
-                <h3><dfn>VideoMirrorEnum</dfn> enumeration</h3>
-                <dl class="idl" title="enum VideoMirrorEnum">
-                    <dt>none</dt>
-                    <dd>No effective mirroring is being applied (default value if no mirroring is supported by the device software).</dd>
-                    <dt>horizontal</dt>
-                    <dd>The image is mirrored along the camera's width value. This setting does not consider the camera's current 
-                        rotation, so if a 90 degree rotation was also applied to this source, then the "horizontal" mirroring would
-                        appear to be a vertical mirroring in a given sink.</dd>
-                    <dt>vertical</dt>
-                    <dd>The image is mirrored along the camera's height value. This setting does not consider the camera's current 
-                        rotation, so if a 90 degree rotation was also applied to this source, then the "vertical" mirroring would
-                        appear to be a horizontal mirroring in a given sink.</dd>
-                </dl>
-            </section>
-
-            <section>
-                <h3><dfn>VideoFocusModeEnum</dfn> enumeration</h3>
+            
+                <p><dfn>VideoFocusModeEnum</dfn> enumeration</p>
                 <dl class="idl" title="enum VideoFocusModeEnum">
                     <dt>notavailable</dt>
-                    <dd>This camera does not have an option to change focus modes.</dd>
+                    <dd>This source does not have an option to change focus modes.</dd>
                     <dt>auto</dt>
-                    <dd>The camera auto-focuses.</dd>
+                    <dd>The source auto-focuses.</dd>
                     <dt>manual</dt>
-                    <dd>The camera must be manually focused.</dd>
+                    <dd>The source must be manually focused.</dd>
                 </dl>
-            </section>
-
-            <section>
-                <h3><dfn>VideoFillLightModeEnum</dfn> enumeration</h3>
+            
+                <p><dfn>VideoFillLightModeEnum</dfn> enumeration</p>
                 <dl class="idl" title="enum VideoFillLightModeEnum">
                     <dt>notavailable</dt>
-                    <dd>This video device does not have an option to change fill light modes (e.g., the camera does not have a flash).</dd>
+                    <dd>This source does not have an option to change fill light modes (e.g., the camera does not have a flash).</dd>
                     <dt>auto</dt>
                     <dd>The video device's fill light will be enabled when required (typically low light conditions). Otherwise it will be 
-                        off. Note that <code>auto</code> does not guarantee that a flash will fire when <code>takePicture</code> is called. 
-                        Use <code>flash</code> to guarantee firing of the flash for the <code>takePicture</code> API. <code>auto</code> is the initial value.
+                        off. Note that <code>auto</code> does not guarantee that a flash will fire when <code>takePhoto</code> is called. 
+                        Use <code>flash</code> to guarantee firing of the flash for the <code>takePhoto</code> API. <code>auto</code> is the initial value.
                     </dd>
                     <dt>off</dt>
-                    <dd>The video device's fill light and/or flash will not be used.</dd>
+                    <dd>The source's fill light and/or flash will not be used.</dd>
                     <dt>flash</dt>
-                    <dd>If the video device is a camera supporting high-resolution photo-mode, this setting will always cause the flash to fire
-                        for the <code>takePicture</code> API. Otherwise, if the video device does not support this mode, this value is equivalent
+                    <dd>If the track's <a>sourceType</a> is <code>"photo-camera"</code>, this value will always cause the flash to fire
+                        for the <code>takePhoto</code> API. Otherwise, for other supporting <a>sourceType</a>s, this value is equivalent
                         to <code>auto</code>.
                     </dd>
                     <dt>on</dt>
-                    <dd>The video device's fill light will be turned on (and remain on) until this setting is changed again, or the underlying track object
-                        has ended.
+                    <dd>The source's fill light will be turned on (and remain on) while the source is in either <code>"armed"</code> or <code>"streaming"</code> <a>mode</a>.
                     </dd>
                 </dl>
-            </section>
 
-            <section>
-                <h3><code><dfn>AudioDeviceSource</dfn></code> interface</h3>
-                <dl class="idl" title="interface AudioDeviceSource : EventTarget">
-                    <dt>readonly attribute float gain</dt>
-                    <dd>The sensitivity of the microphone. This value must be a positive floating-point number or zero. 
-                        The gain value establishes the maximum threshold of the the microphone's sensitivity. When the gain is 0, 
-                        the microphone is essentially off (it will not be able to pick-up any sound). When first initialized for this 
-                        track, the gain value should be set to 1, the initial value. Values greater than 1 are possible and are clipped
-                        at the maximum value allowed by the capabilities's max value.
-                        <p>If the UA cannot support changing the <code>gain</code> of an audio source, the value of 1 should be returned.</p>
-                    </dd>
-                    <dt>void stop()</dt>
-                    <dd>Causes this track to enter the <code>ended</code> state. Same behavior of the old LocalMediaStream's stop 
-                        API, but only for this track source.
-                    </dd>
-                    <dt>static unsigned long getNumDevices()</dt>
-                    <dd>Returns the number of potential audio sources that are available in this UA. As a static method, this information can be
-                        queried without instantiating any <a>AudioStreamTrack</a> or <a>AudioDeviceSource</a> objects or without calling <code>getUserMedia</code>.
-                        <p class="issue"><strong>Issue: </strong> This information deliberately adds to the fingerprinting surface of the UA. However, this information 
-                            can also be obtained by other round-about techniques using <code>getUserMedia</code>, and is important for determining 
-                            whether multiple devices of this type are available.
-                        </p>
-                        <p class="issue"><strong>Issue: </strong> The ability to be notified when new devices become available has been dropped from this proposal
-                            (it was available in v4 via the DeviceList object).
-                        </p>
-                    </dd>
-                </dl>
-            </section>
-        </section>
-
-        <section>
-            <h2>Camera sources with "high-resolution picture" modes</h2>
-
-            <p>The PictureStreamSource derived interface is created by the user agent if the camera source providing the VideoDeviceSource
-                supports an optional "high-resolution picture mode" with picture settings that are separate from those of 
-                its basic video source (which is usually considered its <q>preview</q> mode).
-            </p>
-
-            <p>The PictureStreamSource object presents a set of capabilities and controls for taking high-resolution pictures. The 
-                unique settings of this object are only applied at the time when the takePicture API is invoked.
-            </p>
-
-            <section>
-                <h3><code><dfn>PictureStreamSource</dfn></code> interface</h3>
-                <dl class="idl" title="interface PictureStreamSource : VideoDeviceSource">
-                    <dt>readonly attribute unsigned long photoWidth</dt>
-                    <dd>The width (in pixels) of the configured high-resolution photo-mode's sensor.</dd>
-                    <dt>readonly attribute unsigned long photoHeight</dt>
-                    <dd>The height (in pixels) of the configured high-resolution photo-mode's sensor.</dd>
-                    <dt>readonly attribute PictureWhiteBalanceModeEnum whiteBalanceMode</dt>
-                    <dd>The white balance mode setting of the configured high-resolution photo-mode's sensor. The not-supported value is <code>auto</code>.</dd>
-                    <dt>readonly attribute PictureExposureModeEnum exposureMode</dt>
-                    <dd>The current value of the high-resolution photo-mode's light sensor. The not-supported value is <code>auto</code>.</dd>
-                    <dt>readonly attribute PictureISOModeEnum isoMode</dt>
-                    <dd>The high-resolution photo-mode's film-equivalent speed (ISO). The not-supported value is <code>auto</code>.</dd>
-                    <dt>readonly attribute float brightness</dt>
-                    <dd>The currently configured brightness level of the high-resolution photo-mode's sensor. The values of this settings must range from 0 to 1. The not-supported and initial value is <code>0.5</code>.</dd>
-                    <dt>readonly attribute float contrast</dt>
-                    <dd>The currently configured contrast level of the high-resolution photo-mode's sensor. The values of this settings must range from 0 to 1. The not-supported and initial value is <code>0.5</code>.</dd>
-                    <dt>readonly attribute float saturation</dt>
-                    <dd>The currently configured saturation level of the high-resolution photo-mode's sensor. The values of this settings must range from 0 to 1. The not-supported and initial value is <code>0.5</code>.</dd>
-                    <dt>readonly attribute float sharpness</dt>
-                    <dd>The currently configured sharpness level of the high-resolution photo-mode's sensor. The values of this settings must range from 0 to 1. The not-supported and initial value is <code>0.5</code>.</dd>
-                    <dt>void takePicture()</dt>
-                    <dd>Temporarily (asynchronously) switches the camera into "high resolution picture mode", applies the settings that 
-                        are unique to this object to the stream (switches the width/height to those of the photoWidth/photoHeight), and 
-                        records/encodes an image (using a user-agent determined format) into a Blob object. 
-                        Finally, queues a task to fire a "picture" event containing the resulting picture Blob instance.
-                        <p class="issue"><strong>Issue: </strong> We could consider providing a hint or setting for the desired picture format?</p>
-                    </dd>
-                    <dt>attribute EventHandler onpicture</dt>
-                    <dd>Register/unregister for "picture" events. The handler should expect to get a BlobEvent object as its first
-                        parameter.
-                        <p class="note">The BlobEvent returns a picture (as a Blob) in a compressed format (for example: PNG/JPEG) rather than a 
-                            raw ImageData object due to the expected large, uncompressed size of the resulting pictures.</p>
-                        <p class="issue">This Event type (BlobEvent) should be the same thing used in the recording proposal.</p>
-                    </dd>
-                    <dt>attribute EventHandler onpictureerror</dt>
-                    <dd>In the event of an error taking the picture, a "pictureerror" event will be dispatched instead of a "picture" event.
-                        The "pictureerror" is a simple event of type Event.
-                    </dd>
-                </dl>
-            </section>
-
-             <section>
-                <h3><dfn>PictureWhiteBalanceModeEnum</dfn> enumeration</h3>
-                <dl class="idl" title="enum PictureWhiteBalanceModeEnum">
+                <p><dfn>VideoWhiteBalanceModeEnum</dfn> enumeration</p>
+                <dl class="idl" title="enum VideoWhiteBalanceModeEnum">
+                    <dt>notavailable</dt><dd>The white-balance information is not available from this source.</dd>
                     <dt>auto</dt><dd>The white-balance is configured to automatically adjust.</dd>
                     <dt>incandescent</dt><dd>Adjust the white-balance between 2500 and 3500 Kelvin</dd>
                     <dt>cool-fluorescent</dt><dd>Adjust the white-balance between 4000 and 5000 Kelvin</dd>
@@ -695,22 +687,20 @@
                     <dt>twilight</dt><dd>Adjust the white-balance between 8000 and 9000 Kelvin</dd>
                     <dt>shade</dt><dd>Adjust the white-balance between 9000 and 10,000 Kelvin</dd>
                 </dl>
-            </section>
 
-            <section>
-                <h3><dfn>PictureExposureModeEnum</dfn> enumeration</h3>
-                <dl class="idl" title="enum PictureExposureModeEnum">
-                    <dt>auto</dt><dd>The exposure mode is not known or not available on this device.</dd>
+                <p><dfn>PhotoExposureModeEnum</dfn> enumeration</p>
+                <dl class="idl" title="enum PhotoExposureModeEnum">
+                    <dt>notavailable</dt><dd>The exposure mode is not known or not available on this source.</dd>
+                    <dt>auto</dt><dd>The exposure mode is automatically configured/adjusted at the source's discretion.</dd>
                     <dt>frame-average</dt><dd>The light sensor should average of light information from entire scene.</dd>
                     <dt>center-weighted</dt><dd>The light sensor should bias sensitivity concentrated towards center of viewfinder.</dd>
                     <dt>spot-metering</dt><dd>The light sensor should only consider a centered spot area for exposure calculations.</dd>
                 </dl>
-            </section>
-
-            <section>
-                <h3><dfn>PictureISOModeEnum</dfn> enumeration</h3>
-                <dl class="idl" title="enum PictureISOModeEnum">
-                    <dt>auto</dt><dd>The iso value cannot be determined or is automatically selected by the device.</dd>
+            
+                <p><dfn>PhotoISOModeEnum</dfn> enumeration</p>
+                <dl class="idl" title="enum PhotoISOModeEnum">
+                    <dt>notavailable</dt><dd>The iso value is not known or not available on this source.</dd>
+                    <dt>auto</dt><dd>The iso value is automatically selected/adjusted at the source's discretion.</dd>
                     <dt>100</dt><dd>An ASA rating of 100</dd>
                     <dt>200</dt><dd>An ASA rating of 200</dd>
                     <dt>400</dt><dd>An ASA rating of 400</dd>
@@ -718,60 +708,95 @@
                     <dt>1250</dt><dd>An ASA rating of 1250</dd>
                 </dl>
             </section>
+        </section>
+
+        <section>
+            <h2>Audio Source State</h2>
+
+            <p>This table summarizes the expected values of the video source state attributes for each of the <code><a>sourceType</a></code>s defined earlier:</p>
+
+            <table class="simple">
+                <thead>
+                    <tr>
+                        <th><code>sourceType</code></th>
+                        <th>"none"</th>
+                        <th>"microphone"</th>
+                        <th>"readonly"</th>
+                        <th>"remote"</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>level</code></td>
+                        <td>null</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                    </tr>
+                    <tr>
+                        <td><code>gain</code></td>
+                        <td>null</td>
+                        <td>current <code>float</code> value</td>
+                        <td>current <code>float</code> value</td>
+                        <td>null</td>
+                    </tr>
+                </tbody>
+            </table>
 
             <section>
-                <h3><code>BlobEvent</code> interface</h3>
-                <dl class="idl" title="[Constructor(DOMString type, optional BlobEventInit blobInitDict)] interface BlobEvent : Event">
-                    <dt>readonly attribute Blob data</dt>
-                    <dd>Returns a Blob object whose type attribute indicates the encoding of the blob data. An implementation must
-                        return a Blob in a format that is capable of being viewed in an HTML <code>&lt;img></code> tag.
+                <h3>Source State Extensions to AudioStreamTrack</h3>
+                <dl class="idl" title="partial interface AudioStreamTrack">
+                    <dt>readonly attribute unsigned long? level</dt>
+                    <dd>The current level of audio flowing through the source. The relative strength (amplitude) of the level is 
+                        proportional to the <code>gain</code> state of the source (e.g., to increase the pick-up of the microphone, 
+                        increase the gain setting).
+                    </dd>
+                    <dt>readonly attribute float? gain</dt>
+                    <dd>The sensitivity of the source. This value MUST be a positive floating-point number or zero. 
+                        The gain value establishes the maximum threshold of the the microphone's sensitivity. When the gain is 0, 
+                        the source is essentially off (it will not be able to pick-up any sound). When first initialized for this 
+                        track, the gain value should be set to 1.0, the initial value. Values greater than 1 are possible to the limit
+                        of the max value of the capabilities of the source.
                     </dd>
                 </dl>
             </section>
 
             <section>
-                <h3>BlobEventInit dictionary</h3>
-                <dl class="idl" title="dictionary BlobEventInit : EventInit">
-                    <dt>Blob data</dt>
-                    <dd>A Blob object containing the data to deliver via this event.</dd>
+                <h3>Tracking Source State Changes</h3>
+
+                <p>As the source adjusts its state (for any reason), applications may observer the related state changes. The following 
+                    extensions to the MediaStreamTrack provide an alternative to polling the individual state attributes defined on the 
+                    video and audio track-types.
+                </p>
+
+                <dl class="idl" title="partial interface MediaStreamTrack">
+                    <dt>attribute EventHandler onstatechanged</dt>
+                    <dd>Register/unregister for "statechanged" events. The handler should expect to get a <a>MediaStreamTrackStateEvent</a> object as its first
+                        parameter. The event is fired asynchronously after the source changes its state.
+                        <p>The user agent is encouraged to coalesce state changes into as few "statechanged" events as possible (when multiple state changes
+                            occur within a reasonably short amount of time to each other).</p>
+                    </dd>
                 </dl>
+
+                <p>The following define the <dfn>MediaStreamTrackStateEvent</dfn> object and related initalizer.</p>
+                
+                <dl class="idl" title="[Constructor(DOMString type, optional MediaStreamTrackStateEventInit eventInitDict)] interface MediaStreamTrackStateEvent : Event">
+                    <dt>readonly attribute DOMString[] states</dt>
+                    <dd>A list of state names that just changed values.</dd>
+                </dl>
+            
+                <p>The initializer for the above-defined event type:</p>
+
+                <dl class="idl" title="dictionary MediaStreamTrackStateEventInit : EventInit">
+                    <dt>sequence&lt;DOMString> states</dt>
+                    <dd>List of state names to populate into the MediaStreamTrackStateEvent object's states readonly attribute.</dd>
+                </dl>
+
             </section>
         </section>
 
         <section>
-            <h2>Remote Media Sources</h2>
-
-            <p>When MediaStreams are transmitted over the network by way of a peer connection, the tracks that are created 
-                on the remote side of the MediaStream will have a remote media source attached as the track's source. This source object allows 
-                remote-consumers of the MediaStream's tracks to request specific changes to the tracks. These change requests will be
-                serviced by the RTCPeerConnection source object which is streaming the media over the network. 
-            </p>
-
-            <section>
-                <h3><code><dfn>VideoStreamRemoteSource</dfn></code> interface</h3>
-                <dl class="idl" title="interface VideoStreamRemoteSource : EventTarget">
-                    <dt>readonly attribute unsigned long width</dt>
-                    <dd>The current video transmission width.</dd>
-                    <dt>readonly attribute unsigned long height</dt>
-                    <dd>The current video transmission height.</dd>
-                    <dt>readonly attribute float frameRate</dt>
-                    <dd>The current video frames-per-second.</dd>
-                    <dt>readonly attribute float bitRate</dt>
-                    <dd>The current video bitRate.</dd>
-                </dl>
-            </section>
-
-            <section>
-                <h3><code><dfn>AudioStreamRemoteSource</dfn></code> interface</h3>
-                <dl class="idl" title="interface AudioStreamRemoteSource : EventTarget">
-                    <dt>readonly attribute float bitRate</dt>
-                    <dd>The current video bitRate.</dd>
-                </dl>
-            </section>
-        </section>
-
-         <section>
-            <h2>Other Settings (out-of-scope in this proposal)</h2>
+            <h2>Out-of-scope State (Considered and Rejected from this Proposal)</h2>
 
             <p>The following settings have been proposed, but are not included in this version to keep the 
                 initial set of settings scoped to those that:
@@ -801,7 +826,7 @@
                     perhaps not as fast...)
                 </li>
                 <li><code>antiShake</code>  - sounds like a v2 feature.</li>
-                <li><code>geoTagging</code> - this can be independently associated with a recorded picture/video/audio clip using the 
+                <li><code>geoTagging</code> - this can be independently associated with a recorded photo/video/audio clip using the 
                     Geolocation API. Automatically hooking up Geolocation to Media Capture sounds like an exercise for v2
                     given the possible complications.
                 </li>
@@ -817,9 +842,12 @@
                     for this feature)</li>
                 <li><code>antiFlicker</code> - not a particularly common setting.</li>
                 <li><code>zeroShutterLag</code> - this seems more like a <em>hope</em> than a setting. I'd rather just have implementations
-                    make the shutter snap as quickly as possible after takePicture, rather than requiring an opt-in/opt-out
+                    make the shutter snap as quickly as possible after takePhoto, rather than requiring an opt-in/opt-out
                     for this setting.
                 </li>
+                <li><code>rotation</code> - rotation can be provided at the sink level if desired (CSS transforms on a video element).</li>
+                <li><code>mirror</code> - mirroring can be provided at the sink level if desired (CSS transforms on a video element).</li>
+                <li><code>bitRate</code> - this is more directly relevant to peer connection transport objects than track-level information.</li>
             </ol>
             
             <p>The following settings may be included by working group decision:</p>
@@ -832,38 +860,203 @@
     </section>
 
     <section>
-        <h1>Changing Stream Source Settings</h1>
+        <h1>Source Capabilities</h1>
 
-        <p>This proposal simplifies the application of settings over the previous proposal and unifies the setting names
-            with the constraint names and syntax. This unification allows developers to use the same syntax when defining
-            constraints as well as with the settings APIs.
+        <p>This section describes APIs for retrieving the capabilites of a given source. The return value of these APIs is contingent on
+            the track's <a>sourceType</a> value as summarized in the table below.
         </p>
 
-        <p>The settings for each track (if available) are all conveniently located on the <code>source</code> object for the respective track. Each setting
-            is defined by a readonly attribute (for example the "width" attribute) which serves as a feature-detection for
-            the given setting, as well as the current value of the setting at any point in time. The constraint name for each 
-            setting are the same as the name of the readonly attribute. For example, "photoWidth" is both the name of the setting
-            as well as the name of the constraint. All of the constraints defined in this proposal are listed later.
+        <p>For each source <a>state</a> attribute defined (in the previous section), there is a corresponding capability associated with it.
+            Capabilities are provided as either a min/max range, or a list of enumerated values but not both. Min/max capabilities are always provided
+            for source <a>state</a> that are not enumerated types. Listed capabilities are always provided for source <a>state</a> corresponding
+            to enumerated types.
         </p>
+        
+        <table class="simple">
+            <thead>
+                <tr>
+                    <th><code>sourceType</code></th>
+                    <th>"none"</th>
+                    <th>"camera"/ "photo-camera"/ "microphone"</th>
+                    <th>"readonly"</th>
+                    <th>"remote"</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>capabilities()</code></td>
+                    <td>null</td>
+                    <td>(<a>AllVideoCapabilities</a> or <a>AllAudioCapabilities</a>)></td>
+                    <td>(<a>AllVideoCapabilities</a> or <a>AllAudioCapabilities</a>)></td>
+                    <td>null</td>
+                </tr>
+                <tr>
+                    <td><code>getCapability()</code></td>
+                    <td>null</td>
+                    <td>(CapabilityRange or CapabilityList)</td>
+                    <td>(CapabilityRange or CapabilityList)</td>
+                    <td>null</td>
+                </tr>
+            </tbody>
+        </table>
 
-        <p>Reading the current settings are as simple as reading the readonly attribute of the same name. Each setting also has 
-            a range of appropriate values (its capabilities), either enumerated values or a range continuum--these are the same ranges/enumerated
-            values that may be used when expressing constraints for the given setting. Retrieving the capabilities of a given setting
-            is done via a <code>getRange</code> API on each source object. Similarly, requesting a change to a setting is done via a
-            <code>set</code> API on each source object. Finally, for symmetry a <code>get</code> method is also defined which reports
-            the current value of any setting.
-        </p>
+        <section>
+            <h2>Source Capabilities Extensions to MediaStreamTrack</h2>
+            
+            <dl class="idl" title="partial interface MediaStreamTrack">
+                <dt>(CapabilityRange or CapabilityList) getCapability(DOMString stateName)</dt>
+                <dd>
+				    <dl class="parameters">
+						<dt>DOMString stateName</dt><dd>The name of the source <a>state</a> for which the range of expected values should be returned.</dd>
+					</dl>
+                    
+                    <p>If a capability is requested that does not have a corresponding <a>state</a> on the track-type, then a <code>null</code> value is returned (e.g., 
+                        a <a>VideoStreamTrack</a> requests the <code>"gain"</code> capability. Since <code>"gain"</code> is not a state supported by video stream tracks, 
+                        this API will return <code>null</code>).
+                    </p>
 
-        <p>As noted in prior proposals, camera/microphone settings must be applied asynchronously to ensure that web
-            applications can remain responsive for all device types that may not respond quickly to setting changes.
-            This is especially true for settings communications over a peer connection.
+                    <p>Given that implementations of various hardware may not exactly map to the same range, an implementation SHOULD make a reasonable attempt to 
+                        translate and scale the hardware's setting onto the mapping provided by this specification. If this is not possible due to the user agent's
+                        inability to retrieve a given capapbility from a source, then for <a>CapabilityRange</a>-typed capabilities, the <code>min</code> and <code>max</code>  
+                        fields will not be present on the returned dictionary, and the <code>supported</code> field will be <code>false</code>. For <a>CapabilityList</a>-typed
+                        capabilities, a suitable <code>"notavailable"</code> value will be the sole capability in the list.
+                    </p>
+
+                    <p class="note">An example of the user agent providing an alternative mapping: if a source supports a hypothetical fluxCapacitance state whose type
+                        is a CapabilityRange, and the state is defined in this specification to be the range from -10 (min) to 10 (max), but the source's (hardware setting) 
+                        for fluxCapacitance only supports values of "off" "medium" and "full", then the user agent should map the range value of -10 to "off", 10 should map 
+                        to "full", and 0 should map to "medium". Constraints imposing a strict value of 3 will cause the user agent to attempt to set the value of "medium"
+                        on the hardware, and return a fluxCapacitance <a>state</a> of 0, the closest supported setting. No error event is raised in this scenario.
+                    </p>
+
+                    <p>CapabilityList objects should order their enumerated values from minimum to maximum where it makes sense, or in 
+                        the order defined by the enumerated type where applicable.
+                    </p>
+
+                    <p>See the <a>AllVideoCapabilities</a> and <a>AllAudioCapabilities</a> dictionary for details on the expected types for the various supported
+                        state names.
+                    </p>
+                </dd>
+                <dt>(AllVideoCapabilities or AllAudioCapabilities) capabilities()</dt>
+                <dd>Returns a dictionary with all of the capabilities for the track type. If the track type is <a>VideoStreamTrack</a>, the 
+                    <a>AllVideoCapabilities</a> dictionary is returned. If the track type is <a>AudioStreamTrack</a>, the 
+                    <a>AllAudioCapabilities</a> dictinoary is returned.
+                    <p>The dictionaries are populated as if each <a>state</a> were requested individually using <code>getCapability()</code>,
+                        and the results of that API are assigned as the value of each stateName in the dictionary. Notably, the returned values
+                    </p>
+                </dd>
+            </dl>
+        </section>
+
+        <section>
+            <h2>Source Capability Supporting Structures</h2>
+            
+            <p>CapabilityRange dictionary</p>
+            <dl class="idl" title="dictionary CapabilityRange">
+                <dt>any max</dt>
+                <dd>The maximum value of this capability. 
+                    <p>The type of this value is specific to the capability as noted in the table for <a>getCapability</a>.</p>
+                    <p>If the related capability is not supported by the source, then this field will not be provided by the 
+                        user agent (it will be <code>undefined</code>).
+                    </p>
+                </dd>
+                <dt>any min</dt>
+                <dd>The minimum value of this capability. 
+                    <p>The type of this value is specific to the capability as noted in the table for <a>getCapability</a>.</p>
+                    <p>If the related capability is not supported by the source, then this field will not be provided by the 
+                        user agent (it will be <code>undefined</code>).
+                    </p>
+                </dd>
+                <dt>boolean supported</dt>
+                <dd>Returns the value <code>true</code> if the capability is supported, false otherwise.</dd>
+            </dl>
+
+            <p>CapabilityList array</p>
+
+            <p>Capability Lists are just an array of supported <code>DOMString</code> values from the possible superset of 
+                values described by each <a>state</a>'s enumerated type.</p>
+
+            <dl class="idl" title="typedef sequence<DOMString> CapabilityList">
+            </dl>
+            
+            <p>AllVideoCapabilities dictionary</p>
+
+            <dl class="idl" title="dictionary AllVideoCapabilities">
+                <dt>CapabilityRange? width</dt>
+                <dd>The range should span the video source's pre-set width values with min being the smallest width, and max the 
+                    largest width. The type of the min/max values are unsigned long.</dd>
+                <dt>CapabilityRange? height</dt>
+                <dd>
+                    The range should span the video source's pre-set height values with min being the smallest width, and max the 
+                    largest width. The type of the min/max values are unsigned long.
+                </dd>
+                <dt>CapabilityRange? frameRate</dt>
+                <dd>The supported range of frame rates on the source. The type of the min/max values are float.</dd>
+                <dt>CapabilityList? facingMode</dt>
+                <dd>The available video rotation options (<a>VideoFacingModeEnum</a>) on the source.</dd>
+                <dt>CapabilityRange? zoom</dt>
+                <dd>
+                    The supported zoom range on the source. The type of the min/max/initial values are float. The initial value is 1. The float value is a scale
+                    factor, for example 0.5 is zoomed out by double, while 2.0 is zoomed in by double. Requests should be rounded to the nearest supporting zoom 
+                    factor by the implementation (when zoom is supported).
+                </dd>
+                <dt>CapabilityList? focusMode</dt>
+                <dd>The available focus mode options (<a>VideoFocusModeEnum</a>) on the source.</dd>
+                <dt>CapabilityList? fillLightMode</dt>
+                <dd>The available fill light mode options (<a>VideoFillLightModeEnum</a>) on the source.</dd>
+                <dt>CapabilityList? whiteBalanceMode</dt>
+                <dd>The available white-balance mode options (<a>VideoWhiteBalanceModeEnum</a>) on the source.</dd>
+                <dt>CapabilityRange? brightness</dt>
+                <dd>The supported range of brightness on the source. The type of the min/max values are unsigned long.</dd>
+                <dt>CapabilityRange? contrast</dt>
+                <dd>The supported range of contrast on the source. The type of the min/max values are unsigned long.</dd>
+                <dt>CapabilityRange? saturation</dt>
+                <dd>The supported range of saturation on the source. The type of the min/max values are unsigned long.</dd>
+                <dt>CapabilityRange? sharpness</dt>
+                <dd>The supported range of sharpness on the source. The type of the min/max values are unsigned long.</dd>
+                <dt>CapabilityRange? photoWidth</dt>
+                <dd>
+                    The range should span the video source's high-resolution photo-mode pre-set width values with min being the smallest width, and max the 
+                    largest width. The type of the min/max/initial values are unsigned long.
+                </dd>
+                <dt>CapabilityRange? photoHeight</dt>
+                <dd>
+                    The range should span the video source's high-resolution photo-mode pre-set height values with min being the smallest width, and max the 
+                    largest width. The type of the min/max/initial values are unsigned long.
+                </dd>
+                <dt>CapabilityList? exposureMode</dt>
+                <dd>The available exposure mode options (<a>PhotoExposureModeEnum</a>) on the source.</dd>
+                <dt>CapabilityList? isoMode</dt>
+                <dd>The available ISO mode options (<a>PhotoISOModeEnum</a>) on the source.</dd>
+            </dl>
+
+            <p>AllAudioCapabilities dictionary</p>
+
+            <dl class="idl" title="dictionary AllAudioCapabilities">
+                <dt>CapabilityRange? level</dt>
+                <dd>
+                    The supported range of output levels on the source. The type of the min/max values are unsigned long.
+                </dd>
+                <dt>CapabilityRange? gain</dt>
+                <dd>The supported gain range on the source. The type of the min/max values are float.</dd>
+            </dl>
+        </section>
+    </section>
+
+    <section>
+        <h1>Track Constraints</h1>
+
+        <p>This section defines APIs for working with the set of applied constraints on a track. proposal defines several constraints for use with video and audio devices.</p>
+
+        <p>As noted in prior proposals, a user agent MUST evaluate changes to constraints on a source asynchronously to ensure that web applications can remain responsive 
+            for all <a>sourceType</a>s that may not respond quickly to constraint changes.
         </p>
       
         <section>
-            <h2>Expectations around changing settings</h2>
+            <h2>Expectations around changing constraints</h2>
 
             <p>Browsers provide a media pipeline from sources to sinks.  In a browser, sinks are the &lt;img>, &lt;video> and &lt;audio> tags. Traditional sources 
-				include streamed content, files and web resources.  The media produced by these sources typically does not change over time - these sources can be 
+				include camera, microphones, streamed content, files and web resources.  The media produced by these sources typically does not change over time - these sources can be 
 				considered to be static.</p>
 	
 			<p>The sinks that display these sources to the user (the actual tags themselves) have a variety of controls for manipulating the source content.  For 
@@ -879,23 +1072,23 @@
 
             <p>This proposal assumes that <code>MediaStream</code> sinks (such as <code>&lt;video></code>, <code>&lt;audio></code>, 
                 and even <code>RTCPeerConnection</code>) will continue to have mechanisms to further transform the source stream beyond that
-                which the settings described in this proposal offer. (The sink transformation options, including those of <code>RTCPeerConnection</code> 
-                are outside the scope of this proposal.)</p>
+                which the <a>state</a>s, <a>capabilities</a>, and <a>constraints</a> described in this proposal offer. (The sink transformation options, including 
+                those of <code>RTCPeerConnection</code> are outside the scope of this proposal.)</p>
 
-            <p>The act of changing a setting on a stream's source will, by definition, affect all down-level sinks that are using that source. Many sinks may be able
-                to take these changes in stride, such as the <code>&lt;video></code> element or <code>RTCPeerConnection</code>. Others like the Recorder API may fail 
-                as a result of a source change.</p>
+            <p>The act of changing or applying a track constraint may affect the <a>state</a> of all tracks sharing that source and consequently all down-level sinks 
+                that are using that source. Many sinks may be able to take these changes in stride, such as the <code>&lt;video></code> element or <code>RTCPeerConnection</code>. 
+                Others like the Recorder API may fail as a result of a source state change.</p>
 
             <p>The <code>RTCPeerConnection</code> is an interesting object because it acts simultaneously as both a sink <strong>and</strong> a source for over-the-network
                 streams. As a sink, it has source transformational capabilities (e.g., lowering bit-rates, scaling-up or down resolutions, adjusting frame-rates), and as a
-                source it may have its own settings changed by a track source that it provides (in this proposal, such sources are the <a>VideoStreamRemoteSource</a> and 
-                <a>AudioStreamRemoteSource</a> objects).
+                source it could have its own settings changed by a track source (though in this proposal <a>sourceType</a>s of type <code>"remote"</code> do not consider 
+                the current constraints applied to a track).
             </p>
 
             <p>To illustrate how changes to a given source impact various sinks, consider the following example. This example only uses width and height, but the same
-                principles apply to any of the settings exposed in this proposal. In the first figure a home client has obtained a video source
-                from its local video camera. The source device's width and height are 800 pixels by 600 pixels, respectively. Three <code>MediaStream</code> objects on the 
-                home client contain tracks that use this same source. The three media streams are connected to three different sinks, a <code>&lt;video></code> element (A), 
+                principles apply to any of the <a>state</a>s exposed in this proposal. In the first figure a home client has obtained a video source
+                from its local video camera. The source's width and height state are 800 pixels by 600 pixels, respectively. Three <code>MediaStream</code> objects on the 
+                home client contain tracks that use this same <a>sourceId</a>. The three media streams are connected to three different sinks, a <code>&lt;video></code> element (A), 
                 another <code>&lt;video></code> element (B), and a peer connection (C). The peer connection is streaming the source video to an away client. On the away client
                 there are two media streams with tracks that use the peer connection as a source. These two media streams are connected to two <code>&lt;video></code> element
                 sinks (Y and Z).
@@ -903,12 +1096,12 @@
             
             <img src="change_settings_before.png" title="Changing media stream source effects: before the requested change">
 
-            <p>Note that in the current state, all of the sinks on the home client must apply a transformation to the original source's dimensions. A is scaling the video up
+            <p>Note that at this moment, all of the sinks on the home client must apply a transformation to the original source's provided state dimensions. A is scaling the video up
                 (resulting in loss of quality), B is scaling the video down, and C is also scaling the video up slightly for sending over the network. On the away client, sink 
                 Y is scaling the video way down, while sink Z is not applying any scaling.
             </p>
 
-            <p>Using the settings APIs defined in the next section, the home client's video source is changed to a higher resolution (1920 by 1200 pixels).</p>
+            <p>Using the constraint APIs defined in the next section, the home client's video source is changed to a higher resolution (1920 by 1200 pixels).</p>
 
             <img src="change_settings_after.png" title="Changing media stream source effects: after the requested change">
 
@@ -931,9 +1124,9 @@
 			<p>It is fairly obvious that changes to a given source will impact sink consumers. However, in some situations changes to a given sink may also be cause for 
 				implementations to adjust the characteristics of a source's stream. This is illustrated in the following figures. In the first figure below, the home 
 				client's video source is sending a video stream sized at 1920 by 1200 pixels. The video source is also unconstrained, such that the exact source dimensions 
-				are flexible as far as the application is concerned. Two <code>MediaStream</code> objects contain tracks that use this same source, and those 
+				are flexible as far as the application is concerned. Two <code>MediaStream</code> objects contain tracks with the same <a>sourceId</a>, and those 
 				<code>MediaStream</code>s are connected to two different <code>&lt;video></code> element sinks A and B. Sink A has been sized to <code>width="1920"</code> and 
-				<code>height="1200"</code> and is displaying the sources video without any transformations. Sink B has been sized smaller and as a result, is scaling the 
+				<code>height="1200"</code> and is displaying the source's video content without any transformations. Sink B has been sized smaller and as a result, is scaling the 
 				video down to fit its rectangle of 320 pixels across by 200 pixels down.
 			</p>
 
@@ -951,346 +1144,97 @@
         </section>
 
         <section>
-            <h2><code>StreamSourceSettings</code> mix-in interface</h2>
-            <pre><code><a>VideoDeviceSource</a></code> implements <code>StreamSourceSettings</code>;</pre>
-            <pre><code><a>AudioDeviceSource</a></code> implements <code>StreamSourceSettings</code>;</pre>
-            <pre><code><a>VideoStreamRemoteSource</a></code> implements <code>StreamSourceSettings</code>;</pre>
-            <pre><code><a>AudioStreamRemoteSource</a></code> implements <code>StreamSourceSettings</code>;</pre>
-            <dl class="idl" title="[NoInterfaceObject] interface StreamSourceSettings">
-                <dt>(MediaSettingsRange or MediaSettingsList) getRange(DOMString settingName)</dt>
-                <dd>
-				    <dl class="parameters">
-						<dt>DOMString settingName</dt><dd>The name of the setting for which the range of expected values should be returned</dd>
-					</dl>
-                    <p>Each setting has an appropriate range of values. These may be either value ranges (a continuum of values) or 
-                        enumerated values but not both. Value ranges include a min and max value, while enumerated values are provided 
-                        as a list of values. Both types of setting ranges include an "initial" value, which is the value that is expected 
-                        to be the source device's default value when it is acquired.
-                    </p>
+            <h2>Constraint Manipulation Extensions to MediaStreamTrack</h2>
 
-                    <p>MediaSettingsRange objects are returned when a setting is not an enumerated type. This specification will indicate what 
-                        the range of values must be for each setting. Given that implementations
-                        of various hardware may not exactly map to the same range, an implementation should make a reasonable attempt to 
-                        translate and scale the hardware's setting onto the mapping provided by this specification. If this is not possible due
-                        to a hardware setting supporting (for example) fewer levels of granularity, then the implementation should make the device
-                        settings min value reflect the min value reported in this specification, and the same for the max value. Then for values
-                        in between the min and max, the implementation may round to the nearest supported value and report that value in the
-                        setting.
-                    </p>
+            <p>Constraints are indpendent of sources. However, depending on the <a>sourceType</a> the constraints may not actually be considered by the user agent. The following
+                table summarizes the expectations around track constraints given a <a>sourceType</a>.
+            </p>
 
-                    <p class="note">For example, if the setting is fluxCapacitance, and has a specified range from -10 (min) to 10 (max) in 
-                        this specification, but the implementation's fluxCapacitance hardware setting only supports values of "off" "medium" and
-                        "full", then -10 should be mapped to "off", 10 should map to "full", and 0 should map to "medium". A request to change the 
-                        value to 3 should be rounded down to the closest supported setting (0). 
-                    </p>
+            <table class="simple">
+                <thead>
+                    <tr>
+                        <th><code>sourceType</code></th>
+                        <th>"none"</th>
+                        <th>"camera"/ "photo-camera"/ "microphone"</th>
+                        <th>"readonly"</th>
+                        <th>"remote"</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>constraints applied to source?</td>
+                        <td>NO</td>
+                        <td>YES</td>
+                        <td>NO</td>
+                        <td>NO</td>
+                    </tr>
+                </tbody>
+            </table>
 
-                    <p>MediaSettingsList objects should order their enumerated values from minimum to maximum where it makes sense, or in 
-                        the order defined by the enumerated type where applicable.
-                    </p>
+            <p>Whether <code>MediaTrackConstraints</code> were provided at track initialization time or need to be established later at runtime, the APIs defined below allow 
+                the retrieval and manipulations of the constraints currently established on a track.
+            </p>
 
-                    <table class="simple">
-                        <thead>
-                            <tr>
-                                <th>Setting name</th>
-                                <th>Dictionary return type</th>
-                                <th>Notes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>width</td>
-                                <td>MediaSettingsRange</td>
-                                <td>
-                                    The range should span the video source's pre-set width values with min being the smallest width, and max the 
-                                    largest width. The type of the min/max/initial values are unsigned long.
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>photoWidth</td>
-                                <td>MediaSettingsRange</td>
-                                <td>
-                                    The range should span the video source's high-resolution photo-mode pre-set width values with min being the smallest width, and max the 
-                                    largest width. The type of the min/max/initial values are unsigned long.
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>height</td>
-                                <td>MediaSettingsRange</td>
-                                <td>
-                                    The range should span the video source's pre-set height values with min being the smallest width, and max the 
-                                    largest width. The type of the min/max/initial values are unsigned long.
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>photoHeight</td>
-                                <td>MediaSettingsRange</td>
-                                <td>
-                                    The range should span the video source's high-resolution photo-mode pre-set height values with min being the smallest width, and max the 
-                                    largest width. The type of the min/max/initial values are unsigned long.
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>whiteBalanceMode</td>
-                                <td>MediaSettingsList</td>
-                                <td>
-                                    The supported range of frame rates on the device. The type of the initial/values array is <a>PictureWhiteBalanceModeEnum</a> (DOMString).
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>exposureMode</td>
-                                <td>MediaSettingsList</td>
-                                <td>
-                                    The supported range of frame rates on the device. The type of the initial/values array is <a>PictureExposureModeEnum</a> (DOMString).
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>isoMode</td>
-                                <td>MediaSettingsList</td>
-                                <td>
-                                    The supported range of frame rates on the device. The type of the initial/values array is <a>PictureISOModeEnum</a> (DOMString).
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>brightness</td>
-                                <td>MediaSettingsRange</td>
-                                <td>
-                                    The supported range of brightness on the device. The type of the min/max/initial values are float.
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>contrast</td>
-                                <td>MediaSettingsRange</td>
-                                <td>
-                                    The supported range of contrast on the device. The type of the min/max/initial values are float.
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>saturation</td>
-                                <td>MediaSettingsRange</td>
-                                <td>
-                                    The supported range of saturation on the device. The type of the min/max/initial values are float.
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>sharpness</td>
-                                <td>MediaSettingsRange</td>
-                                <td>
-                                    The supported range of sharpness on the device. The type of the min/max/initial values are float.
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>frameRate</td>
-                                <td>MediaSettingsRange</td>
-                                <td>
-                                    The supported range of frame rates on the device. The type of the min/max/initial values are float.
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>rotation</td>
-                                <td>MediaSettingsList</td>
-                                <td>
-                                    The available video rotation options on the source device. The type of the initial/values array is <a>VideoRotationEnum</a> (DOMString).
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>mirror</td>
-                                <td>MediaSettingsList</td>
-                                <td>
-                                    The available video mirror options on the source device. The type of the initial/values array is <a>VideoMirrorEnum</a> (DOMString).
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>zoom</td>
-                                <td>MediaSettingsRange</td>
-                                <td>
-                                    The supported zoom range on the device. The type of the min/max/initial values are float. The initial value is 1. The float value is a scale
-                                    factor, for example 0.5 is zoomed out by double, while 2.0 is zoomed in by double. Requests should be rounded to the nearest supporting zoom 
-                                    factor by the implementation (when zoom is supported).
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>focusMode</td>
-                                <td>MediaSettingsList</td>
-                                <td>
-                                    The available focus mode options on the source device. The type of the initial/values array is <a>VideoFocusModeEnum</a> (DOMString).
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>fillLightMode</td>
-                                <td>MediaSettingsList</td>
-                                <td>
-                                    The available fill light mode options on the source device. The type of the initial/values array is <a>VideoFillLightModeEnum</a> (DOMString).
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>gain</td>
-                                <td>MediaSettingsRange</td>
-                                <td>
-                                    The supported gain range on the device. The type of the min/max/initial values are float. The initial value is 1. 
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>bitRate</td>
-                                <td>MediaSettingsRange</td>
-                                <td>
-                                    The supported bit rate range on the device. The type of the min/max/initial values are float.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </dd>
-                <dt>any get(DOMString settingName)</dt>
+            <dl class="idl" title="partial interface MediaStreamTrack">
+                <dt>any? getConstraint(DOMString constraintName, optional boolean mandatory = false)</dt>
                 <dd>
 					<dl class="parameters">
-						<dt>DOMString settingName</dt><dd>The name of the setting for which the current value of that setting should be returned</dd>
+						<dt>DOMString constraintName</dt><dd>The name of the setting for which the current value of that setting should be returned</dd>
+                        <dt>optional boolean mandatory = false</dt><dd><code>true</code> to indicate that the constraint should be looked up in the mandatory set of constraints,
+                            otherwise, the constraintName should be retrieved from the optional list of constraints.</dd>
 					</dl>
-                    Returns the current value of a given setting. This is equivalent to reading the IDL attribute of the same name on the source object.
+                    Returns one of the following:
+                    <dl>
+                        <dt>null</dt><dd>If no constraint matching the provided constraintName exists in the respective optional or mandatory set on this track.</dd>
+                        <dt>sequence&lt;MediaTrackConstraint></dt>
+                        <dd>If the mandatory flag is false and there is at least one optional constraint defined on this track. 
+                            <p>Each MediaTrackConstraint will contain a key which matches the requested <a>constraintName</a> parameter, and values indicating each 
+                                optional constraint's current value. The values will either be a single value, or a MinMaxConstraint object.
+                            </p>
+                            <p>The returned list will be ordered from most important-to-satisfy at index 0, to the least-important-to-satisfy.</p>
+                        </dd>
+                        <dt><em>MinMaxConstraint</em></dt>
+                        <dd>If the mandatory flag is true, and the requested constraint is defined in the mandatory <code>MediaTrackConstraintSet</code> associated 
+                            with this track, and the value of the constraint is a min/max range object.
+                        </dd>
+                        <dt><em>primitive_value</em></dt>
+                        <dd>If the mandatory flag is true, and the requested constraint is defined in the mandatory <code>MediaTrackConstraintSet</code> associated 
+                            with this track, and the value of the constraint is a primitive value (unsigned long, float, etc.).
+                        </dd>
+                    </dl>
                 </dd>
-                <dt>void set(MediaTrackConstraint setting, optional boolean isMandatory = false)</dt>
+                <dt>MediaTrackConstraints constraints()</dt>
+                <dd>Returns the complete constraints object associated with the track. If no mandatory constraints have been defined, the <code>mandatory</code>
+                    field will not be present (it will be undefined). If no optional constraints have been defined, the <code>optional</code> field will not be
+                    present (it will be undefined). If neither optional, nor mandatory constraints have been created, an empty object is returned. 
+                </dd>
+                <dt>void setConstraint(DOMString constraintName, any constraintValue, optional boolean mandatory = false)</dt>
                 <dd>
 					<dl class="parameters">
-						<dt>MediaTrackConstraint setting</dt><dd>A JavaScript object (dictionary) consisting of a single property which is the setting name to change,
-						and whose value is either a primitive value (float/DOMString/etc), or another dictionary consisting of a <code>min</code>
-						and/or <code>max</code> property and associated values.</dd>
-						<dt>optional boolean isMandatory = false</dt><dd>A flag indicating whether this settings change request should be considered mandatory. If a value
-						of <code>true</code> is provided, then should the settings change fail for some reason, a <code><a>settingserror</a></code>
-						event will be raised. Otherwise, only <code><a>settingschanged</a></code> event will be dispatched for the settings
-						that were successfully changed. The default, if this flag is not provided, is <code>false</code></dd>
+						<dt>DOMString constraintName</dt><dd>The name of the constraint to set.</dd>
+						<dt>any constraintValue</dt><dd>Either a primitive value (float/DOMString/etc), or a MinMaxConstraint dictionary.</dd>
+                        <dt>optional boolean mandatory = false</dt><dd>A flag indicating whether this constraint should be applied to the optional 
+                            or mandatory constraints.</dd>
 					</dl>
-                    <p>The <code>set</code> API is the mechanism for asynchronously requesting that the source device change the value 
-                        of a given setting. The API mirrors the syntax used for applying constraints. Generally, the <code>set</code> API
-                        will be used to apply specific values to a setting (such as setting the <code>flashMode</code> setting to a specific 
-                        value), however ranges can also be applied using the same min/max syntax used in constraints (i.e., setting 
-                        <code>width</code> to a range between 800 and 1200 pixels).
-                    </p>
-
-                    <p>The <code>set</code> API queues requests until the conclusion of the micro-task after which all of the settings requests
-                        will be evaluated according to the constraint algorithm, and requests that can be honored will be applied to the 
-                        source device. Any requests specified using the <code>mandatory</code> parameter that could not be applied must
-                        generate a <a>settingserror</a> event. All other non-mandatory requests that could not be applied do not cause 
-                        any notification to be generated.
-                    </p>
-
-                    <p>For all of the given settings that were changed as a result of a sequence of calls to the <code>set</code> API during a 
-                        micro-task, one single <a>settingschanged</a> event will be generated containing the names of the settings that
-                        changed.</p>
-
-                    <p class="note"><strong>Example: </strong>To change the video source's dimensions to any aspect ratio where the height 
-                        is 768 pixels and the width is at least 300 pixels, would require two calls to <code>set</code>: <br>
-                        <span style="white-space:pre "><code>set({ width: { min: 300}}, true);<br>set({ height: 768}, true);</code></span>
-                    </p>
-
-                    <p>In each case where the setting/constraint does not take an enumerated value, the implementation should attempt to match
-                        the value onto the nearest supported value of the source device unless the mandatory flag is provided. In the case of
-                        mandatory requests, if the setting cannot be exactly supported as requested, then the setting must fail and generate
-                        a settingserror event. Regarding width/height values--if an implementation is able to scale the source video to 
-                        match the requested mandatory constraints, this need not cause a <a>settingserror</a> (but the result may be weirdly proportioned video).
+                    <p>This API attempts to update the value of an existing constraint (if present), and if not, will set the new constraint.</p>
+                    <p>If the <code>mandatory</code> flag is <code>false</code> and the constraint is not found in the list of optional constraints, then
+                        a new optional constraint is created and appended to the end of the list (with lowest priority).</p>
+                    <p class="note"><strong>Note: </strong>This behavior allows applications to iteratively call <code>set</code> and have their 
+                        constraints added in the order specified in the source.
                     </p>
                 </dd>
+                <dt>void applyConstraints(MediaTrackConstraints constraints)</dt>
+                <dd>
+                    <dl class="parameters">
+                        <dt>MediaTrackConstraints constraints</dt><dd>A new constraint structure to apply to this track.</dd>
+                    </dl>
+                    <p>This API will replace all existing constraints with the provided constraints (if existing constraints exist).
+                        Otherwise, it will apply the newly provided constraints to the track.
+                    </p>
+                </dd>
+                <!--<dt>void prependConstraint(DOMString AAAA)</dt>-->
+                    
             </dl>
-
-            <section>
-                <h2>MediaSettingsRange dictionary</h2>
-                <dl class="idl" title="dictionary MediaSettingsRange">
-                    <dt>any max</dt>
-                    <dd>The maximum value of this setting. 
-                        <p>The type of this value is specific to the setting. Each setting will 
-                        describe a specific type. That type must be returned for this attribute.</p>
-                    </dd>
-                    <dt>any min</dt>
-                    <dd>The minimum value of this setting. 
-                        <p>The type of this value is specific to the setting. Each setting will 
-                        describe a specific type. That type must be returned for this attribute.</p>
-                    </dd>
-                    <dt>any initial</dt>
-                    <dd>The initial value of this setting. When the object associated with this setting is first made available
-                        to the application, the current value of the setting should be set to the initial value.
-                        For example, in a browsing scenario, if one web site changes this setting and a subsequent web site
-                        gets access to this same setting, the setting should have been reset back to its initial value. 
-                        <p>The type of this value is specific to the setting. Each setting will describe a specific type. That 
-                            type must be returned for this attribute.</p>
-                    </dd>
-                </dl>
-            </section>
-
-            <section>
-                <h2>MediaSettingsList dictionary</h2>
-
-                <p>This dictionary will be populated differently based on the requested setting capabilities. For example, if the requested
-                    setting is <code><q>focusMode</q></code> the returned <code>MediaSettingList</code> 
-                    will be: <code>{ initial: "auto", values: [ "notavailable", "auto", "manual" ] }</code>. The actual value
-                    of the setting can be read using the <code>focusMode</code> attribute.
-                </p>
-
-                <dl class="idl" title="dictionary MediaSettingsList">
-                    <dt>sequence&lt;any> values</dt>
-                    <dd>An array of the values of the enumerated type for this setting. Items should be sorted
-                        from min (at index 0) to max where applicable, or in the order listed in the enumerated type otherwise.
-                        <p>The type of this value is specific to the setting. Each setting will describe a specific type. That 
-                            type must be returned for this attribute.</p>
-                    </dd>
-                    <dt>any initial</dt>
-                    <dd>The initial value of this setting. When the object associated with this setting is first made available
-                        to the application, the current value of the setting should be set to the initial value.
-                        For example, in a browsing scenario, if one web site changes this setting and a subsequent web site
-                        gets access to this same setting, the setting should have been reset back to its initial value.
-                        <p>The type of this value is specific to the setting. Each setting will describe a specific type. That 
-                            type must be returned for this attribute.</p>
-                    </dd>
-                </dl>
-            </section>  
-        </section>
-          
-        <section>
-            <h2>Tracking the result of constraint application</h2>
-
-            <section>
-                <h3><code>MediaSettingsEventHandlers</code> mix-in interface</h3>
-                <pre><code><a>AudioDeviceSource</a></code> implements <code>MediaSettingsEventHandlers</code>;</pre>
-                <pre><code><a>VideoDeviceSource</a></code> implements <code>MediaSettingsEventHandlers</code>;</pre>
-                <pre><code><a>AudioStreamRemoteSource</a></code> implements <code>MediaSettingsEventHandlers</code>;</pre>
-                <pre><code><a>VideoStreamRemoteSource</a></code> implements <code>MediaSettingsEventHandlers</code>;</pre>
-                <dl class="idl" title="[NoInterfaceObject] interface MediaSettingsEventHandlers">
-                    <dt>attribute EventHandler onsettingserror</dt>
-                    <dd>Register/unregister for "settingserror" events. The handler should expect to get a <a>MediaSettingsEvent</a> object as its first
-                        parameter. The event is fired asynchronously after settings change requests (using the <code>set</code> API have been made with at least
-                        one such request using the mandatory flag. The MediaSettingsEvent reports the name of the settings that could not be 
-                        applied. The "settingschanged" event fires before the "settingserror" event (if any).</dd>
-                    <dt>attribute EventHandler onsettingschanged</dt>
-                    <dd>Register/unregister for "settingschanged" events. The handler should expect to get a <a>MediaSettingsEvent</a> object as its first
-                        parameter. The event is fired asynchronously after the settings change requests are made and the settings have actually changed. 
-                        The "settingschanged" event fires before the "settingserror" event (if any).
-                    </dd>
-                </dl>
-            </section>
-
-            <section>
-                <h3><code><dfn>MediaSettingsEvent</dfn></code> interface</h3>
-                <dl class="idl" title="[Constructor(DOMString type, optional MediaSettingsEventInit eventInitDict)] interface MediaSettingsEvent : Event">
-                    <dt>readonly attribute DOMString[] settings</dt>
-                    <dd>A list of settings that failed or succeeded (depending on the event type).</dd>
-                </dl>
-            </section>
-
-            <section>
-                <h3><code><dfn>MediaSettingsEventInit</dfn></code> dictionary</h3>
-                <dl class="idl" title="dictionary MediaSettingsEventInit : EventInit">
-                    <dt>sequence&lt;DOMString> settings</dt>
-                    <dd>List of settings to populate into the MediaSettingsEvent object's settings readonly attribute.</dd>
-                </dl>
-            </section>
-        </section>
-    </section>
-
-    <section>
-        <h1>Constraints Defined in this Proposal</h1>
-
-        <p>This proposal defines several constraints for use with video and audio devices.</p>
-
-        <section>
-            <h2>Video Constraints</h2>
-
-            <p>The following constraints are applicable to video devices</p>
 
             <section>
                 <h3>VideoConstraints dictionary</h3>
@@ -1403,8 +1347,8 @@ function mediaStarted() {
             <pre>
 function mediaStarted() {
    var videoDevice = videoTrack.source;
-   var maxWidth = videoDevice.getRange("width").max;
-   var maxHeight = videoDevice.getRange("height").max;
+   var maxWidth = videoDevice.getCapability("width").max;
+   var maxHeight = videoDevice.getCapability("height").max;
    // Check for 1080p+ support
    if ((maxWidth >= 1920) && (maxHeight >= 1080)) {
       // See if I need to change the current settings...
@@ -1436,7 +1380,7 @@ function mediaStarted() {
 }
 
 function setupRange(videoDevice) {
-   var zoomCaps = videoDevice.getRange("zoom");
+   var zoomCaps = videoDevice.getCapability("zoom");
    // Check to see if the device supports zooming...
    if (zoomCaps.min != zoomCaps.max) {
       // Set HTML5 range control to min/max values of zoom
@@ -1465,20 +1409,20 @@ function mediaStarted() {
         </section>
 
         <section>
-            <h2>Take a picture, show the picture in an image tag:</h2>
+            <h2>Take a photo, show the photo in an image tag:</h2>
 
             <pre>
 function mediaStarted() {
    var videoDevice = videoTrack.source;
-   // Check if this device supports a picture mode...
-   if (videoDevice.takePicture) {
-       videoDevice.onpicture = showPicture;
+   // Check if this device supports a photo mode...
+   if (videoDevice.takePhoto) {
+       videoDevice.onphoto = showPicture;
        // Turn on flash only for the snapshot...if available
        if (videoDevice.fillLightMode != "notavailable")
           videoDevice.set({ fillLightMode: "flash"}, true);
        else
           console.info("Flash not available");
-       videoDevice.takePicture();
+       videoDevice.takePhoto();
    }
 }
 
@@ -1528,7 +1472,7 @@ for (var i = 0; i &lt; totalVideoDevices; i++) {
         <ol>
             <li>Removed some outdated arguments in the 1.1 Rationale section for removing the LocalMediaStream.</li>
             <li>Updated the gain range from 0-100 (unsigned long) to 0-1+ (float) to better match the <a href="https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html#attributes-GainNode">WebAudio definition</a>.</li>
-            <li>Added some of the picture settings suggested by gmandyam at: http://gmandyam.github.com/media-capture/. Limited these to photo settings unless anyone wants to move these up to general video attributes. I specifically excluded the following: exposureCompensation and redEye because I didn't have a clear understanding of the value range for exposure comp. and I don't think redEye is necessary for a v1 settings across a wide range of cameras.</li>
+            <li>Added some of the photo settings suggested by gmandyam at: http://gmandyam.github.com/media-capture/. Limited these to photo settings unless anyone wants to move these up to general video attributes. I specifically excluded the following: exposureCompensation and redEye because I didn't have a clear understanding of the value range for exposure comp. and I don't think redEye is necessary for a v1 settings across a wide range of cameras.</li>
             <li>Removed the MediaStreamRemoteSource objects. It didn't make sense to be able to changes settings on the source of these tracks (which is always related to a peer-connection). The best thing to do here is allow the remote tracks get a <code>source</code> that is a peer connection. Rather than create a new track type just to return a correct type for <code>source</code>, I'm simply overloading the source's type for both--as well as local resources.</li>
             <li>Renamed <code>*StreamSource</code> to <code>*DeviceSource</code> to clearly differentiate that this is a "device" providing video/audio and to differentiate that from a img, video, audio sources that are not devices.</li>
             <li>Added support for changing sources. This support is via the <code>changeSource</code> API on the <a>MediaStreamTrack</a> root-level object.</li>
@@ -1585,7 +1529,7 @@ for (var i = 0; i &lt; totalVideoDevices; i++) {
 	<section>
 		<h1>Acknowledgements</h1>
 		<p>I'd like to specially thank Anant Narayanan of Mozilla for collaborating on the new settings design, and EKR for his 2c. Also, thanks to
-		Martin Thomson (Microsoft) for his comments and review.
+		Martin Thomson (Microsoft) for his comments and review, and other participants on the public-media-capture mailing list.
 	</section>
   </body>
 </html>
