@@ -53,7 +53,7 @@
         <p>For any of you just joining us, feel free to skip on down to the next section.</p>
         <p>As I was looking at source objects in V5, and starting to rationalize what properties of the source should go on the
             track, vs. on the source object, I got the notion that the source object really wasn't providing much value aside from 
-            a logical separation for properties of the track vs. stream. From our last telecon, it was apparent that most settings
+            a logical separation for properties of the track vs. source. From our last telecon, it was apparent that most settings
             needed to be on the tracks as state-full information about the track. So, then what was left on the source?
         </p>
         <p>EKR's comments about wondering what happens when multiple apps (or tabs within a browser) go to access and manipulate
@@ -81,8 +81,11 @@
         </p>
         <p>In order to clarify the track's behavior under various source types, I also had to get crisp about the things called "settings" 
             and the things called "constraints" and how they all work together. I think this proposal gets it right, and provides the right
-            set of controls that ensure that devices can optimize where needed but still be constrained, and how these concepts relate to
-            "settings" and state of the track.
+            APIs for applications to manipulate what they want to in an easy to rationalize manner.
+        </p>
+        <p>And rather unfortunately (due to the name of the proposal), I've removed all notion of the term "settings" from this proposal. 
+            The things previously called settings were a combination of constraints and capabilities, and now I've just formalized on the
+            latter and given up on the former. It works--especially with long-lasting constraints and introspection of them.
         </p>
     </section>
 
@@ -98,7 +101,7 @@
             </dd>
             <dt><dfn title="source">Source</dfn></dt>
             <dd>Sources are the "thing" providing the source of a media stream track. The source is the broadcaster of the media itself. A source
-                can be a physical webcam, microphone, local video or audio file from the user's hard drive, or even a static image.
+                can be a physical webcam, microphone, local video or audio file from the user's hard drive, network resource, or static image.
                 <p>Individual sources have five basic <dfn title="mode">modes</dfn> that are not directly exposed to an application via any 
                     API defined in this spec. The modes are described in this spec for clarification purposes only:</p>
                 <table class="simple">
@@ -108,13 +111,14 @@
                     <tbody>
                         <tr><td>unknown-authorization</td><td>The source hasn't yet been authorized for use by the 
                             application. (Authorization occurs via the getUserMedia API.) All sources start out in this mode at the start of the
-                            application. Sources that are attached cameras or microphones make their existence known to the application in this 
-                            mode. Others like files on the local file system do not.</td></tr>
+                            application (though trusted hardware or software envirnments MAY automatically pre-authorize certain sources when 
+                            their use is requested via getUserMedia). Camera or microphone sources that are visible to the user agent can make 
+                            their existence known to the application in this mode. Other sources like files on the local file system do not.</td></tr>
                         <tr><td>armed</td><td>the source has been granted use by the application and is on/ready, but not actively broadcasting 
                             any media. This can be the case if a camera source has been authorized, but there are no sinks connected to this 
                             source (so no reason to be emitting media yet). Implementations of this specification are advised to include some 
                             indicator that a device is armed in their UI so that users are aware that an application may start the source at any 
-                            time. A conservative user agent would enable some form of UI to show the source as "on" in ths mode.</td></tr>
+                            time. A conservative user agent would enable some form of UI to show the source as "on" in this mode.</td></tr>
                         <tr><td>streaming</td><td>The source has been granted use by the application and is actively streaming media. User agents 
                             should provide an indicator to the user that the source is on and streaming in this mode.</td></tr>
                         <tr><td>not-authorized</td><td>This source has been forbidden/rejected by the user.</td></tr>
@@ -124,15 +128,15 @@
                 </table>
                 <p>In addition to these modes, a source can be removed (physically in the case camera/microphone sources, or deleted in the case
                     of a file from the local file system), in which case it is no longer detectable by the application.</p>
-                <p>The user should remain in control of the source at all times and can cause any state-machine mode transition.</p>
+                <p>The user MUST remain in control of the source at all times and can cause any state-machine mode transition.</p>
                 <p>Some sources have an identifier which MUST be unique to the application (un-guessable by another application) and persistent between
                     application sessions (e.g., the identifier for a given source device/application must stay the same, but not be guessable by another
                     application). Sources that must have an identifier are camera and microphone sources; local file sources are not required to have 
                     an identifier. Source identifiers let the application save, identify the availability of, and directly request specific sources.
                 </p>
-                <p>Other than the identifier, sources are <strong>never</strong> directly available to the application until the user-agent connects a 
-                    source to a track. Once a source has been "released" to the application (either via a permissions UI, pre-configured allow-list, or 
-                    some other release mechanism) the application will be able discover additional source-specific capabilities about the source.
+                <p>Other than the identifier, other bits of source identify are <strong>never</strong> directly available to the application until the 
+                    user agent connects a source to a track. Once a source has been "released" to the application (either via a permissions UI, pre-configured allow-list, or 
+                    some other release mechanism) the application will be able discover additional source-specific capabilities.
                 </p> 
                 <p>Sources have <a>capabilities</a> and <a>state</a>. The capabilities and state are "owned" by the source and are common to any [multiple] tracks 
                     that happen to be using the same source (e.g., if two different tracks objects bound to the same source ask for the same capability 
@@ -154,7 +158,7 @@
                     should do its best to conform to the set of optional constraints specified.
                 </p>
                 <p>A source's state is directly exposed to audio and video track objects through individual read-only attributes. These attributes share
-                    the same name as their corresponding constraints.
+                    the same name as their corresponding <a>capabilities</a> and <a>constraints</a>.
                 </p>
                 <p>Events are available that signal to the application that source state has changed.</p>
                 <p>A conforming user-agent MUST support all the state names defined in this spec.</p>
@@ -162,10 +166,10 @@
             <dt><dfn title="capabilities">Capabilities</dfn></dt>
             <dd>
                 Source capabilities are the intrinsic "features" of a source object. For each source state, there is a corresponding capability that describes
-                whether the it is supported by the source and if so, what the range of supported values are. Capability are expressed as either
+                whether it is supported by the source and if so, what the range of supported values are. Capability are expressed as either
                 a series of states (for enumerated-type capabilities) or as a min/max range.
                 <p>The values of the supported capabilities must be normalized to the ranges and enumerated types defined in this specification.</p>
-                <p>Capability requests should return the same underlying per-source capabilities, regardless of any user-supplied constraints 
+                <p>Capabilities return the same underlying per-source capabilities, regardless of any user-supplied constraints 
                     present on the source (capabilities are independent of constraints).</p>
                 <p>Source capabilities are effectively constant. Applications should be able to depend on a specific source having the same capabilities
                     for any session.
@@ -228,7 +232,7 @@
             <h2>Generic Tracks</h2>
 
             <p>This section describes the <dfn>MediaStreamTrack</dfn> interface (currently in the Media Capture and Streams document), but makes targetted changes in order 
-                to add the <code>"new"</code> state and associated event handlers. The definition is otherwise identical to the current definition except that the defined 
+                to add the <code>"new"</code> state and associated event handler (<code>onstarted</code>). The definition is otherwise identical to the current definition except that the defined 
                 constants are replaced by strings (using an enumerated type).
             </p>
 
@@ -264,7 +268,8 @@
                     </dd>
                     <dt>attribute EventHandler onstarted</dt>
                     <dd>Event handler for the <code>"started"</code> event. The <code>"started"</code> event is fired when this track transitions
-                        from the <code>"new"</code> <code>readyState</code> to any other state. This event fires before any other corresponding events like <code>"ended"</code>.
+                        from the <code>"new"</code> <code>readyState</code> to any other state. This event fires before any other corresponding events like <code>"ended"</code>
+                        or <code>"statechanged"</code>.
                         <p class="issue"><strong>Recommendation: </strong> We should add a convenience API to <code>MediaStream</code> for being notified of various track changes 
                             like this one. The event would contain a reference to the track, as well as the name of the event that happened. Such a convenience API would 
                             fire last in the sequence of such events.
@@ -293,9 +298,13 @@
                     <dt>live</dt>
                     <dd>See the definition of the <a href="">LIVE</a> constant in the current editor's draft.</dd>
                     <dt>muted</dt>
-                    <dd>See the definition of the <a href="">MUTED</a> constant in the current editor's draft.</dd>
+                    <dd>See the definition of the <a href="">MUTED</a> constant in the current editor's draft. In addition, in this specification the <code>"muted"</code>
+                        state can be entered when a track becomes over-constrained.
+                    </dd>
                     <dt>ended</dt>
-                    <dd>See the definition of the <a href="">ENDED</a> constant in the current editor's draft.</dd>
+                    <dd>See the definition of the <a href="">ENDED</a> constant in the current editor's draft. In this specification, once a track enters this state
+                        it never exits it.
+                    </dd>
                 </dl>
             </section>
         </section>
@@ -304,7 +313,7 @@
             <h2>Track Sources</h2>
 
             <section>
-                <h3>Track Source Extensions to <a>MediaStreamTrack</a></h3>
+                <h3>Track Source API Extensions to <a>MediaStreamTrack</a></h3>
                 <dl class="idl" title="partial interface MediaStreamTrack">
                     <dt>readonly attribute SourceTypeEnum sourceType</dt>
                     <dd>Returns the type information associated with the currently attached source (if any).</dd>
@@ -370,9 +379,6 @@
                             will not be identifyable outside the scope of this application. could also be obtained via other round-about techniques using <code>getUserMedia</code>. This editor deems it worthwhile directly providing
                             this data as it seems important for determining whether multiple devices of this type are available.
                         </p>
-                        <p class="issue"><strong>Issue: </strong> The ability to be notified when new devices become available has been dropped from this proposal
-                            (it was available in v4 via the DeviceList object).
-                        </p>
                     </dd>
                     <dt>void takePhoto()</dt>
                     <dd>If the <a>sourceType</a>'s value is anything other than <code>"photo-camera"</code>, this method returns immediately and does nothing.
@@ -381,14 +387,15 @@
                         to the stream, and records/encodes an image (using a user-agent determined format) into a <code>Blob</code> object. Finally, a task is
                         queued to fire a "photo" event with the resulting recorded/encoded data. In case of a failure for any reason, a "photoerror" event
                         is queued instead and no "photo" event is dispatched.
-                        <p class="issue"><strong>Issue: </strong> We could consider providing a hint or setting for the desired photo format?</p>
+                        <p class="issue"><strong>Issue: </strong> We could consider providing a hint or setting for the desired photo format? There could be 
+                            some alignment opportunity with the Recoding proposal...
+                        </p>
                     </dd>
                     <dt>attribute EventHandler onphoto</dt>
                     <dd>Register/unregister for "photo" events. The handler should expect to get a BlobEvent object as its first
                         parameter.
                         <p class="note">The BlobEvent returns a photo (as a Blob) in a compressed format (for example: PNG/JPEG) rather than a 
                             raw ImageData object due to the expected large, uncompressed size of the resulting photos.</p>
-                        <p class="issue">This Event type (BlobEvent) should be the same thing used in the recording proposal.</p>
                     </dd>
                     <dt>attribute EventHandler onphotoerror</dt>
                     <dd>In the event of an error taking the photo, a "photoerror" event will be dispatched instead of a "photo" event.
@@ -439,6 +446,10 @@
         <p>Source states (the current states of the source media flowing through a track) are observable by the attributes defined in this section. They are divided by 
             track type: video and audio.
         </p>
+
+        <p>Note that the source states defined in this section do not include <a>sourceType</a> and <a>sourceId</a> merely because they were already defined earlier.
+            These two attributes are also considered states, and have appropriate visibility as <a>capabilities</a> and <a>constraints</a>.
+        </p>
       
         <section>
             <h2>Video Source State</h2>
@@ -457,6 +468,22 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <tr>
+                        <td><code>sourceType</code></td>
+                        <td>current <a>SourceTypeEnum</a> value</td>
+                        <td>current <a>SourceTypeEnum</a> value</td>
+                        <td>current <a>SourceTypeEnum</a> value</td>
+                        <td>current <a>SourceTypeEnum</a> value</td>
+                        <td>current <a>SourceTypeEnum</a> value</td>
+                    </tr>
+                    <tr>
+                        <td><code>sourceId</code></td>
+                        <td>null</td>
+                        <td>current <code>DOMString</code> value</td>
+                        <td>current <code>DOMString</code> value</td>
+                        <td>current <code>DOMString</code> value</td>
+                        <td>null</td>
+                    </tr>
                     <tr>
                         <td><code>width</code></td>
                         <td>null</td>
@@ -589,45 +616,67 @@
             </table>
 
             <section>
-                <h3>Source State Extensions to VideoStreamTrack</h3>
+                <h3>Source State API Extensions to VideoStreamTrack</h3>
                 <dl class="idl" title="partial interface VideoStreamTrack">
                     <dt>readonly attribute unsigned long? width</dt>
                     <dd>The width (in pixels) of the source of the video flowing through the track.</dd>
                     <dt>readonly attribute unsigned long? height</dt>
                     <dd>The height (in pixels) of the source of the video flowing through the track.</dd>
                     <dt>readonly attribute float? frameRate</dt>
-                    <dd>The current frames per second rate of video provided by this source.</dd>
+                    <dd>The current frames per second rate of video provided by this source.
+                        <p>If the <a>sourceType</a> is a <code>"camera"</code> or <code>"photo-camera"</code>, or a <code>"readonly"</code> variant of those, 
+                            and the source does not provide a frameRate (or the frameRate cannot be determined from the source stream), then this attribute 
+                            MUST be the user agent's vsync display rate.
+                        </p>
+                    </dd>
                     <dt>readonly attribute VideoFacingModeEnum? facingMode</dt>
                     <dd>From the user's perspective, this attribute describes whether this camera is pointed toward the 
-                        user ("user") or away from the user ("environment"). If the <a>sourceType</a> is a <code>"camera"</code> or <code>"photo-camera"</code>, 
-                        or a <code>"readonly"</code> variant of those, and the user agent cannot reliable obtain facing information from the source (e.g., 
-                        from a USB external camera), then the value <code>"notavailable"</code> is returned.
+                        user ("user") or away from the user ("environment").
                     </dd>
                     <dt>readonly attribute float? zoom</dt>
-                    <dd>The current zoom scale value in use by the camera. If the <a>sourceType</a> is a <code>"camera"</code> or <code>"photo-camera"</code>, 
-                        or a <code>"readonly"</code> variant of those, and the source does not support changing the zoom factor, then this property will always return 1.0.</dd>
+                    <dd>The current zoom scale value in use by the camera.
+                        <p>If the <a>sourceType</a> is a <code>"camera"</code> or <code>"photo-camera"</code>, or a <code>"readonly"</code> variant of those, 
+                            and the source does not support changing the zoom factor, then this attribute MUST always return the value <code>1.0</code>.
+                        </p>
+                    </dd>
                     <dt>readonly attribute VideoFocusModeEnum? focusMode</dt>
-                    <dd>The source's current focusMode state. The initial/default value is "auto".</dd>
+                    <dd>The source's current focusMode state.</dd>
                     <dt>readonly attribute VideoFillLightModeEnum? fillLightMode</dt>
                     <dd>The source's current fill light/flash mode.</dd>
                     <dt>readonly attribute VideoWhiteBalanceModeEnum? whiteBalanceMode</dt>
-                    <dd>The source's current white balance mode. The initial/default value is <code>auto</code>.</dd>
+                    <dd>The source's current white balance mode.</dd>
                     <dt>readonly attribute unsigned long? brightness</dt>
-                    <dd>The source's current brightness level. The values of this settings must range from 0 to 100. The initial/default value is <code>50</code>.</dd>
+                    <dd>The source's current brightness level. The values of this settings MUST range from 0 to 100.
+                        <p>If the <a>sourceType</a> is a <code>"camera"</code> or <code>"photo-camera"</code>, or a <code>"readonly"</code> variant of those, 
+                            and the source does not provide brightness level information, then this attribute MUST always return the value <code>50</code>.
+                        </p>
+                    </dd>
                     <dt>readonly attribute unsigned long? contrast</dt>
-                    <dd>The source's current contrast level. The values of this settings must range from 0 to 100. The initial/default value is <code>50</code>.</dd>
+                    <dd>The source's current contrast level. The values of this settings MUST range from 0 to 100.
+                        <p>If the <a>sourceType</a> is a <code>"camera"</code> or <code>"photo-camera"</code>, or a <code>"readonly"</code> variant of those, 
+                            and the source does not provide contrast level information, then this attribute MUST always return the value <code>50</code>.
+                        </p>
+                    </dd>
                     <dt>readonly attribute unsigned long? saturation</dt>
-                    <dd>The source's current saturation level. The values of this settings must range from 0 to 100. The initial/default value is <code>50</code>.</dd>
+                    <dd>The source's current saturation level. The values of this settings MUST range from 0 to 100. 
+                        <p>If the <a>sourceType</a> is a <code>"camera"</code> or <code>"photo-camera"</code>, or a <code>"readonly"</code> variant of those, 
+                            and the source does not provide saturation level information, then this attribute MUST always return the value <code>50</code>.
+                        </p>
+                    </dd>
                     <dt>readonly attribute unsigned long? sharpness</dt>
-                    <dd>The source's current sharpness level. The values of this settings must range from 0 to 100. The initial/default value is <code>50</code>.</dd>
+                    <dd>The source's current sharpness level. The values of this settings MUST range from 0 to 100. 
+                        <p>If the <a>sourceType</a> is a <code>"camera"</code> or <code>"photo-camera"</code>, or a <code>"readonly"</code> variant of those, 
+                            and the source does not provide sharpness level information, then this attribute MUST always return the value <code>50</code>.
+                        </p>
+                    </dd>
                     <dt>readonly attribute unsigned long? photoWidth</dt>
                     <dd>The width (in pixels) of the configured <a>sourceType</a>'s <code>"photo-camera"</code> (or <code>"readonly"</code> variant) high-resolution sensor.</dd>
                     <dt>readonly attribute unsigned long? photoHeight</dt>
                     <dd>The height (in pixels) of the configured <a>sourceType</a>'s <code>"photo-camera"</code> (or <code>"readonly"</code> variant) high-resolution sensor.</dd>
                     <dt>readonly attribute PhotoExposureModeEnum? exposureMode</dt>
-                    <dd>The current value of the <a>sourceType</a>'s <code>"photo-camera"</code> (or <code>"readonly"</code> variant) light meter. The default/initial value is <code>auto</code>.</dd>
+                    <dd>The current value of the <a>sourceType</a>'s <code>"photo-camera"</code> (or <code>"readonly"</code> variant) light meter.</dd>
                     <dt>readonly attribute PhotoISOModeEnum? isoMode</dt>
-                    <dd>The <a>sourceType</a>'s <code>"photo-camera"</code> (or <code>"readonly"</code> variant) film-equivalent speed (ISO) setting. The default/initial value is <code>auto</code>.</dd>
+                    <dd>The <a>sourceType</a>'s <code>"photo-camera"</code> (or <code>"readonly"</code> variant) film-equivalent speed (ISO) setting.</dd>
                 </dl>
             </section>
 
@@ -727,7 +776,21 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><code>level</code></td>
+                        <td><code>sourceType</code></td>
+                        <td>current <a>SourceTypeEnum</a> value</td>
+                        <td>current <a>SourceTypeEnum</a> value</td>
+                        <td>current <a>SourceTypeEnum</a> value</td>
+                        <td>current <a>SourceTypeEnum</a> value</td>
+                    </tr>
+                    <tr>
+                        <td><code>sourceId</code></td>
+                        <td>null</td>
+                        <td>current <code>DOMString</code> value</td>
+                        <td>current <code>DOMString</code> value</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>volume</code></td>
                         <td>null</td>
                         <td>current <code>unsigned long</code> value</td>
                         <td>current <code>unsigned long</code> value</td>
@@ -744,30 +807,36 @@
             </table>
 
             <section>
-                <h3>Source State Extensions to AudioStreamTrack</h3>
+                <h3>Source State API Extensions to AudioStreamTrack</h3>
                 <dl class="idl" title="partial interface AudioStreamTrack">
-                    <dt>readonly attribute unsigned long? level</dt>
-                    <dd>The current level of audio flowing through the source. The relative strength (amplitude) of the level is 
-                        proportional to the <code>gain</code> state of the source (e.g., to increase the pick-up of the microphone, 
-                        increase the gain setting).
+                    <dt>readonly attribute unsigned long? volume</dt>
+                    <dd>The current audio track's volume (as a percentage). A volume of 0 is silence, while a volume of
+                        100 is the maximum supported volume.
                     </dd>
                     <dt>readonly attribute float? gain</dt>
                     <dd>The sensitivity of the source. This value MUST be a positive floating-point number or zero. 
                         The gain value establishes the maximum threshold of the the microphone's sensitivity. When the gain is 0, 
-                        the source is essentially off (it will not be able to pick-up any sound). When first initialized for this 
-                        track, the gain value should be set to 1.0, the initial value. Values greater than 1 are possible to the limit
-                        of the max value of the capabilities of the source.
+                        the source is essentially off (it will not be able to pick-up any sound).
+                        <p>If the <a>sourceType</a> is a <code>"microphone"</code> or a <code>"readonly"</code> microphone, 
+                            and the source does not provide gain information, then this attribute MUST always return the value <code>1.0</code>.
+                        </p>
                     </dd>
                 </dl>
             </section>
+        </section>
+
+        <section>
+            <h2>Tracking Source State Changes</h2>
+
+            <p>As the source adjusts its state (for any reason), applications may observer the related state changes. The following 
+                extensions to the MediaStreamTrack provide an alternative to polling the individual state attributes defined on the 
+                video and audio track-types.
+            </p>
 
             <section>
-                <h3>Tracking Source State Changes</h3>
+                <h3>Event Handlers and Object Definitions</h3>
 
-                <p>As the source adjusts its state (for any reason), applications may observer the related state changes. The following 
-                    extensions to the MediaStreamTrack provide an alternative to polling the individual state attributes defined on the 
-                    video and audio track-types.
-                </p>
+                <p>The following event handler is added to the generic <a>MediaStreamTrack</a> interface.</p>
 
                 <dl class="idl" title="partial interface MediaStreamTrack">
                     <dt>attribute EventHandler onstatechanged</dt>
@@ -775,6 +844,10 @@
                         parameter. The event is fired asynchronously after the source changes its state.
                         <p>The user agent is encouraged to coalesce state changes into as few "statechanged" events as possible (when multiple state changes
                             occur within a reasonably short amount of time to each other).</p>
+                        <p>The <code>"start"</code> event described earlier is a convenience event because a "statechanged" event will also
+                            be fired when the <a>sourceType</a> changes from <code>"none"</code> to something else. The <code>"start"</code> event
+                            MUST fire before the "statechanged" event fires.
+                        </p>
                     </dd>
                 </dl>
 
@@ -791,8 +864,8 @@
                     <dt>sequence&lt;DOMString> states</dt>
                     <dd>List of state names to populate into the MediaStreamTrackStateEvent object's states readonly attribute.</dd>
                 </dl>
-
             </section>
+
         </section>
 
         <section>
@@ -886,8 +959,8 @@
                 <tr>
                     <td><code>capabilities()</code></td>
                     <td>null</td>
-                    <td>(<a>AllVideoCapabilities</a> or <a>AllAudioCapabilities</a>)></td>
-                    <td>(<a>AllVideoCapabilities</a> or <a>AllAudioCapabilities</a>)></td>
+                    <td>(<a>AllVideoCapabilities</a> or <a>AllAudioCapabilities</a>)</td>
+                    <td>(<a>AllVideoCapabilities</a> or <a>AllAudioCapabilities</a>)</td>
                     <td>null</td>
                 </tr>
                 <tr>
@@ -901,7 +974,7 @@
         </table>
 
         <section>
-            <h2>Source Capabilities Extensions to MediaStreamTrack</h2>
+            <h2>Source Capabilities API Extensions to MediaStreamTrack</h2>
             
             <dl class="idl" title="partial interface MediaStreamTrack">
                 <dt>(CapabilityRange or CapabilityList) getCapability(DOMString stateName)</dt>
@@ -982,6 +1055,13 @@
             <p>AllVideoCapabilities dictionary</p>
 
             <dl class="idl" title="dictionary AllVideoCapabilities">
+                <dt>CapabilityList? sourceType</dt>
+                <dd>The available sourceType options (<a>SourceTypeEnum</a>) on the current source.</dd>
+                <dt>CapabilityList? sourceId</dt>
+                <dd>The available source identifiers of the current source--this will always return a list with a single 
+                    identifier (that of the current source). Note, to get a list of other available source identifiers,
+                    use the static <a>getSourceIds</a> method.
+                </dd>
                 <dt>CapabilityRange? width</dt>
                 <dd>The range should span the video source's pre-set width values with min being the smallest width, and max the 
                     largest width. The type of the min/max values are unsigned long.</dd>
@@ -993,7 +1073,7 @@
                 <dt>CapabilityRange? frameRate</dt>
                 <dd>The supported range of frame rates on the source. The type of the min/max values are float.</dd>
                 <dt>CapabilityList? facingMode</dt>
-                <dd>The available video rotation options (<a>VideoFacingModeEnum</a>) on the source.</dd>
+                <dd>The available video facing options (<a>VideoFacingModeEnum</a>) on the source.</dd>
                 <dt>CapabilityRange? zoom</dt>
                 <dd>
                     The supported zoom range on the source. The type of the min/max/initial values are float. The initial value is 1. The float value is a scale
@@ -1033,9 +1113,16 @@
             <p>AllAudioCapabilities dictionary</p>
 
             <dl class="idl" title="dictionary AllAudioCapabilities">
-                <dt>CapabilityRange? level</dt>
+                <dt>CapabilityList? sourceType</dt>
+                <dd>The available sourceType options (<a>SourceTypeEnum</a>) on the current source.</dd>
+                <dt>CapabilityList? sourceId</dt>
+                <dd>The available source identifiers of the current source--this will always return a list with a single 
+                    identifier (that of the current source). Note, to get a list of other available source identifiers,
+                    use the static <a>getSourceIds</a> method.
+                </dd>
+                <dt>CapabilityRange? volume</dt>
                 <dd>
-                    The supported range of output levels on the source. The type of the min/max values are unsigned long.
+                    The supported range of output volume percentages on the source. The type of the min/max values are unsigned long.
                 </dd>
                 <dt>CapabilityRange? gain</dt>
                 <dd>The supported gain range on the source. The type of the min/max values are float.</dd>
@@ -1046,14 +1133,12 @@
     <section>
         <h1>Track Constraints</h1>
 
-        <p>This section defines APIs for working with the set of applied constraints on a track. proposal defines several constraints for use with video and audio devices.</p>
+        <p>This section contains an explanation of how constraint manipulation is expected to work with sources under various conditions. It also defines APIs 
+            for working with the set of applied constraints on a track. Finally, it defines a set of constraint names matching the previously-defined 
+            state attributes and capabilities.</p>
 
-        <p>As noted in prior proposals, a user agent MUST evaluate changes to constraints on a source asynchronously to ensure that web applications can remain responsive 
-            for all <a>sourceType</a>s that may not respond quickly to constraint changes.
-        </p>
-      
         <section>
-            <h2>Expectations around changing constraints</h2>
+            <h2>Constraints Manipulation Expectations</h2>
 
             <p>Browsers provide a media pipeline from sources to sinks.  In a browser, sinks are the &lt;img>, &lt;video> and &lt;audio> tags. Traditional sources 
 				include camera, microphones, streamed content, files and web resources.  The media produced by these sources typically does not change over time - these sources can be 
@@ -1144,10 +1229,10 @@
         </section>
 
         <section>
-            <h2>Constraint Manipulation Extensions to MediaStreamTrack</h2>
+            <h2>Constraint Manipulation API Extensions to MediaStreamTrack</h2>
 
-            <p>Constraints are indpendent of sources. However, depending on the <a>sourceType</a> the constraints may not actually be considered by the user agent. The following
-                table summarizes the expectations around track constraints given a <a>sourceType</a>.
+            <p>Constraints are indpendent of sources. However, depending on the <a>sourceType</a> the track's constraints may or may not actually be considered by the user 
+                agent. The following table summarizes the expectations around track constraints given a <a>sourceType</a>.
             </p>
 
             <table class="simple">
@@ -1155,73 +1240,118 @@
                     <tr>
                         <th><code>sourceType</code></th>
                         <th>"none"</th>
-                        <th>"camera"/ "photo-camera"/ "microphone"</th>
+                        <th>"camera"/<br>"photo-camera"/<br>"microphone"</th>
                         <th>"readonly"</th>
                         <th>"remote"</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>constraints applied to source?</td>
-                        <td>NO</td>
-                        <td>YES</td>
-                        <td>NO</td>
-                        <td>NO</td>
+                        <td>Constraints apply to <a>sourceType</a>?</td>
+                        <td>No</td>
+                        <td>Yes</td>
+                        <td>No</td>
+                        <td>No
+                            <p class="issue"><strong>Issue: </strong>This may be too cut-and-dry. Maybe <em>some</em> of the constraints should apply?</p>
+                        </td>
                     </tr>
                 </tbody>
             </table>
 
             <p>Whether <code>MediaTrackConstraints</code> were provided at track initialization time or need to be established later at runtime, the APIs defined below allow 
-                the retrieval and manipulations of the constraints currently established on a track.
+                the retrieval and manipulation of the constraints currently established on a track.
+            </p>
+
+            <p>Each track maintains an internal version of the <code>MediaTrackConstraints</code> structure, namely a mandatory set of constraints (no duplicates),
+                and an optional ordered list of individual constraint objects (may contain duplicates). The internal stored constraint structure is only exposed 
+                to the application using the existing <code>MediaTrackConstraints</code>, <code>MediaTrackConstraintSet</code>, <code>MediaTrackConstraint</code>, 
+                and similarly-derived-type dictionary objects.
+            </p>
+
+            <p>When track constraints change, a user agent MUST queue a task to evaluate those changes when the task queue is next serviced. Similarly, if the
+                <a>sourceType</a> changes, then the user agent should perform the same actions to re-evaluate the constraints of each track affected by that source
+                change.
             </p>
 
             <dl class="idl" title="partial interface MediaStreamTrack">
-                <dt>any? getConstraint(DOMString constraintName, optional boolean mandatory = false)</dt>
+                <dt>any getConstraint(DOMString constraintName, optional boolean mandatory = false)</dt>
                 <dd>
 					<dl class="parameters">
 						<dt>DOMString constraintName</dt><dd>The name of the setting for which the current value of that setting should be returned</dd>
                         <dt>optional boolean mandatory = false</dt><dd><code>true</code> to indicate that the constraint should be looked up in the mandatory set of constraints,
                             otherwise, the constraintName should be retrieved from the optional list of constraints.</dd>
 					</dl>
-                    Returns one of the following:
+                    <p>Retrieves a specific named constraint value from the track. The named constraints are the same names used for the <a>capabilities</a> API, and also
+                        are the same names used for the source's <a>state</a> attributes.
+                    </p>
+                    Returns one of the following types:
                     <dl>
-                        <dt>null</dt><dd>If no constraint matching the provided constraintName exists in the respective optional or mandatory set on this track.</dd>
-                        <dt>sequence&lt;MediaTrackConstraint></dt>
-                        <dd>If the mandatory flag is false and there is at least one optional constraint defined on this track. 
-                            <p>Each MediaTrackConstraint will contain a key which matches the requested <a>constraintName</a> parameter, and values indicating each 
-                                optional constraint's current value. The values will either be a single value, or a MinMaxConstraint object.
+                        <dt><strong>null</strong></dt>
+                        <dd>If no constraint matching the provided constraintName exists in the respective optional or mandatory set on this track.</dd>
+                        <dt><strong>sequence&lt;MediaTrackConstraint></strong></dt>
+                        <dd>If the mandatory flag is false and there is at least one optional matching constraint name defined on this track. 
+                            <p>Each MediaTrackConstraint result in the list will contain a key which matches the requested <a>constraintName</a> parameter, 
+                                and whose value will either be a primitive value, or a <a>MinMaxConstraint</a> object.
                             </p>
-                            <p>The returned list will be ordered from most important-to-satisfy at index 0, to the least-important-to-satisfy.</p>
+                            <p>The returned list will be ordered from most important-to-satisfy at index <code>0</code>, to the least-important-to-satisfy
+                                optional constraint.</p>
+                            <p class="note"><strong>Example: </strong>Given a track with an internal constraint structure:<tt style="white-space:pre">
+{
+  <code>mandatory</code>: {
+    width: { min: 640 },
+    height: { min: 480 }
+  },
+  <code>optional</code>: [
+    { width: 650 },
+    { width: { min: 650, max: 800 }},
+    { frameRate: 60 },
+    { fillLightMode: "off" },
+    { facingMode: "user" }
+  ]
+}                                
+</tt>
+                            and a request for <code>getConstraint("width")</code>, the following list would be returned:<tt style="white-space:pre">
+[
+    { width: 650 },
+    { width: { min: 650, max: 800 }}
+]
+</tt>
+                            </p>
                         </dd>
-                        <dt><em>MinMaxConstraint</em></dt>
+                        <dt><strong>MinMaxConstraint</strong></dt>
                         <dd>If the mandatory flag is true, and the requested constraint is defined in the mandatory <code>MediaTrackConstraintSet</code> associated 
                             with this track, and the value of the constraint is a min/max range object.
                         </dd>
-                        <dt><em>primitive_value</em></dt>
+                        <dt><strong><em>primitive_value</em></strong></dt>
                         <dd>If the mandatory flag is true, and the requested constraint is defined in the mandatory <code>MediaTrackConstraintSet</code> associated 
-                            with this track, and the value of the constraint is a primitive value (unsigned long, float, etc.).
+                            with this track, and the value of the constraint is a primitive value (DOMString, unsigned long, float, etc.).
                         </dd>
                     </dl>
-                </dd>
-                <dt>MediaTrackConstraints constraints()</dt>
-                <dd>Returns the complete constraints object associated with the track. If no mandatory constraints have been defined, the <code>mandatory</code>
-                    field will not be present (it will be undefined). If no optional constraints have been defined, the <code>optional</code> field will not be
-                    present (it will be undefined). If neither optional, nor mandatory constraints have been created, an empty object is returned. 
                 </dd>
                 <dt>void setConstraint(DOMString constraintName, any constraintValue, optional boolean mandatory = false)</dt>
                 <dd>
 					<dl class="parameters">
 						<dt>DOMString constraintName</dt><dd>The name of the constraint to set.</dd>
-						<dt>any constraintValue</dt><dd>Either a primitive value (float/DOMString/etc), or a MinMaxConstraint dictionary.</dd>
+						<dt>any constraintValue</dt><dd>Either a primitive value (float/DOMString/etc), or a <a>MinMaxConstraint</a> dictionary.</dd>
                         <dt>optional boolean mandatory = false</dt><dd>A flag indicating whether this constraint should be applied to the optional 
                             or mandatory constraints.</dd>
 					</dl>
-                    <p>This API attempts to update the value of an existing constraint (if present), and if not, will set the new constraint.</p>
+                    <p>This method updates the value of a same-named existing constraint (if found) in either the mandatory or optional list, and otherwise sets 
+                        the new constraint.</p>
+                    <p>This method searches the list of optional constraints from index <code>0</code> (hightest priority) to the end of the list (lowest priority)
+                        looking for matching constraints. Therefore, for multiple same-named optional constraints, this method will only update the
+                        value of the highest-priority matching constraint.
+                    </p>
                     <p>If the <code>mandatory</code> flag is <code>false</code> and the constraint is not found in the list of optional constraints, then
-                        a new optional constraint is created and appended to the end of the list (with lowest priority).</p>
-                    <p class="note"><strong>Note: </strong>This behavior allows applications to iteratively call <code>set</code> and have their 
+                        a new optional constraint is created and appended to the end of the list (thus having lowest priority).</p>
+                    <p class="note"><strong>Note: </strong>This behavior allows applications to iteratively call <code>setConstraint</code> and have their 
                         constraints added in the order specified in the source.
                     </p>
+                </dd>
+                <dt>MediaTrackConstraints? constraints()</dt>
+                <dd>Returns the complete constraints object associated with the track. If no mandatory constraints have been defined, the <code>mandatory</code>
+                    field will not be present (it will be undefined). If no optional constraints have been defined, the <code>optional</code> field will not be
+                    present (it will be undefined). If neither optional, nor mandatory constraints have been created, the value <code>null</code> is returned. 
                 </dd>
                 <dt>void applyConstraints(MediaTrackConstraints constraints)</dt>
                 <dd>
@@ -1232,73 +1362,201 @@
                         Otherwise, it will apply the newly provided constraints to the track.
                     </p>
                 </dd>
-                <!--<dt>void prependConstraint(DOMString AAAA)</dt>-->
-                    
+                <dt>void prependConstraint(DOMString constraintName, any constraintValue)</dt>
+                <dd>
+                    <dl class="parameters">
+						<dt>DOMString constraintName</dt><dd>The name of the constraint to prepend to the list of optional constraints.</dd>
+						<dt>any constraintValue</dt><dd>Either a primitive value (float/DOMString/etc), or a <a>MinMaxConstraint</a> dictionary.</dd>
+					</dl>
+                    <p>Prepends (inserts before the start of the list) the provided constraint name and value. This method does not consider whether
+                        a same-named constraint already exists in the optional constraints list.
+                    </p>
+                    <p>This method applies exclusively to optional constraints; it does not modify mandatory constraints.</p>
+                    <p>This method is a convenience API for programmatically building constraint structures.</p>
+                </dd>
+                <dt>void appendConstraint(DOMString constraintName, any constraintValue)</dt>
+                <dd>
+                    <dl class="parameters">
+						<dt>DOMString constraintName</dt><dd>The name of the constraint to append to the list of optional constraints.</dd>
+						<dt>any constraintValue</dt><dd>Either a primitive value (float/DOMString/etc), or a <a>MinMaxConstraint</a> dictionary.</dd>
+					</dl>
+                    <p>Appends (at the end of the list) the provided constraint name and value. This method does not consider whether
+                        a same-named constraint already exists in the optional constraints list.</p>
+                    <p>This method applies exclusively to optional constraints; it does not modify mandatory constraints.</p>
+                    <p>This method is a convenience API for programmatically building constraint structures.</p>
+                </dd>
+                <dt>attribute EventHandler onoverconstrained</dt>
+                <dd>Register an event handler for the "overconstrained" event. This event fires asynchronously for each affected track (when multiple
+                    tracks share the same source) after the user agent has evaluated the current constraints against a given <a>sourceId</a> and is
+                    not able to configure the source within the limitations established by the union of imposed constraints.
+                    <p>This event may also fire when <a>takePhoto</a> is called and the source cannot record/encode an image due to over-constrained
+                        or conflicting constraints of those uniquely related to <a>sourceType</a>s of type <code>"photo-camera"</code>.</p>
+                    <p>Due to being over-constrained, the user agent MUST transition the source to the <code>"armed"</code> <a>mode</a>, which may
+                        result in also dispatching one or more "muted" events to affected tracks.
+                    </p>
+                    <p>The affected track(s) will remain un-usable (in the <code>"muted"</code> <a>readyState</a>) until the application adjusts the 
+                        constraints to accomodate the source's capabilities.</p>
+                    <p>The "overconstrained" event is a simple event of type <code>Event</code>; it carries no information about which constraints 
+                        caused the source to be over-constrained (the application has all the necessary APIs to figure it out).
+                    </p>
+                </dd>
             </dl>
 
             <section>
-                <h3>VideoConstraints dictionary</h3>
-                <dl class="idl" title="dictionary VideoConstraints : MediaTrackConstraintSet">
-                    <dt>(unsigned long or <a>MinMaxULongSubConstraint</a>) width</dt>
-                    <dd>A device that supports the desired width or width range.</dd>
-                    <dt>(unsigned long or <a>MinMaxULongSubConstraint</a>) height</dt>
-                    <dd>A device that supports the desired height or height range.</dd>
-                    <dt>(unsigned long or <a>MinMaxULongSubConstraint</a>) photoWidth</dt>
-                    <dd>A device that supports the desired width or width range for high-resolution photo-modes.</dd>
-                    <dt>(unsigned long or <a>MinMaxULongSubConstraint</a>) photoHeight</dt>
-                    <dd>A device that supports the desired height or height range for high-resolution photo-modes.</dd>
-                    <dt><a>VideoRotationEnum</a> rotation</dt>
-                    <dd>A device that supports the desired rotation.</dd>
-                    <dt><a>VideoMirrorEnum</a> mirror</dt>
-                    <dd>A device that supports the desired mirroring.</dd>
-                    <dt>(float or <a>MinMaxFloatSubConstraint</a>) zoom</dt>
-                    <dd>A device that supports the desired zoom setting.</dd>
-                    <dt><a>VideoFocusModeEnum</a> focusMode</dt>
-                    <dd>A device that supports the desired focus mode.</dd>
-                    <dt><a>VideoFillLightModeEnum</a> fillLightMode</dt>
-                    <dd>A device that supports the desired fill light (flash) mode.</dd>
-                    <dt>(float or <a>MinMaxFloatSubConstraint</a>) frameRate</dt>
-                    <dd>A device that supports the desired frames per second.</dd>
-                    <dt>(float or <a>MinMaxFloatSubConstraint</a>) bitRate</dt>
-                    <dd>A device that supports the desired bit rate.</dd>
+                <h3>Constraint Definitions and Related Structures</h3>
+                
+                <p>The following constraint names are defined to apply to both <a>VideoStreamTrack</a> and <a>AudioStreamTrack</a> objects:</p>
+
+                <table class="simple">
+                    <thead>
+                        <tr>
+                            <th>Constraint Name</th>
+                            <th>Values</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="def-constraint-sourceType">
+                            <td>sourceType</td>
+                            <td><a>SourceTypeEnum</a></td>
+                            <td>Constrain the video or audio source to an exact value from the set of enumerated-type values of the <a>SourceTypeEnum</a>.</td>
+                        </tr>
+                        <tr id="def-constraint-sourceId">
+                            <td>sourceId</td>
+                            <td>DOMString</td>
+                            <td>Constrain the video or audio source to an exact source identifier value.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p>The following constraint names are defined to apply only to <a>VideoStreamTrack</a> objects:</p>
+
+                <table class="simple">
+                    <thead>
+                        <tr>
+                            <th>Constraint Name</th>
+                            <th>Values</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="def-constraint-width">
+                            <td>witdh</td>
+                            <td>unsigned long or <a>MinMaxConstraint</a></td>
+                            <td>Constrain the video source to the exact desired width or width range.</td>
+                        </tr>
+                        <tr id="def-constraint-height">
+                            <td>height</td>
+                            <td>unsigned long or <a>MinMaxConstraint</a></td>
+                            <td>Constrain the video source to the exact desired height or height range.</td>
+                        </tr>
+                        <tr id="def-constraint-frameRate">
+                            <td>frameRate</td>
+                            <td>float or <a>MinMaxConstraint</a></td>
+                            <td>Constrain the video source to the exact desired frame rate (fps) or frameRate range.</td>
+                        </tr>
+                        <tr id="def-constraint-facingMode">
+                            <td>facingMode</td>
+                            <td><a>VideoFacingModeEnum</a></td>
+                            <td>Constrain the video source to an exact value from the set of enumerated-type values of the <a>VideoFacingModeEnum</a>.</td>
+                        </tr>
+                        <tr id="def-constraint-zoom">
+                            <td>zoom</td>
+                            <td>float or <a>MinMaxConstraint</a></td>
+                            <td>Constrain the video source to the exact desired zoom ratio or zoom ratio range.</td>
+                        </tr>
+                        <tr id="def-constraint-focusMode">
+                            <td>focusMode</td>
+                            <td><a>VideoFocusModeEnum</a></td>
+                            <td>Constrain the video source to an exact value from the set of enumerated-type values of the <a>VideoFocusModeEnum</a>.</td>
+                        </tr>
+                        <tr id="def-constraint-fillLightMode">
+                            <td>fillLightMode</td>
+                            <td><a>VideoFillLightModeEnum</a></td>
+                            <td>Constrain the video source to an exact value from the set of enumerated-type values of the <a>VideoFillLightModeEnum</a>.</td>
+                        </tr>
+                        <tr id="def-constraint-whiteBalanceMode">
+                            <td>whiteBalanceMode</td>
+                            <td><a>VideoWhiteBalanceModeEnum</a></td>
+                            <td>Constrain the video source to an exact value from the set of enumerated-type values of the <a>VideoWhiteBalanceModeEnum</a>.</td>
+                        </tr>
+                        <tr id="def-constraint-brightness">
+                            <td>brightness</td>
+                            <td>unsigned long or <a>MinMaxConstraint</a></td>
+                            <td>Constrain the video source to the exact desired brightness or brightness range.</td>
+                        </tr>
+                        <tr id="def-constraint-contrast">
+                            <td>contrast</td>
+                            <td>unsigned long or <a>MinMaxConstraint</a></td>
+                            <td>Constrain the video source to the exact desired contrast or contrast range.</td>
+                        </tr>
+                        <tr id="def-constraint-saturation">
+                            <td>saturation</td>
+                            <td>unsigned long or <a>MinMaxConstraint</a></td>
+                            <td>Constrain the video source to the exact desired saturation or saturation range.</td>
+                        </tr>
+                        <tr id="def-constraint-sharpness">
+                            <td>sharpness</td>
+                            <td>unsigned long or <a>MinMaxConstraint</a></td>
+                            <td>Constrain the video source to the exact desired sharpness or sharpness range.</td>
+                        </tr>
+                        <tr id="def-constraint-photoWitdh">
+                            <td>photoWitdh</td>
+                            <td>unsigned long or <a>MinMaxConstraint</a></td>
+                            <td>Constrain the width of the photo produced by the <a>takePhoto</a> method to the exact desired width or width range.</td>
+                        </tr>
+                        <tr id="def-constraint-photoHeight">
+                            <td>photoHeight</td>
+                            <td>unsigned long or <a>MinMaxConstraint</a></td>
+                            <td>Constrain the height of the photo produced by the <a>takePhoto</a> method to the exact desired height or height range.</td>
+                        </tr>
+                        <tr id="def-constraint-exposureMode">
+                            <td>exposureMode</td>
+                            <td><a>PhotoExposureModeEnum</a></td>
+                            <td>Constrain the exposure used for the photo produced by the <a>takePhoto</a> method to an exact value from the set of enumerated-type values of the <a>PhotoExposureModeEnum</a>.</td>
+                        </tr>
+                        <tr id="def-constraint-isoMode">
+                            <td>CapabilityList? isoMode</td>
+                            <td><a>PhotoISOModeEnum</a></td>
+                            <td>Constrain the ISO mode used for the photo produced by the <a>takePhoto</a> method to an exact value from the set of enumerated-type values of the <a>PhotoISOModeEnum</a>.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p>The following constraint names are defined to apply only to <a>AudioStreamTrack</a> objects:</p>
+                
+                <table class="simple">
+                    <thead>
+                        <tr>
+                            <th>Constraint Name</th>
+                            <th>Values</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="def-constraint-volume">
+                            <td>volume</td>
+                            <td>unsigned long or <a>MinMaxConstraint</a></td>
+                            <td>Constrain the audio source to the exact desired volume or volume range.</td>
+                        </tr>
+                        <tr id="def-constraint-gain">
+                            <td>gain</td>
+                            <td>float or <a>MinMaxConstraint</a></td>
+                            <td>Constrain the audio source to the exact desired gain or gain range.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p>For constraints that accept ranges, the <a>MinMaxConstraits</a> dictionary is also defined. Note, that the type 
+                    of the value associated with <code>min</code> and <code>max</code> must be the same for both. The specific 
+                    types associated with <code>min</code> and <code>max</code> are defined differently for each constraint name.</p>
+
+                <dl class="idl" title="dictionary MinMaxConstraint">
+                    <dt>any max</dt><dd>The related constraint's maximum allowed value.</dd>
+                    <dt>any min</dt><dd>The related constraint's minimum allowed value.</dd>
                 </dl>
+        
             </section>
-        </section>
-
-        <section>
-            <h2>Audio Constraints</h2>
-
-            <p>The following constraints are applicable to audio devices</p>
-
-            <section>
-                <h3>AudioConstraints dictionary</h3>
-                <dl class="idl" title="dictionary AudioConstraints : MediaTrackConstraintSet">
-                    <dt>(float or <a>MinMaxFloatSubConstraint</a>) gain</dt>
-                    <dd>A device that supports the desired gain or gain range.</dd>
-                </dl>
-            </section>
-
-        </section>
-
-        <section>
-            <h2>Common sub-constraint structures</h2>
-
-            <section>
-                <h3><code><dfn>MinMaxULongSubConstraint</dfn></code> dictionary</h3>
-                <dl class="idl" title="dictionary MinMaxULongSubConstraint">
-                    <dt>unsigned long max</dt>
-                    <dt>unsigned long min</dt>
-                </dl>
-            </section>
-
-            <section>
-                <h3><code><dfn>MinMaxFloatSubConstraint</dfn></code> dictionary</h3>
-                <dl class="idl" title="dictionary MinMaxFloatSubConstraint">
-                    <dt>float max</dt>
-                    <dt>float min</dt>
-                </dl>
-            </section>
-
         </section>
     </section>
 
@@ -1308,25 +1566,43 @@
         <p>The following JavaScript examples demonstrate how the Settings APIs defined in this proposal could be used.</p>
 
         <section>
-            <h2>Getting access to a video and/or audio device (if available)</h2>
+            <h2>Getting access to a video and audio device (if available)</h2>
 
             <pre>
-var audioTrack = (AudioDeviceSource.getNumDevices() > 0) ? new AudioStreamTrack() : null;
-if (audioTrack)
-   audioTrack.onstarted = mediaStarted;
-var videoTrack = (VideoDeviceSource.getNumDevices() > 0) ? new VideoStreamTrack() : null;
-if (videoTrack)
+var audioTrack = (AudioStreamTrack.getSourceIds().length > 0) ? new AudioStreamTrack() : null;
+var videoTrack = (VideoStreamTrack.getSourceIds().length > 0) ? new VideoStreamTrack() : null;
+if (audioTrack && videoTrack) {
    videoTrack.onstarted = mediaStarted;
-var MS = new MediaStream();
-MS.addTrack(audioTrack);
-MS.addTrack(videoTrack);
-navigator.getUserMedia(MS);
+   var MS = new MediaStream();
+   MS.addTrack(audioTrack);
+   MS.addTrack(videoTrack);
+   navigator.getUserMedia(MS);
+}
 
 function mediaStarted() {
-   // One of the video/audio devices started.
+   // One of the video/audio devices started (assume both, but may not be strictly true if the user doesn't approve both tracks)
 }
 </pre>
         </section>
+
+        <section>
+            <h2>Getting access to a specific video source (if available)</h2>
+
+            <pre>
+var lastUsedSourceId = localStorage["last-source-id"];
+var lastUsedSourceIdAvailable = false;
+VideoStreamTrack.getSourceIds().forEach(function (sourceId) { if (sourceId == lastUsedSourceId) lastUsedSourceIdAvailable = true; });
+if (lastUsedSourceIdAvailable) {
+   // Request this specific source...
+   var vidTrack = new VideoStreamTrack( { mandatory: { sourceId: lastUsedSourceId }});
+   vidTrack.onoverconstrained = function() { alert("User, why didn't to give me access to the same source? I know you have it..."); }
+   navigator.getUserMedia(new MediaStream([vidTrack]));
+}
+else
+   alert("User could you plug back in that camera you were using on this page last time?");
+</pre>
+        </section>
+
 
         <section>
             <h2>Previewing the local video/audio in HTML5 video tag -- scenario is unchanged</h2>
@@ -1346,16 +1622,17 @@ function mediaStarted() {
 
             <pre>
 function mediaStarted() {
-   var videoDevice = videoTrack.source;
-   var maxWidth = videoDevice.getCapability("width").max;
-   var maxHeight = videoDevice.getCapability("height").max;
+   videoTrack;
+   var maxWidth = videoTrack.getCapability("width").max;
+   var maxHeight = videoTrack.getCapability("height").max;
    // Check for 1080p+ support
    if ((maxWidth >= 1920) && (maxHeight >= 1080)) {
       // See if I need to change the current settings...
-      if ((videoDevice.width &lt; 1920) && (videoDevice.height &lt; 1080)) {
-         videoDevice.set({ width: maxWidth}, true);
-         videoDevice.set({ height: maxHeight}, true);
-         videoDevice.onsettingserror = failureToComply;
+      if ((videoTrack.width &lt; 1920) && (videoTrack.height &lt; 1080)) {
+         videoTrack.setConstraint("width", maxWidth);
+         videoTrack.setConstraint("height", maxHeight);
+         videoTrack.onoverconstrained = failureToComply;
+         videoTrack.onstatechanged = didItWork;
       }
    }
    else
@@ -1368,6 +1645,10 @@ function failureToComply(e) {
    else
       console.error("Device doesn't support at least 1080p");
 }
+
+function didItWork(e) {
+   e.states.forEach( function (state) { if ((state == "width") || (state == "height")) alert("Resolution changed!"); });
+}
 </pre>
         </section>
 
@@ -1376,24 +1657,24 @@ function failureToComply(e) {
 
             <pre>
 function mediaStarted() {
-   setupRange( videoTrack.source );
+   setupRange( videoTrack );
 }
 
-function setupRange(videoDevice) {
-   var zoomCaps = videoDevice.getCapability("zoom");
+function setupRange(videoTrack) {
+   var zoomCaps = videoTrack.getCapability("zoom");
    // Check to see if the device supports zooming...
-   if (zoomCaps.min != zoomCaps.max) {
+   if (zoomCaps.supported) {
       // Set HTML5 range control to min/max values of zoom
       var zoomControl = document.querySelector("input[type=range]");
       zoomControl.min = zoomCaps.min;
       zoomControl.max = zoomCaps.max;
-      zoomControl.value = videoDevice.zoom;
+      zoomControl.value = videoTrack.zoom;
       zoomControl.onchange = applySettingChanges;
    }
 }
 
 function applySettingChanges(e) {
-   videoTrack.source.set({ zoom: parseFloat(e.target.value)}, true);
+   videoTrack.setConstraint("zoom", parseFloat(e.target.value));
 }
 </pre>
         </section>
@@ -1413,16 +1694,15 @@ function mediaStarted() {
 
             <pre>
 function mediaStarted() {
-   var videoDevice = videoTrack.source;
    // Check if this device supports a photo mode...
-   if (videoDevice.takePhoto) {
-       videoDevice.onphoto = showPicture;
+   if (videoTrack.sourceType == "photo-camera") {
+       videoTrack.onphoto = showPicture;
        // Turn on flash only for the snapshot...if available
-       if (videoDevice.fillLightMode != "notavailable")
-          videoDevice.set({ fillLightMode: "flash"}, true);
+       if (videoTrack.fillLightMode != "notavailable")
+          videoTrack.setConstraint("fillLightMode", "flash");
        else
           console.info("Flash not available");
-       videoDevice.takePhoto();
+       videoTrack.takePhoto();
    }
 }
 
@@ -1436,24 +1716,25 @@ function showPicture(e) {
         <section>
             <h2>Show a newly available device</h2>
 
-            <p class="note">A newly available device occurs whenever an existing device that was being used by
-                another application (with exclusive access) is relinquished and becomes available for this
-                application to use. Of course, plugging-in a new device also causes a device to become available.
-            </p>
+            <p class="note">A newly available device occurs when the user plugs in a device that wasn't previously
+                visible to the user agent.</p>
 
             <pre>
-This scenario is not currently possible with this proposal.
+var lastSourceCount = VideoStreamTrack.getSourceIds().length;
+setTimeout(function () {
+   if (lastSourceCount != VideoStreamTrack.getSourceIds().length)
+      alert("New device available! Do you want to use it?");
+}, 1000 * 60); // Poll every minute
 </pre>
         </section>
 
         <section>
-            <h2>Show all available video devices:</h2>
+            <h2>Show all available video devices (that the user authorizes):</h2>
 
             <pre>
-var totalVideoDevices = VideoDeviceSource.getNumDevices();
-var videoTracksList = [];
-for (var i = 0; i &lt; totalVideoDevices; i++) {
-   var mediaStream = new MediaStream( new VideoStreamTrack() );
+var allSources = VideoStreamTrack.getSourceIds();
+for (var i = 0; i &lt; allSources.length; i++) {
+   var mediaStream = new MediaStream( new VideoStreamTrack({ mandatory: { sourceId: allSources[i] }}) );
    // Create a video element and add it to the UI
    var videoTag = document.createElement('video');
    videoTag.srcObject = mediaStream;
@@ -1464,66 +1745,15 @@ for (var i = 0; i &lt; totalVideoDevices; i++) {
 </pre>
         </section>
     </section>
+
     <section>
-        <h1>Changes</h1>
-
-        <p>This section documents the changes from the prior proposal:</p>
-
-        <ol>
-            <li>Removed some outdated arguments in the 1.1 Rationale section for removing the LocalMediaStream.</li>
-            <li>Updated the gain range from 0-100 (unsigned long) to 0-1+ (float) to better match the <a href="https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html#attributes-GainNode">WebAudio definition</a>.</li>
-            <li>Added some of the photo settings suggested by gmandyam at: http://gmandyam.github.com/media-capture/. Limited these to photo settings unless anyone wants to move these up to general video attributes. I specifically excluded the following: exposureCompensation and redEye because I didn't have a clear understanding of the value range for exposure comp. and I don't think redEye is necessary for a v1 settings across a wide range of cameras.</li>
-            <li>Removed the MediaStreamRemoteSource objects. It didn't make sense to be able to changes settings on the source of these tracks (which is always related to a peer-connection). The best thing to do here is allow the remote tracks get a <code>source</code> that is a peer connection. Rather than create a new track type just to return a correct type for <code>source</code>, I'm simply overloading the source's type for both--as well as local resources.</li>
-            <li>Renamed <code>*StreamSource</code> to <code>*DeviceSource</code> to clearly differentiate that this is a "device" providing video/audio and to differentiate that from a img, video, audio sources that are not devices.</li>
-            <li>Added support for changing sources. This support is via the <code>changeSource</code> API on the <a>MediaStreamTrack</a> root-level object.</li>
-        </ol>
-    </section>
-	
-      <section>
         <h1>Remove <code>LocalMediaStream</code> interface</h1>
         <p>This proposal recommends removing the derived <code>LocalMediaStream</code> interface. All relevant "local" information
             has been moved to the track level, and anything else that offers a convenience API for working with all the set of tracks
             on a MediaStream should just be added to the vanilla <code>MediaStream</code> interface itself.
         </p>
 
-        <section>
-            <h2>Rationale</h2>
-
-            The LocalMediaStream object currently extends MediaStream by adding a single method "stop()". In my prior proposals, this
-            object was radically altered in order to facilitate several goals:
-            <dl>
-                <dt>Provide a predictable home for developers to find and modify device settings</dt>
-                <dd>A previous proposal went out of its way to strongly associate LocalMediaStream objects with devices. This 
-                    seemed like a good design because local device configuration is always on the local media stream. This made
-                    for a stable, dependable API surface for all local media stream instances (no guesswork).
-                </dd>
-            </dl>
-        
-            <p>Some feedback even suggested re-considering the "at most one video/audio track per request to getUserMedia".</p>
-        
-            <p>While thinking about these goals and the feedback, I began to consider a few things:</p>
-
-            <dl>
-                <dt>Device-centric tracks</dt>
-                <dd>With tracks supplemented with device-characteristics (duck-typing), the LocalMediaStream's stop() API was a 
-                    convenience feature for stopping all tracks backed by a device on the LocalMediaStream object. With tracks that 
-                    contain a source object, a stop() API should be present on the source objects themselves (stop is logically
-                    a request to stop a source of the track).
-                </dd>
-                <dt>Mutable track lists</dt>
-                <dd>Mutable track lists were not a desirable feature while I was locked into considering the LocalMediaStream 
-                    as strongly associated with device-control. What is actually necessary, is that there is a something immutable
-                    associated with devices--that "something" doesn't necessarily need to be a LocalMediaStream or any MediaStream-like
-                    object at all. In this proposal it is a new <q>source</q> object that supplies the source of a track.
-                </dd>
-                <dt>Importance of restricting control to LocalMediaStream</dt>
-                <dd>Upon reflection of the feedback around the prior proposal, the relative importance of restricting control
-                    of the devices associated with tracks on the LocalMediaStream to <em>only</em> the LocalMediaStream did not
-                    seem as vital, insofar as the device-level access via the track is not directly available through a 
-                    PeerConnection to a remote browser.
-                </dd>
-            </dl>
-        </section>
+        <p>See the previous proposals for a statement on the rationale behind this recommendation.</p>
     </section>
 
 	<section>
