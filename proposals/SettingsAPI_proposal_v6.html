@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <title>Proposal: Media Capture and Streams Settings API v6</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    
+    
+  <style>/*****************************************************************
+ * ReSpec 3 CSS
+ * Robin Berjon - http://berjon.com/
+ *****************************************************************/
+
+/* --- INLINES --- */
+em.rfc2119 { 
+    text-transform:     lowercase;
+    font-variant:       small-caps;
+    font-style:         normal;
+    color:              #900;
+}
+
+h1 acronym, h2 acronym, h3 acronym, h4 acronym, h5 acronym, h6 acronym, a acronym,
+h1 abbr, h2 abbr, h3 abbr, h4 abbr, h5 abbr, h6 abbr, a abbr {
+    border: none;
+}
+
+dfn {
+    font-weight:    bold;
+}
+
+a.internalDFN {
+    color:  inherit;
+    border-bottom:  1px solid #99c;
+    text-decoration:    none;
+}
+
+a.externalDFN {
+    color:  inherit;
+    border-bottom:  1px dotted #ccc;
+    text-decoration:    none;
+}
+
+a.bibref {
+    text-decoration:    none;
+}
+
+cite .bibref {
+    font-style: normal;
+}
+
+code {
+    color:  #ff4500;
+}
+
+
+/* --- --- */
+ol.algorithm { counter-reset:numsection; list-style-type: none; }
+ol.algorithm li { margin: 0.5em 0; }
+ol.algorithm li:before { font-weight: bold; counter-increment: numsection; content: counters(numsection, ".") ") "; }
+
+/* --- TOC --- */
+.toc a, .tof a {
+    text-decoration:    none;
+}
+
+a .secno, a .figno {
+    color:  #000;
+}
+
+ul.tof, ol.tof {
+    list-style: none outside none;
+}
+
+.caption {
+    margin-top: 0.5em;
+    font-style:   italic;
+}
+
+/* --- TABLE --- */
+table.simple {
+    border-spacing: 0;
+    border-collapse:    collapse;
+    border-bottom:  3px solid #005a9c;
+}
+
+.simple th {
+    background: #005a9c;
+    color:  #fff;
+    padding:    3px 5px;
+    text-align: left;
+}
+
+.simple th[scope="row"] {
+    background: inherit;
+    color:  inherit;
+    border-top: 1px solid #ddd;
+}
+
+.simple td {
+    padding:    3px 10px;
+    border-top: 1px solid #ddd;
+}
+
+.simple tr:nth-child(even) {
+    background: #f0f6ff;
+}
+
+/* --- DL --- */
+.section dd > p:first-child {
+    margin-top: 0;
+}
+
+.section dd > p:last-child {
+    margin-bottom: 0;
+}
+
+.section dd {
+    margin-bottom:  1em;
+}
+
+.section dl.attrs dd, .section dl.eldef dd {
+    margin-bottom:  0;
+}
+</style><style>/* --- ISSUES/NOTES --- */
+div.issue-title, div.note-title {
+    padding-right:  1em;
+    min-width: 7.5em;
+    color: #b9ab2d;
+}
+div.issue-title { color: #e05252; }
+div.note-title { color: #52e052; }
+div.issue-title span, div.note-title span {
+    text-transform: uppercase;
+}
+div.note, div.issue {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+.note > p:first-child, .issue > p:first-child { margin-top: 0 }
+.issue, .note {
+    padding: .5em;
+    border-left-width: .5em;
+    border-left-style: solid;
+}
+div.issue, div.note {
+    padding: 0.5em;
+    margin: 1em 0;
+    position: relative;
+    clear: both;
+}
+span.note, span.issue { padding: .1em .5em .15em; }
+
+.issue {
+    border-color: #e05252;
+    background: #fbe9e9;
+}
+.note {
+    border-color: #52e052;
+    background: #e9fbe9;
+}
+
+
+</style><style>/* --- WEB IDL --- */
+pre.idl {
+    border-top: 1px solid #90b8de;
+    border-bottom: 1px solid #90b8de;
+    padding:    1em;
+    line-height:    120%;
+}
+
+pre.idl::before {
+    content:    "WebIDL";
+    display:    block;
+    width:      150px;
+    background: #90b8de;
+    color:  #fff;
+    font-family:    initial;
+    padding:    3px;
+    font-weight:    bold;
+    margin: -1em 0 1em -1em;
+}
+
+.idlType {
+    color:  #ff4500;
+    font-weight:    bold;
+    text-decoration:    none;
+}
+
+/*.idlModule*/
+/*.idlModuleID*/
+/*.idlInterface*/
+.idlInterfaceID, .idlDictionaryID, .idlCallbackID, .idlEnumID {
+    font-weight:    bold;
+    color:  #005a9c;
+}
+
+.idlSuperclass {
+    font-style: italic;
+    color:  #005a9c;
+}
+
+/*.idlAttribute*/
+.idlAttrType, .idlFieldType, .idlMemberType {
+    color:  #005a9c;
+}
+.idlAttrName, .idlFieldName, .idlMemberName {
+    color:  #ff4500;
+}
+.idlAttrName a, .idlFieldName a, .idlMemberName a {
+    color:  #ff4500;
+    border-bottom:  1px dotted #ff4500;
+    text-decoration: none;
+}
+
+/*.idlMethod*/
+.idlMethType, .idlCallbackType {
+    color:  #005a9c;
+}
+.idlMethName {
+    color:  #ff4500;
+}
+.idlMethName a {
+    color:  #ff4500;
+    border-bottom:  1px dotted #ff4500;
+    text-decoration: none;
+}
+
+/*.idlParam*/
+.idlParamType {
+    color:  #005a9c;
+}
+.idlParamName, .idlDefaultValue {
+    font-style: italic;
+}
+
+.extAttr {
+    color:  #666;
+}
+
+/*.idlConst*/
+.idlConstType {
+    color:  #005a9c;
+}
+.idlConstName {
+    color:  #ff4500;
+}
+.idlConstName a {
+    color:  #ff4500;
+    border-bottom:  1px dotted #ff4500;
+    text-decoration: none;
+}
+
+/*.idlException*/
+.idlExceptionID {
+    font-weight:    bold;
+    color:  #c00;
+}
+
+.idlTypedefID, .idlTypedefType {
+    color:  #005a9c;
+}
+
+.idlRaises, .idlRaises a.idlType, .idlRaises a.idlType code, .excName a, .excName a code {
+    color:  #c00;
+    font-weight:    normal;
+}
+
+.excName a {
+    font-family:    monospace;
+}
+
+.idlRaises a.idlType, .excName a.idlType {
+    border-bottom:  1px dotted #c00;
+}
+
+.excGetSetTrue, .excGetSetFalse, .prmNullTrue, .prmNullFalse, .prmOptTrue, .prmOptFalse {
+    width:  45px;
+    text-align: center;
+}
+.excGetSetTrue, .prmNullTrue, .prmOptTrue { color:  #0c0; }
+.excGetSetFalse, .prmNullFalse, .prmOptFalse { color:  #c00; }
+
+.idlImplements a {
+    font-weight:    bold;
+}
+
+dl.attributes, dl.methods, dl.constants, dl.fields, dl.dictionary-members {
+    margin-left:    2em;
+}
+
+.attributes dt, .methods dt, .constants dt, .fields dt, .dictionary-members dt {
+    font-weight:    normal;
+}
+
+.attributes dt code, .methods dt code, .constants dt code, .fields dt code, .dictionary-members dt code {
+    font-weight:    bold;
+    color:  #000;
+    font-family:    monospace;
+}
+
+.attributes dt code, .fields dt code, .dictionary-members dt code {
+    background:  #ffffd2;
+}
+
+.attributes dt .idlAttrType code, .fields dt .idlFieldType code, .dictionary-members dt .idlMemberType code {
+    color:  #005a9c;
+    background:  transparent;
+    font-family:    inherit;
+    font-weight:    normal;
+    font-style: italic;
+}
+
+.methods dt code {
+    background:  #d9e6f8;
+}
+
+.constants dt code {
+    background:  #ddffd2;
+}
+
+.attributes dd, .methods dd, .constants dd, .fields dd, .dictionary-members dd {
+    margin-bottom:  1em;
+}
+
+table.parameters, table.exceptions {
+    border-spacing: 0;
+    border-collapse:    collapse;
+    margin: 0.5em 0;
+    width:  100%;
+}
+table.parameters { border-bottom:  1px solid #90b8de; }
+table.exceptions { border-bottom:  1px solid #deb890; }
+
+.parameters th, .exceptions th {
+    color:  #fff;
+    padding:    3px 5px;
+    text-align: left;
+    font-family:    initial;
+    font-weight:    normal;
+    text-shadow:    #666 1px 1px 0;
+}
+.parameters th { background: #90b8de; }
+.exceptions th { background: #deb890; }
+
+.parameters td, .exceptions td {
+    padding:    3px 10px;
+    border-top: 1px solid #ddd;
+    vertical-align: top;
+}
+
+.parameters tr:first-child td, .exceptions tr:first-child td {
+    border-top: none;
+}
+
+.parameters td.prmName, .exceptions td.excName, .exceptions td.excCodeName {
+    width:  100px;
+}
+
+.parameters td.prmType {
+    width:  120px;
+}
+
+table.exceptions table {
+    border-spacing: 0;
+    border-collapse:    collapse;
+    width:  100%;
+}
+</style><link href="http://www.w3.org/StyleSheets/TR/W3C-ED" rel="stylesheet"><!--[if lt IE 9]><script src='http://www.w3.org/2008/site/js/html5shiv.js'></script><![endif]--></head>
+  <body><div class="head">
+  <p>
+    
+      <a href="http://www.w3.org/"><img width="72" height="48" alt="W3C" src="http://www.w3.org/Icons/w3c_home"></a>
+    
+  </p>
+  <h1 class="title" id="title">Proposal: Media Capture and Streams Settings API v6</h1>
+  
+  <h2 id="w3c-editor-s-draft-12-december-2012">Editor's Draft 12 December 2012</h2>
+  <dl>
+        
+    <dt>Author:</dt>
+    <dd><span>Travis Leithead</span>, <a href="http://www.microsoft.com/">Microsoft</a></dd>
+    
+  </dl>
+    
+      <p class="copyright">
+        <a href="http://www.w3.org/Consortium/Legal/ipr-notice#Copyright">Copyright</a> © 
+        2012
+        
+        <a href="http://www.w3.org/"><abbr title="World Wide Web Consortium">W3C</abbr></a><sup>®</sup> 
+        (<a href="http://www.csail.mit.edu/"><abbr title="Massachusetts Institute of Technology">MIT</abbr></a>,
+        <a href="http://www.ercim.eu/"><abbr title="European Research Consortium for Informatics and Mathematics">ERCIM</abbr></a>,
+        <a href="http://www.keio.ac.jp/">Keio</a>), All Rights Reserved.
+        <abbr title="World Wide Web Consortium">W3C</abbr> <a href="http://www.w3.org/Consortium/Legal/ipr-notice#Legal_Disclaimer">liability</a>,
+        <a href="http://www.w3.org/Consortium/Legal/ipr-notice#W3C_Trademarks">trademark</a> and
+        <a href="http://www.w3.org/Consortium/Legal/copyright-documents">document use</a> rules apply.
+      </p>
+    
+  
+  <hr>
+</div>
+    <section class="introductory" id="abstract"><h2>Abstract</h2><p>
+      This proposal describes additions and suggested changes to the 
+        <a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html">Media Capture and Streams</a>
+        specification in order to support the goal of device settings retrieval and modification. This proposal (v6) incorporates 
+        feedback from the public-media-capture mailing list on the <a href="http://dvcs.w3.org/hg/dap/raw-file/999605452b3b/media-stream-capture/proposals/SettingsAPI_proposal_v5.html">Settings v5</a> proposal. The v5 proposal builds on four prior proposals with the same goal
+        [<a href="http://dvcs.w3.org/hg/dap/raw-file/999605452b3b/media-stream-capture/proposals/SettingsAPI_proposal_v4.html">v4</a>]
+        [<a href="http://lists.w3.org/Archives/Public/public-media-capture/2012Aug/0143.html">v3</a>]
+        [<a href="http://lists.w3.org/Archives/Public/public-media-capture/2012Aug/0066.html">v2</a>]
+        [<a href="http://lists.w3.org/Archives/Public/public-media-capture/2012Jul/0069.html">v1</a>].
+    </p></section>
+	<section id="toc"><h2 class="introductory">Table of Contents</h2><ul class="toc"><li class="tocline"><a class="tocxref" href="#evolution-from-v5"><span class="secno">1. </span>Evolution from V5</a></li><li class="tocline"><a class="tocxref" href="#definitions"><span class="secno">2. </span>Definitions</a></li><li class="tocline"><a class="tocxref" href="#tracks"><span class="secno">3. </span>Tracks</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#generic-tracks"><span class="secno">3.1 </span>Generic Tracks</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#mediastreamtrack-interface"><span class="secno">3.1.1 </span><code>MediaStreamTrack</code> interface</a></li><li class="tocline"><a class="tocxref" href="#trackreadystateenum-enumeration"><span class="secno">3.1.2 </span>TrackReadyStateEnum enumeration</a></li></ul></li><li class="tocline"><a class="tocxref" href="#track-sources"><span class="secno">3.2 </span>Track Sources</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#track-source-api-extensions-to-mediastreamtrack"><span class="secno">3.2.1 </span>Track Source API Extensions to <span class="formerLink">MediaStreamTrack</span></a></li><li class="tocline"><a class="tocxref" href="#track-source-types"><span class="secno">3.2.2 </span>Track Source Types</a></li></ul></li><li class="tocline"><a class="tocxref" href="#video-and-audio-tracks"><span class="secno">3.3 </span>Video and Audio Tracks</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#videostreamtrack-interface"><span class="secno">3.3.1 </span><code><span>VideoStreamTrack</span></code> interface</a></li><li class="tocline"><a class="tocxref" href="#photo-related-event-definitions"><span class="secno">3.3.2 </span>Photo-related Event Definitions</a></li><li class="tocline"><a class="tocxref" href="#audiostreamtrack-interface"><span class="secno">3.3.3 </span><code><span>AudioStreamTrack</span></code> interface</a></li></ul></li></ul></li><li class="tocline"><a class="tocxref" href="#source-states"><span class="secno">4. </span>Source States</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#video-source-state"><span class="secno">4.1 </span>Video Source State</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#source-state-api-extensions-to-videostreamtrack"><span class="secno">4.1.1 </span>Source State API Extensions to VideoStreamTrack</a></li><li class="tocline"><a class="tocxref" href="#video-source-state-supporting-enumerations"><span class="secno">4.1.2 </span>Video Source State Supporting Enumerations</a></li></ul></li><li class="tocline"><a class="tocxref" href="#audio-source-state"><span class="secno">4.2 </span>Audio Source State</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#source-state-api-extensions-to-audiostreamtrack"><span class="secno">4.2.1 </span>Source State API Extensions to AudioStreamTrack</a></li></ul></li><li class="tocline"><a class="tocxref" href="#tracking-source-state-changes"><span class="secno">4.3 </span>Tracking Source State Changes</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#event-handlers-and-object-definitions"><span class="secno">4.3.1 </span>Event Handlers and Object Definitions</a></li></ul></li><li class="tocline"><a class="tocxref" href="#out-of-scope-state-considered-and-rejected-from-this-proposal"><span class="secno">4.4 </span>Out-of-scope State (Considered and Rejected from this Proposal)</a></li></ul></li><li class="tocline"><a class="tocxref" href="#source-capabilities"><span class="secno">5. </span>Source Capabilities</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#source-capabilities-api-extensions-to-mediastreamtrack"><span class="secno">5.1 </span>Source Capabilities API Extensions to MediaStreamTrack</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#methods"><span class="secno">5.1.1 </span>Methods</a></li></ul></li><li class="tocline"><a class="tocxref" href="#source-capability-supporting-structures"><span class="secno">5.2 </span>Source Capability Supporting Structures</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#dictionary-capabilityrange-members"><span class="secno">5.2.1 </span>Dictionary <span class="formerLink"><code>CapabilityRange</code></span> Members</a></li><li class="tocline"><a class="tocxref" href="#dictionary-allvideocapabilities-members"><span class="secno">5.2.2 </span>Dictionary <span class="formerLink"><code>AllVideoCapabilities</code></span> Members</a></li><li class="tocline"><a class="tocxref" href="#dictionary-allaudiocapabilities-members"><span class="secno">5.2.3 </span>Dictionary <span class="formerLink"><code>AllAudioCapabilities</code></span> Members</a></li></ul></li></ul></li><li class="tocline"><a class="tocxref" href="#track-constraints"><span class="secno">6. </span>Track Constraints</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#constraints-manipulation-expectations"><span class="secno">6.1 </span>Constraints Manipulation Expectations</a></li><li class="tocline"><a class="tocxref" href="#constraint-manipulation-api-extensions-to-mediastreamtrack"><span class="secno">6.2 </span>Constraint Manipulation API Extensions to MediaStreamTrack</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#attributes"><span class="secno">6.2.1 </span>Attributes</a></li><li class="tocline"><a class="tocxref" href="#methods-1"><span class="secno">6.2.2 </span>Methods</a></li><li class="tocline"><a class="tocxref" href="#constraint-definitions-and-related-structures"><span class="secno">6.2.3 </span>Constraint Definitions and Related Structures</a></li></ul></li></ul></li><li class="tocline"><a class="tocxref" href="#example-usage-scenarios"><span class="secno">7. </span>Example usage scenarios</a><ul class="toc"><li class="tocline"><a class="tocxref" href="#getting-access-to-a-video-and-audio-device-if-available"><span class="secno">7.1 </span>Getting access to a video and audio device (if available)</a></li><li class="tocline"><a class="tocxref" href="#getting-access-to-a-specific-video-source-if-available"><span class="secno">7.2 </span>Getting access to a specific video source (if available)</a></li><li class="tocline"><a class="tocxref" href="#previewing-the-local-video-audio-in-html5-video-tag----scenario-is-unchanged"><span class="secno">7.3 </span>Previewing the local video/audio in HTML5 video tag -- scenario is unchanged</a></li><li class="tocline"><a class="tocxref" href="#applying-resolution-constraints"><span class="secno">7.4 </span>Applying resolution constraints</a></li><li class="tocline"><a class="tocxref" href="#changing-zoom-in-response-to-user-input"><span class="secno">7.5 </span>Changing zoom in response to user input:</a></li><li class="tocline"><a class="tocxref" href="#adding-the-local-media-tracks-into-a-new-media-stream"><span class="secno">7.6 </span>Adding the local media tracks into a new media stream:</a></li><li class="tocline"><a class="tocxref" href="#take-a-photo-show-the-photo-in-an-image-tag"><span class="secno">7.7 </span>Take a photo, show the photo in an image tag:</a></li><li class="tocline"><a class="tocxref" href="#show-a-newly-available-device"><span class="secno">7.8 </span>Show a newly available device</a></li><li class="tocline"><a class="tocxref" href="#show-all-available-video-devices-that-the-user-authorizes"><span class="secno">7.9 </span>Show all available video devices (that the user authorizes):</a></li></ul></li><li class="tocline"><a class="tocxref" href="#remove-localmediastream-interface"><span class="secno">8. </span>Remove <code>LocalMediaStream</code> interface</a></li><li class="tocline"><a class="tocxref" href="#acknowledgements"><span class="secno">9. </span>Acknowledgements</a></li></ul></section>
+
+    <section id="evolution-from-v5">
+        <!--OddPage--><h2><span class="secno">1. </span>Evolution from V5</h2>
+        <p>For those of you who have been following along, this section introduces you to some of the changes from the last version.</p>
+        <p>For any of you just joining us, feel free to skip on down to the next section.</p>
+        <p>As I was looking at source objects in V5, and starting to rationalize what properties of the source should go on the
+            track, vs. on the source object, I got the notion that the source object really wasn't providing much value aside from 
+            a logical separation for properties of the track vs. source. From our last telecon, it was apparent that most settings
+            needed to be on the tracks as state-full information about the track. So, then what was left on the source?
+        </p>
+        <p>EKR's comments about wondering what happens when multiple apps (or tabs within a browser) go to access and manipulate
+            a source also resonated with me. He proposed that this either be not allowed (exclusive locks on devices by apps), or 
+            that this be better defined somehow.</p>
+        <p>In thinking about this and wanting to have a better answer than the exclusive lock route, it occurred to me that when choosing 
+            to grant a second app access to the same device, we might offer more than one choice. One choice that we've assumed so far, 
+            is to share one device among two apps with either app having the ability to modify the devices' settings. Another option
+            that I explore in this proposal is the concept of granting a read-only version of the device. There may be a primary owner
+            in another app, or simply in another track instance that can change the settings, and the other track(s) can see and observe
+            the changes, but cannot apply any changes of their own.
+        </p>
+        <p>In also thinking about allowing media other than strictly cameras and microphones with getUserMedia, such as a video from the
+            user's hard drive, or an audio file, or even just a static image, it was apparent that sometimes the source for a track might
+            be read-only anyway--you wouldn't be allowed to adjust the meta-data of a video streaming from the user's hard drive anyway.
+        </p>
+        <p>So the "read-only" media source concept was born.</p>
+        <p>The set of source objects was now starting to grow. I could foresee it being difficult to rationalize/manage these objects, their
+            purpose and/or properties into the future, and I as thought about all of these points together, it became clear that having 
+            an explicit object defined for various source devices/things was unnecessary overhead and complication.
+        </p>
+        <p>As such, the source objects that came into existence in the v4 proposal as track sub-types, and were changed in v5 to be objects
+            tied to tracks, are now gone. Instead, track sources have been simplified into a single string identifier on a track, which allows 
+            the app to understand how access to various things about a track behave given a certain type of source (or no source).
+        </p>
+        <p>In order to clarify the track's behavior under various source types, I also had to get crisp about the things called "settings" 
+            and the things called "constraints" and how they all work together. I think this proposal gets it right, and provides the right
+            APIs for applications to manipulate what they want to in an easy to rationalize manner.
+        </p>
+        <p>And rather unfortunately (due to the name of the proposal), I've removed all notion of the term "settings" from this proposal. 
+            The things previously called settings were a combination of constraints and capabilities, and now I've just formalized on the
+            latter and given up on the former. It works--especially with long-lasting constraints and introspection of them.
+        </p>
+    </section>
+
+    <section id="definitions">
+        <!--OddPage--><h2><span class="secno">2. </span>Definitions</h2>
+        <p>This proposal establishes the following definitions that I hope are used consistently throughout. (If not please let me know...)</p>
+        <dl>
+            <dt><dfn id="dfn-application">Application</dfn></dt>
+            <dd>The code that uses the APIs and interface defined in this specification. On the web, the application is authored in JavaScript and 
+                tied to a particular domain, and typically runs inside of a single tab in browsers that offer tabbed browsing. In a browser it is 
+                possible to be running multiple applications at one time in different domains/tabs. It is also possible that another application 
+                outside of the browser and one inside of the browser may want to share media resources.
+            </dd>
+            <dt><dfn title="source" id="dfn-source">Source</dfn></dt>
+            <dd>Sources are the "thing" providing the source of a media stream track. The source is the broadcaster of the media itself. A source
+                can be a physical webcam, microphone, local video or audio file from the user's hard drive, network resource, or static image.
+                <p>Individual sources have five basic <dfn title="mode" id="dfn-mode">modes</dfn> that are not directly exposed to an application via any 
+                    API defined in this spec. The modes are described in this spec for clarification purposes only:</p>
+                <table class="simple">
+                    <thead>
+                        <tr><th>Source's Mode</th><th>Details</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>unknown-authorization</td><td>The source hasn't yet been authorized for use by the 
+                            application. (Authorization occurs via the getUserMedia API.) All sources start out in this mode at the start of the
+                            application (though trusted hardware or software environments <em title="may" class="rfc2119">may</em> automatically pre-authorize certain sources when 
+                            their use is requested via getUserMedia). Camera or microphone sources that are visible to the user agent can make 
+                            their existence known to the application in this mode. Other sources like files on the local file system do not.</td></tr>
+                        <tr><td>armed</td><td>the source has been granted use by the application and is on/ready, but not actively broadcasting 
+                            any media. This can be the case if a camera source has been authorized, but there are no sinks connected to this 
+                            source (so no reason to be emitting media yet). Implementations of this specification are advised to include some 
+                            indicator that a device is armed in their UI so that users are aware that an application may start the source at any 
+                            time. A conservative user agent would enable some form of UI to show the source as "on" in this mode.</td></tr>
+                        <tr><td>streaming</td><td>The source has been granted use by the application and is actively streaming media. User agents 
+                            should provide an indicator to the user that the source is on and streaming in this mode.</td></tr>
+                        <tr><td>not-authorized</td><td>This source has been forbidden/rejected by the user.</td></tr>
+                        <tr><td>off</td><td>The source has been turned off, but is still detectable (its existence can still be confirmed) by the 
+                            application.</td></tr>
+                    </tbody>
+                </table>
+                <p>In addition to these modes, a source can be removed (physically in the case camera/microphone sources, or deleted in the case
+                    of a file from the local file system), in which case it is no longer detectable by the application.</p>
+                <p>The user <em title="must" class="rfc2119">must</em> remain in control of the source at all times and can cause any state-machine mode transition.</p>
+                <p>Some sources have an identifier which <em title="must" class="rfc2119">must</em> be unique to the application (un-guessable by another application) and persistent between
+                    application sessions (e.g., the identifier for a given source device/application must stay the same, but not be guessable by another
+                    application). Sources that must have an identifier are camera and microphone sources; local file sources are not required to have 
+                    an identifier. Source identifiers let the application save, identify the availability of, and directly request specific sources.
+                </p>
+                <p>Other than the identifier, other bits of source identify are <strong>never</strong> directly available to the application until the 
+                    user agent connects a source to a track. Once a source has been "released" to the application (either via a permissions UI, pre-configured allow-list, or 
+                    some other release mechanism) the application will be able discover additional source-specific capabilities.
+                </p> 
+                <p>Sources have <a class="internalDFN" href="#dfn-capabilities">capabilities</a> and <a class="internalDFN" href="#dfn-state">state</a>. The capabilities and state are "owned" by the source and are common to any [multiple] tracks 
+                    that happen to be using the same source (e.g., if two different tracks objects bound to the same source ask for the same capability 
+                    or state information, they will get back the same answer).
+                </p>
+                <p>Sources <strong>do not</strong> have constraints--tracks have constraints. When a source is connected to a track, it must conform 
+                    to the constraints present on that track (or set of tracks).
+                </p>
+                <p>Sources will be released (un-attached) from a track when the track is ended for any reason.</p>
+                <p>On the track object, sources are represented by a <code><a class="internalDFN" href="#dfn-sourcetype">sourceType</a></code> attribute. The behavior of APIs associated with the 
+                    source's capabilities and state change depending on the source type.
+                </p>
+            </dd>
+            <dt><dfn title="state" id="dfn-state">State</dfn></dt>
+            <dt>Source State</dt>
+            <dd>State refers to the immediate, current value of the source's [optionally constrained] capabilities. State is always read-only.
+                <p>A source's state can change dynamically over time due to environmental conditions, sink configurations, or constraint changes. A source's 
+                    state must always conform to the current set of mandatory constraints that [each of] the tracks it is bound to have defined, and 
+                    should do its best to conform to the set of optional constraints specified.
+                </p>
+                <p>A source's state is directly exposed to audio and video track objects through individual read-only attributes. These attributes share
+                    the same name as their corresponding <a class="internalDFN" href="#dfn-capabilities">capabilities</a> and <a class="internalDFN" href="#dfn-constraints">constraints</a>.
+                </p>
+                <p>Events are available that signal to the application that source state has changed.</p>
+                <p>A conforming user-agent <em title="must" class="rfc2119">must</em> support all the state names defined in this spec.</p>
+            </dd>
+            <dt><dfn title="capabilities" id="dfn-capabilities">Capabilities</dfn></dt>
+            <dd>
+                Source capabilities are the intrinsic "features" of a source object. For each source state, there is a corresponding capability that describes
+                whether it is supported by the source and if so, what the range of supported values are. Capability are expressed as either
+                a series of states (for enumerated-type capabilities) or as a min/max range.
+                <p>The values of the supported capabilities must be normalized to the ranges and enumerated types defined in this specification.</p>
+                <p>Capabilities return the same underlying per-source capabilities, regardless of any user-supplied constraints 
+                    present on the source (capabilities are independent of constraints).</p>
+                <p>Source capabilities are effectively constant. Applications should be able to depend on a specific source having the same capabilities
+                    for any session.
+                </p>
+            </dd>
+            <dt><dfn title="constraints" id="dfn-constraints">Constraints</dfn></dt>
+            <dd>
+                Constraints are an optional feature for restricting the range of allowed variability on a source. Without provided constraints, implementations
+                are free to select a source's state from the full range of its supported capabilities, and to adjust that state at any time for any reason.
+                <p>Constraints may be optional or mandatory. Optional constraints are represented by an ordered list, mandatory constraints are an unordered
+                    set. The order of the optional constraints is from most important (at the head of the list) to least important (at the tail of the list).
+                </p>
+                <p>Constraints are stored on the track object, not the source. Each track can be optionally initialized with constraints, or constraints can
+                    be added afterward through the constraint APIs defined in this spec.
+                </p>
+                <p>Applying track level constraints to a source is conditional based on the type of source. For example, read-only sources
+                    will ignore any specified constraints on the track.
+                </p>
+                <p>It is possible for two tracks that share a unique source to apply contradictory constraints. Under such contradictions, the implementation 
+                    may be forced to transition to the source to the "armed" state until the conflict is resolved.
+                </p>
+                <p>Events are available that allow the application to know when constraints cannot be met by the user agent. These typically occur when
+                    the application applies constraints beyond the capability of a source, contradictory constraints, or in some cases when a source 
+                    cannot sustain itself in over-constrained scenarios (overheating, etc.). 
+                </p>
+                <p>Constraints that are intended for video sources will be ignored by audio sources and vice-versa. Similarly, constraints that are not
+                    recognized will be preserved in the constraint structure, but ignored by the application. This will allow future constraints to be
+                    defined in a backward compatible manner.
+                </p>
+                <p>A correspondingly-named constraint exists for each corresponding source state name and capability name.</p>
+                <p>In general, user agents will have more flexibility to optimize the media streaming experience the fewer constraints are applied.</p>
+            </dd>
+        </dl>
+    </section>
+
+    <section id="tracks">
+        <!--OddPage--><h2><span class="secno">3. </span>Tracks</h2>
+
+        <p>With <a href="http://lists.w3.org/Archives/Public/public-media-capture/2012Dec/0027.html">proposed changes</a> to 
+            <code>getUserMedia</code> to support a synchronous API, this proposal enables developer code to 
+            directly create [derived] <code>MediaStreamTrack</code>s and initialize them with [optional] constraints. It also 
+            adds the concept of the <code>"new"</code> readyState for tracks, a state which signifies that the track 
+            is not connected to a source [yet].
+        </p>
+
+        <p>Below is the track hierarchy: new video and audio media streams are defined to inherit from <code>MediaStreamTrack</code>. The factoring into
+            derived track types allows for <a class="internalDFN" href="#dfn-state">state</a> to be conveniently split onto the objects for which they make sense.
+        </p>
+        
+        <ul>
+            <li>MediaStreamTrack
+                <ul>
+                    <li>VideoStreamTrack</li>
+                    <li>AudioStreamTrack</li>
+                </ul>
+            </li>
+        </ul>
+
+        <section id="generic-tracks">
+            <h3><span class="secno">3.1 </span>Generic Tracks</h3>
+
+            <p>This section describes the <dfn id="dfn-mediastreamtrack">MediaStreamTrack</dfn> interface (currently in the Media Capture and Streams document), but makes targeted changes in order 
+                to add the <code>"new"</code> state and associated event handler (<code>onstarted</code>). The definition is otherwise identical to the current definition except that the defined 
+                constants are replaced by strings (using an enumerated type).
+            </p>
+
+            <section id="mediastreamtrack-interface">
+                <h4><span class="secno">3.1.1 </span><code>MediaStreamTrack</code> interface</h4>
+                <pre class="idl"><span class="idlInterface" id="idl-def-MediaStreamTrack">interface <span class="idlInterfaceID">MediaStreamTrack</span> : <span class="idlSuperclass"><a>EventTarget</a></span> {
+<span class="idlAttribute">             attribute <span class="idlAttrType"><a>DOMString</a></span>           <span class="idlAttrName"><a href="#widl-MediaStreamTrack-id">id</a></span>;</span>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>DOMString</a></span>           <span class="idlAttrName"><a href="#widl-MediaStreamTrack-kind">kind</a></span>;</span>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>DOMString</a></span>           <span class="idlAttrName"><a href="#widl-MediaStreamTrack-label">label</a></span>;</span>
+<span class="idlAttribute">             attribute <span class="idlAttrType"><a>boolean</a></span>             <span class="idlAttrName"><a href="#widl-MediaStreamTrack-enabled">enabled</a></span>;</span>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a class="idlType" href="#idl-def-TrackReadyStateEnum"><code>TrackReadyStateEnum</code></a></span> <span class="idlAttrName"><a href="#widl-MediaStreamTrack-readyState">readyState</a></span>;</span>
+<span class="idlAttribute">             attribute <span class="idlAttrType"><a>EventHandler</a></span>        <span class="idlAttrName"><a href="#widl-MediaStreamTrack-onstarted">onstarted</a></span>;</span>
+<span class="idlAttribute">             attribute <span class="idlAttrType"><a>EventHandler</a></span>        <span class="idlAttrName"><a href="#widl-MediaStreamTrack-onmute">onmute</a></span>;</span>
+<span class="idlAttribute">             attribute <span class="idlAttrType"><a>EventHandler</a></span>        <span class="idlAttrName"><a href="#widl-MediaStreamTrack-onunmute">onunmute</a></span>;</span>
+<span class="idlAttribute">             attribute <span class="idlAttrType"><a>EventHandler</a></span>        <span class="idlAttrName"><a href="#widl-MediaStreamTrack-onended">onended</a></span>;</span>
+};</span></pre><section><h5 id="attributes-1">Attributes</h5><dl class="attributes"><dt id="widl-MediaStreamTrack-id"><code>id</code> of type <span class="idlAttrType"><a>DOMString</a></span></dt><dd>Provides a mechanism for developers to assign and read-back the identify this track and to reference it using <code>MediaStream</code>'s 
+                        <code>getTrackById</code>. (This is a preliminary definition, but is expected in the latest editor's draft soon.)
+                    </dd><dt id="widl-MediaStreamTrack-kind"><code>kind</code> of type <span class="idlAttrType"><a>DOMString</a></span>, readonly</dt><dd>See <a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html#widl-MediaStreamTrack-kind">kind</a> definition in the current editor's draft.
+                        <div class="issue"><div class="issue-title"><span>Issue 1</span></div><p><strong>Issue: </strong> Is this attribute really necessary anymore? Perhaps we should drop it since application code will directly
+                            create tracks from derived constructors: VideoStreamTrack and AudioStreamTrack?
+                        </p></div>
+                    </dd><dt id="widl-MediaStreamTrack-label"><code>label</code> of type <span class="idlAttrType"><a>DOMString</a></span>, readonly</dt><dd>See <a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html#widl-MediaStreamTrack-label">label</a> definition in the current editor's draft.</dd><dt id="widl-MediaStreamTrack-enabled"><code>enabled</code> of type <span class="idlAttrType"><a>boolean</a></span></dt><dd>See <a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html#widl-MediaStreamTrack-enabled">enabled</a> definition in the current editor's draft.</dd><dt id="widl-MediaStreamTrack-readyState"><code>readyState</code> of type <span class="idlAttrType"><a class="idlType" href="#idl-def-TrackReadyStateEnum"><code>TrackReadyStateEnum</code></a></span>, readonly</dt><dd>The track's current state. Tracks start off in the <code>"new"</code> state after being instantiated.
+                        <p>State transitions are as follows:</p>
+                        <ul>
+                            <li><strong>new -&gt; live</strong> The user has approved access to this track and the attached <a class="internalDFN" href="#dfn-source">source</a> is in the "streaming" <a class="internalDFN" href="#dfn-mode">mode</a>.</li>
+                            <li><strong>new -&gt; ended</strong> The user rejected this track (did not approve its use). No <a class="internalDFN" href="#dfn-source">source</a> is attached in this state.</li>
+                            <li><strong>live -&gt; muted</strong> The <a class="internalDFN" href="#dfn-source">source</a> transitioned from the "streaming" to the "armed" <a class="internalDFN" href="#dfn-mode">mode</a>. This could be a result of applying mandatory 
+                                constraints to a track that cannot be satisfied by the track's <a class="internalDFN" href="#dfn-source">source</a>.</li>
+                            <li><strong>live -&gt; ended</strong> The track has ended (for various reasons, including invoking the <code>stop()</code> API). No source object is attached.</li>
+                            <li><strong>muted -&gt; live</strong> The <a class="internalDFN" href="#dfn-source">source</a> transitioned from the "armed" to the "streaming" <a class="internalDFN" href="#dfn-mode">mode</a>.</li>
+                            <li><strong>muted -&gt; ended</strong> The <a class="internalDFN" href="#dfn-source">source</a> was stopped while in the "armed" <a class="internalDFN" href="#dfn-mode">mode</a>.</li>
+                        </ul> 
+                    </dd><dt id="widl-MediaStreamTrack-onstarted"><code>onstarted</code> of type <span class="idlAttrType"><a>EventHandler</a></span></dt><dd>Event handler for the <code>"started"</code> event. The <code>"started"</code> event is fired when this track transitions
+                        from the <code>"new"</code> <code>readyState</code> to any other state. This event fires before any other corresponding events like <code>"ended"</code>
+                        or <code>"statechanged"</code>.
+                        <div class="issue"><div class="issue-title"><span>Issue 2</span></div><p><strong>Recommendation: </strong> We should add a convenience API to <code>MediaStream</code> for being notified of various track changes 
+                            like this one. The event would contain a reference to the track, as well as the name of the event that happened. Such a convenience API would 
+                            fire last in the sequence of such events.
+                        </p></div>
+                    </dd><dt id="widl-MediaStreamTrack-onmute"><code>onmute</code> of type <span class="idlAttrType"><a>EventHandler</a></span></dt><dd>See <a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html#widl-MediaStreamTrack-onmute">onmute</a> definition in the current editor's draft.
+                    </dd><dt id="widl-MediaStreamTrack-onunmute"><code>onunmute</code> of type <span class="idlAttrType"><a>EventHandler</a></span></dt><dd>See <a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html#widl-MediaStreamTrack-onunmute">onunmute</a> definition in the current editor's draft.
+                    </dd><dt id="widl-MediaStreamTrack-onended"><code>onended</code> of type <span class="idlAttrType"><a>EventHandler</a></span></dt><dd>See <a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html#widl-MediaStreamTrack-onended">onended</a> definition in the current editor's draft.
+                    </dd></dl></section>
+            </section>
+
+            <p>To support the above readyState changes, the following enumeration is defined:</p>
+
+            <section id="trackreadystateenum-enumeration">
+                <h4><span class="secno">3.1.2 </span>TrackReadyStateEnum enumeration</h4>
+                <pre class="idl"><span class="idlEnum" id="idl-def-TrackReadyStateEnum">enum <span class="idlEnumID">TrackReadyStateEnum</span> {
+    "<span class="idlEnumItem">new</span>",
+    "<span class="idlEnumItem">live</span>",
+    "<span class="idlEnumItem">muted</span>",
+    "<span class="idlEnumItem">ended</span>"
+};</span></pre><table class="simple"><tr><th colspan="2">Enumeration description</th></tr><tr><td><code>new</code></td><td>The track type is new and has not been initialized (connected to a source of any kind). This state implies that 
+                        the track's label will be the empty string.</td></tr><tr><td><code>live</code></td><td>See the definition of the <a href="">LIVE</a> constant in the current editor's draft.</td></tr><tr><td><code>muted</code></td><td>See the definition of the <a href="">MUTED</a> constant in the current editor's draft. In addition, in this specification the <code>"muted"</code>
+                        state can be entered when a track becomes over-constrained.
+                    </td></tr><tr><td><code>ended</code></td><td>See the definition of the <a href="">ENDED</a> constant in the current editor's draft. In this specification, once a track enters this state
+                        it never exits it.
+                    </td></tr></table>
+            </section>
+        </section>
+
+        <section id="track-sources">
+            <h3><span class="secno">3.2 </span>Track Sources</h3>
+
+            <section id="track-source-api-extensions-to-mediastreamtrack">
+                <h4><span class="secno">3.2.1 </span>Track Source API Extensions to <a class="internalDFN" href="#dfn-mediastreamtrack">MediaStreamTrack</a></h4>
+                <pre class="idl"><span class="idlInterface" id="idl-def-MediaStreamTrack-1">partial interface <span class="idlInterfaceID">MediaStreamTrack</span> {
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a class="idlType" href="#idl-def-SourceTypeEnum"><code>SourceTypeEnum</code></a></span> <span class="idlAttrName"><a href="#widl-MediaStreamTrack-sourceType">sourceType</a></span>;</span>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>DOMString</a></span>      <span class="idlAttrName"><a href="#widl-MediaStreamTrack-sourceId">sourceId</a></span>;</span>
+<span class="idlMethod">    <span class="idlMethType"><a>void</a></span> <span class="idlMethName"><a href="#widl-MediaStreamTrack-stop-void">stop</a></span> ();</span>
+};</span></pre><section><h5 id="attributes-2">Attributes</h5><dl class="attributes"><dt id="widl-MediaStreamTrack-sourceType"><code>sourceType</code> of type <span class="idlAttrType"><a class="idlType" href="#idl-def-SourceTypeEnum"><code>SourceTypeEnum</code></a></span>, readonly</dt><dd>Returns the type information associated with the currently attached source (if any).</dd><dt id="widl-MediaStreamTrack-sourceId"><code>sourceId</code> of type <span class="idlAttrType"><a>DOMString</a></span>, readonly</dt><dd>The application-unique identifier for this source. The same identifier <em title="must" class="rfc2119">must</em> be valid between sessions of this application, but <em title="must" class="rfc2119">must</em> also be different for other 
+                        applications. Some sort of GUID is recommended for the identifier.</dd></dl></section><section><h5 id="methods-2">Methods</h5><dl class="methods"><dt id="widl-MediaStreamTrack-stop-void"><code>stop</code></dt><dd>Stops the source associated with this track (if any). If no source is attached (e.g., <a class="internalDFN" href="#dfn-sourcetype">sourceType</a> is "none"), then this call returns immediately (e.g., is a no-op).<div><em>No parameters.</em></div><div><em>Return type: </em><code><a>void</a></code></div></dd></dl></section>
+            </section>
+
+            <section id="track-source-types">
+                <h4><span class="secno">3.2.2 </span>Track Source Types</h4>
+                <p>The <dfn id="dfn-sourcetype">sourceType</dfn> attribute may have the following states:</p>
+                <pre class="idl"><span class="idlEnum" id="idl-def-SourceTypeEnum">enum <span class="idlEnumID">SourceTypeEnum</span> {
+    "<span class="idlEnumItem">none</span>",
+    "<span class="idlEnumItem">camera</span>",
+    "<span class="idlEnumItem">microphone</span>",
+    "<span class="idlEnumItem">photo-camera</span>",
+    "<span class="idlEnumItem">readonly</span>",
+    "<span class="idlEnumItem">remote</span>"
+};</span></pre><table class="simple"><tr><th colspan="2">Enumeration description</th></tr><tr><td><code>none</code></td><td>This track has no source. This is the case when the track is in the <code>"new"</code> or <code>"ended"</code> <a>readyState</a>.</td></tr><tr><td><code>camera</code></td><td>A valid source type only for <a class="internalDFN" href="#dfn-videostreamtrack">VideoStreamTrack</a>s. The source is a local video-producing camera source (without special photo-mode support).</td></tr><tr><td><code>microphone</code></td><td>A valid source type only for <a class="internalDFN" href="#dfn-audiostreamtrack">AudioStreamTrack</a>s. The source is a local audio-producing microphone source.</td></tr><tr><td><code>photo-camera</code></td><td>A valid source type only for <a class="internalDFN" href="#dfn-videostreamtrack">VideoStreamTrack</a>s. The source is a local video-producing camera source which supports high-resolution photo-mode and its related <a class="internalDFN" href="#dfn-state">state</a> attributes.</td></tr><tr><td><code>readonly</code></td><td>The track (audio or video) is backed by a read-only source such as a file, or the track source is a local microphone or camera, but is shared so that this track cannot modify any of the source's settings.</td></tr><tr><td><code>remote</code></td><td>The track is sourced by an <code>RTCPeerConnection</code>.</td></tr></table>
+            </section>
+        </section>
+
+        <section id="video-and-audio-tracks">
+            <h3><span class="secno">3.3 </span>Video and Audio Tracks</h3>
+
+            <p>The <a class="internalDFN" href="#dfn-mediastreamtrack">MediaStreamTrack</a> object cannot be instantiated directly. To create an instance of a <a class="internalDFN" href="#dfn-mediastreamtrack">MediaStreamTrack</a>, one of 
+                its derived track types may be instantiated. These derived types are defined in this section.
+            </p>
+
+            <p>It's important to note that the camera's <q>green light</q> doesn't come on when a new track is created; nor does the user get 
+                prompted to enable the camera/microphone. Those actions only happen after the developer has requested that a media stream containing 
+                <code>"new"</code> tracks be bound to a source via <code>getUserMedia</code>. Until that point tracks are inert.
+            </p>
+
+            <section id="videostreamtrack-interface">
+                <h4><span class="secno">3.3.1 </span><code><dfn id="dfn-videostreamtrack">VideoStreamTrack</dfn></code> interface</h4>
+
+                <p>Video tracks may be instantiated with optional media track constraints. These constraints can be later modified on the track as
+                    needed by the application, or created after-the-fact if the initial constraints are unknown to the application.
+                </p>
+
+                <div class="note"><div class="note-title"><span>Note</span></div><p><strong>Example: </strong><a class="internalDFN" href="#dfn-videostreamtrack">VideoStreamTrack</a> objects are instantiated in JavaScript using the new operator: <br>
+                    <tt><b>new</b> <code>VideoStreamTrack</code>();</tt><br>or<br>
+                    <tt><b>new</b> <code>VideoStreamTrack</code>( { optional: [ { <code>sourceId</code>: "20983-20o198-109283-098-09812" }, { <code>width</code>: { min: 800, max: 1200 }}, { <code>height</code>: { min: 600 }}] });</tt>
+                </p></div>
+
+                <pre class="idl"><span class="idlInterface" id="idl-def-VideoStreamTrack">[<span class="extAttr">Constructor(optional MediaTrackConstraints videoConstraints)</span>]
+interface <span class="idlInterfaceID">VideoStreamTrack</span> : <span class="idlSuperclass"><a class="idlType" href="#idl-def-MediaStreamTrack"><code>MediaStreamTrack</code></a></span> {
+<span class="idlMethod">    static <span class="idlMethType">sequence&lt;<a>DOMString</a>&gt;</span> <span class="idlMethName"><a href="#widl-VideoStreamTrack-getSourceIds-sequence-DOMString">getSourceIds</a></span> ();</span>
+<span class="idlMethod">    <span class="idlMethType"><a>void</a></span>                       <span class="idlMethName"><a href="#widl-VideoStreamTrack-takePhoto-void">takePhoto</a></span> ();</span>
+<span class="idlAttribute">             attribute <span class="idlAttrType"><a>EventHandler</a></span> <span class="idlAttrName"><a href="#widl-VideoStreamTrack-onphoto">onphoto</a></span>;</span>
+<span class="idlAttribute">             attribute <span class="idlAttrType"><a>EventHandler</a></span> <span class="idlAttrName"><a href="#widl-VideoStreamTrack-onphotoerror">onphotoerror</a></span>;</span>
+};</span></pre><section><h5 id="attributes-3">Attributes</h5><dl class="attributes"><dt id="widl-VideoStreamTrack-onphoto"><code>onphoto</code> of type <span class="idlAttrType"><a>EventHandler</a></span></dt><dd>Register/unregister for "photo" events. The handler should expect to get a BlobEvent object as its first
+                        parameter.
+                        <div class="note"><div class="note-title"><span>Note</span></div><p>The BlobEvent returns a photo (as a Blob) in a compressed format (for example: PNG/JPEG) rather than a 
+                            raw ImageData object due to the expected large, uncompressed size of the resulting photos.</p></div>
+                    </dd><dt id="widl-VideoStreamTrack-onphotoerror"><code>onphotoerror</code> of type <span class="idlAttrType"><a>EventHandler</a></span></dt><dd>In the event of an error taking the photo, a "photoerror" event will be dispatched instead of a "photo" event.
+                        The "photoerror" is a simple event of type Event.
+                    </dd></dl></section><section><h5 id="methods-3">Methods</h5><dl class="methods"><dt id="widl-VideoStreamTrack-getSourceIds-sequence-DOMString"><code>getSourceIds</code>, static</dt><dd>Returns an array of application-unique source identifiers. This list will be populated only with local sources whose <a class="internalDFN" href="#dfn-sourcetype">sourceType</a> is <code>"camera"</code>, 
+                        <code>"photo-camera"</code>, and if allowed by the user-agent, <code>"readonly"</code> variants of the former two types. The video source ids returned in the 
+                        list constitute those sources that the user agent can identify at the time the API is called (the list can grow/shrink over time as sources may be added or 
+                        removed). As a static method, <a>getSourceIds</a> can be queried without instantiating any <a class="internalDFN" href="#dfn-videostreamtrack">VideoStreamTrack</a> objects or without calling <code>getUserMedia</code>.
+                        <div class="issue"><div class="issue-title"><span>Issue 3</span></div><p><strong>Issue: </strong> This information deliberately adds to the fingerprinting surface of the UA. However, this information 
+                            will not be identifiable outside the scope of this application. could also be obtained via other round-about techniques using <code>getUserMedia</code>. This editor deems it worthwhile directly providing
+                            this data as it seems important for determining whether multiple devices of this type are available.
+                        </p></div>
+                    <div><em>No parameters.</em></div><div><em>Return type: </em><code>sequence&lt;<a>DOMString</a>&gt;</code></div></dd><dt id="widl-VideoStreamTrack-takePhoto-void"><code>takePhoto</code></dt><dd>If the <a class="internalDFN" href="#dfn-sourcetype">sourceType</a>'s value is anything other than <code>"photo-camera"</code>, this method returns immediately and does nothing.
+                        If the <a class="internalDFN" href="#dfn-sourcetype">sourceType</a> is <code>"photo-camera"</code>, then this method temporarily (asynchronously) switches the source into "high 
+                        resolution photo mode", applies the configured <a>photoWidth</a>, <a>photoHeight</a>, <a>exposureMode</a>, and <a>isoMode</a> <a class="internalDFN" href="#dfn-state">state</a>
+                        to the stream, and records/encodes an image (using a user-agent determined format) into a <code>Blob</code> object. Finally, a task is
+                        queued to fire a "photo" event with the resulting recorded/encoded data. In case of a failure for any reason, a "photoerror" event
+                        is queued instead and no "photo" event is dispatched.
+                        <div class="issue"><div class="issue-title"><span>Issue 4</span></div><p><strong>Issue: </strong> We could consider providing a hint or setting for the desired photo format? There could be 
+                            some alignment opportunity with the Recoding proposal...
+                        </p></div>
+                    <div><em>No parameters.</em></div><div><em>Return type: </em><code><a>void</a></code></div></dd></dl></section>
+            </section>
+
+            <section id="photo-related-event-definitions">
+                <h4><span class="secno">3.3.2 </span>Photo-related Event Definitions</h4>
+
+                <p><dfn id="dfn-blobevent">BlobEvent</dfn> interface</p>
+                <pre class="idl"><span class="idlInterface" id="idl-def-BlobEvent">[<span class="extAttr">Constructor(DOMString type, optional BlobEventInit blobInitDict)</span>]
+interface <span class="idlInterfaceID">BlobEvent</span> : <span class="idlSuperclass"><a>Event</a></span> {
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>Blob</a></span> <span class="idlAttrName"><a href="#widl-BlobEvent-data">data</a></span>;</span>
+};</span></pre><section><h5 id="attributes-4">Attributes</h5><dl class="attributes"><dt id="widl-BlobEvent-data"><code>data</code> of type <span class="idlAttrType"><a>Blob</a></span>, readonly</dt><dd>Returns a Blob object whose type attribute indicates the encoding of the blob data. An implementation must
+                        return a Blob in a format that is capable of being viewed in an HTML <code>&lt;img&gt;</code> tag.
+                    </dd></dl></section>
+            
+                <p>BlobEventInit dictionary</p>
+                <pre class="idl"><span class="idlDictionary" id="idl-def-BlobEventInit">dictionary <span class="idlDictionaryID">BlobEventInit</span> : <span class="idlSuperclass"><a>EventInit</a></span> {
+<span class="idlMember">    <span class="idlMemberType"><a>Blob</a></span> <span class="idlMemberName"><a href="#widl-BlobEventInit-data">data</a></span>;</span>
+};</span></pre><section><h5 id="dictionary-blobeventinit-members">Dictionary <a class="idlType" href="#idl-def-BlobEventInit"><code>BlobEventInit</code></a> Members</h5><dl class="dictionary-members"><dt id="widl-BlobEventInit-data"><code>data</code> of type <span class="idlMemberType"><a>Blob</a></span></dt><dd>A Blob object containing the data to deliver via this event.</dd></dl></section>
+            </section>
+                    
+            <section id="audiostreamtrack-interface">
+                <h4><span class="secno">3.3.3 </span><code><dfn id="dfn-audiostreamtrack">AudioStreamTrack</dfn></code> interface</h4>
+                
+                <div class="note"><div class="note-title"><span>Note</span></div><p><strong>Example: </strong><a class="internalDFN" href="#dfn-audiostreamtrack">AudioStreamTrack</a> objects are instantiated in JavaScript using the new operator: <br>
+                    <tt><b>new</b> <code>AudioStreamTrack</code>();</tt><br>or<br>
+                    <tt><b>new</b> <code>AudioStreamTrack</code>( { optional: [ { <code>sourceId</code>: "64815-wi3c89-1839dk-x82-392aa" }, { <code>gain</code>: 0.5 }] });</tt>
+                </p></div>
+
+                <pre class="idl"><span class="idlInterface" id="idl-def-AudioStreamTrack">[<span class="extAttr">Constructor</span>]
+interface <span class="idlInterfaceID">AudioStreamTrack</span> : <span class="idlSuperclass"><a class="idlType" href="#idl-def-MediaStreamTrack"><code>MediaStreamTrack</code></a></span> {
+<span class="idlMethod">    static <span class="idlMethType">sequence&lt;<a>DOMString</a>&gt;</span> <span class="idlMethName"><a href="#widl-AudioStreamTrack-getSourceIds-sequence-DOMString">getSourceIds</a></span> ();</span>
+};</span></pre><section><h5 id="methods-4">Methods</h5><dl class="methods"><dt id="widl-AudioStreamTrack-getSourceIds-sequence-DOMString"><code>getSourceIds</code>, static</dt><dd>See definition of <code>getSourceIds</code> on the <a class="internalDFN" href="#dfn-videostreamtrack">VideoStreamTrack</a> object. Note, that the list of source ids for <a class="internalDFN" href="#dfn-audiostreamtrack">AudioStreamTrack</a> will be populated 
+                        only with local sources whose <a class="internalDFN" href="#dfn-sourcetype">sourceType</a> is <code>"microphone"</code>, and if allowed by the user-agent, <code>"readonly"</code> microphone variants.
+                    <div><em>No parameters.</em></div><div><em>Return type: </em><code>sequence&lt;<a>DOMString</a>&gt;</code></div></dd></dl></section>
+            </section>
+        </section>
+    </section>
+        
+    <section id="source-states">
+        <!--OddPage--><h2><span class="secno">4. </span>Source States</h2>
+
+        <p>Source states (the current states of the source media flowing through a track) are observable by the attributes defined in this section. They are divided by 
+            track type: video and audio.
+        </p>
+
+        <p>Note that the source states defined in this section do not include <a class="internalDFN" href="#dfn-sourcetype">sourceType</a> and <a>sourceId</a> merely because they were already defined earlier.
+            These two attributes are also considered states, and have appropriate visibility as <a class="internalDFN" href="#dfn-capabilities">capabilities</a> and <a class="internalDFN" href="#dfn-constraints">constraints</a>.
+        </p>
+      
+        <section id="video-source-state">
+            <h3><span class="secno">4.1 </span>Video Source State</h3>
+
+            <p>This table summarizes the expected values of the video source state attributes for each of the <code><a class="internalDFN" href="#dfn-sourcetype">sourceType</a></code>s defined earlier:</p>
+
+            <table class="simple">
+                <thead>
+                    <tr>
+                        <th><code>sourceType</code></th>
+                        <th>"none"</th>
+                        <th>"camera"</th>
+                        <th>"photo-camera"</th>
+                        <th>"readonly"</th>
+                        <th>"remote"</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>sourceType</code></td>
+                        <td>current <a class="idlType" href="#idl-def-SourceTypeEnum"><code>SourceTypeEnum</code></a> value</td>
+                        <td>current <a class="idlType" href="#idl-def-SourceTypeEnum"><code>SourceTypeEnum</code></a> value</td>
+                        <td>current <a class="idlType" href="#idl-def-SourceTypeEnum"><code>SourceTypeEnum</code></a> value</td>
+                        <td>current <a class="idlType" href="#idl-def-SourceTypeEnum"><code>SourceTypeEnum</code></a> value</td>
+                        <td>current <a class="idlType" href="#idl-def-SourceTypeEnum"><code>SourceTypeEnum</code></a> value</td>
+                    </tr>
+                    <tr>
+                        <td><code>sourceId</code></td>
+                        <td>null</td>
+                        <td>current <code>DOMString</code> value</td>
+                        <td>current <code>DOMString</code> value</td>
+                        <td>current <code>DOMString</code> value</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>width</code></td>
+                        <td>null</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                    </tr>
+                    <tr>
+                        <td><code>height</code></td>
+                        <td>null</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                    </tr>
+                    <tr>
+                        <td><code>frameRate</code></td>
+                        <td>null</td>
+                        <td>current <code>float</code> value</td>
+                        <td>current <code>float</code> value</td>
+                        <td>current <code>float</code> value</td>
+                        <td>current <code>float</code> value</td>
+                    </tr>
+                    <tr>
+                        <td><code>facingMode</code></td>
+                        <td>null</td>
+                        <td>current <a class="internalDFN" href="#dfn-videofacingmodeenum">VideoFacingModeEnum</a> value</td>
+                        <td>current <a class="internalDFN" href="#dfn-videofacingmodeenum">VideoFacingModeEnum</a> value</td>
+                        <td>current <a class="internalDFN" href="#dfn-videofacingmodeenum">VideoFacingModeEnum</a> value</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>zoom</code></td>
+                        <td>null</td>
+                        <td>current <code>float</code> value</td>
+                        <td>current <code>float</code> value</td>
+                        <td>current <code>float</code> value</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>focusMode</code></td>
+                        <td>null</td>
+                        <td>current <a class="internalDFN" href="#dfn-videofocusmodeenum">VideoFocusModeEnum</a> value</td>
+                        <td>current <a class="internalDFN" href="#dfn-videofocusmodeenum">VideoFocusModeEnum</a> value</td>
+                        <td>current <a class="internalDFN" href="#dfn-videofocusmodeenum">VideoFocusModeEnum</a> value</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>fillLightMode</code></td>
+                        <td>null</td>
+                        <td>current <a class="internalDFN" href="#dfn-videofilllightmodeenum">VideoFillLightModeEnum</a> value</td>
+                        <td>current <a class="internalDFN" href="#dfn-videofilllightmodeenum">VideoFillLightModeEnum</a> value</td>
+                        <td>current <a class="internalDFN" href="#dfn-videofilllightmodeenum">VideoFillLightModeEnum</a> value</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>whiteBalanceMode</code></td>
+                        <td>null</td>
+                        <td>current <a class="internalDFN" href="#dfn-videowhitebalancemodeenum">VideoWhiteBalanceModeEnum</a> value</td>
+                        <td>current <a class="internalDFN" href="#dfn-videowhitebalancemodeenum">VideoWhiteBalanceModeEnum</a> value</td>
+                        <td>current <a class="internalDFN" href="#dfn-videowhitebalancemodeenum">VideoWhiteBalanceModeEnum</a> value</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>brightness</code></td>
+                        <td>null</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>contrast</code></td>
+                        <td>null</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>saturation</code></td>
+                        <td>null</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>sharpness</code></td>
+                        <td>null</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>photoWidth</code></td>
+                        <td>null</td>
+                        <td>null</td>
+                        <td>configured <code>unsigned long</code> value</td>
+                        <td>configured <code>unsigned long</code> value (if readonly <a class="internalDFN" href="#dfn-source">source</a> is a photo-camera), <code>null</code> otherwise.</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>photoHeight</code></td>
+                        <td>null</td>
+                        <td>null</td>
+                        <td>configured <code>unsigned long</code> value</td>
+                        <td>configured <code>unsigned long</code> value (if readonly <a class="internalDFN" href="#dfn-source">source</a> is a photo-camera), <code>null</code> otherwise.</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>exposureMode</code></td>
+                        <td>null</td>
+                        <td>null</td>
+                        <td>configured <a class="internalDFN" href="#dfn-photoexposuremodeenum">PhotoExposureModeEnum</a> value</td>
+                        <td>configured <a class="internalDFN" href="#dfn-photoexposuremodeenum">PhotoExposureModeEnum</a> value (if readonly <a class="internalDFN" href="#dfn-source">source</a> is a photo-camera), <code>null</code> otherwise.</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>isoMode</code></td>
+                        <td>null</td>
+                        <td>null</td>
+                        <td>configured <a class="internalDFN" href="#dfn-photoisomodeenum">PhotoISOModeEnum</a> value</td>
+                        <td>configured <a class="internalDFN" href="#dfn-photoisomodeenum">PhotoISOModeEnum</a> value (if readonly <a class="internalDFN" href="#dfn-source">source</a> is a photo-camera), <code>null</code> otherwise.</td>
+                        <td>null</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <section id="source-state-api-extensions-to-videostreamtrack">
+                <h4><span class="secno">4.1.1 </span>Source State API Extensions to VideoStreamTrack</h4>
+                <pre class="idl"><span class="idlInterface" id="idl-def-VideoStreamTrack-1">partial interface <span class="idlInterfaceID">VideoStreamTrack</span> {
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>unsigned long</a>?</span>             <span class="idlAttrName"><a href="#widl-VideoStreamTrack-width">width</a></span>;</span>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>unsigned long</a>?</span>             <span class="idlAttrName"><a href="#widl-VideoStreamTrack-height">height</a></span>;</span>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>float</a>?</span>                     <span class="idlAttrName"><a href="#widl-VideoStreamTrack-frameRate">frameRate</a></span>;</span>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a class="idlType" href="#idl-def-VideoFacingModeEnum"><code>VideoFacingModeEnum</code></a>?</span>       <span class="idlAttrName"><a href="#widl-VideoStreamTrack-facingMode">facingMode</a></span>;</span>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>float</a>?</span>                     <span class="idlAttrName"><a href="#widl-VideoStreamTrack-zoom">zoom</a></span>;</span>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a class="idlType" href="#idl-def-VideoFocusModeEnum"><code>VideoFocusModeEnum</code></a>?</span>        <span class="idlAttrName"><a href="#widl-VideoStreamTrack-focusMode">focusMode</a></span>;</span>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a class="idlType" href="#idl-def-VideoFillLightModeEnum"><code>VideoFillLightModeEnum</code></a>?</span>    <span class="idlAttrName"><a href="#widl-VideoStreamTrack-fillLightMode">fillLightMode</a></span>;</span>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a class="idlType" href="#idl-def-VideoWhiteBalanceModeEnum"><code>VideoWhiteBalanceModeEnum</code></a>?</span> <span class="idlAttrName"><a href="#widl-VideoStreamTrack-whiteBalanceMode">whiteBalanceMode</a></span>;</span>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>unsigned long</a>?</span>             <span class="idlAttrName"><a href="#widl-VideoStreamTrack-brightness">brightness</a></span>;</span>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>unsigned long</a>?</span>             <span class="idlAttrName"><a href="#widl-VideoStreamTrack-contrast">contrast</a></span>;</span>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>unsigned long</a>?</span>             <span class="idlAttrName"><a href="#widl-VideoStreamTrack-saturation">saturation</a></span>;</span>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>unsigned long</a>?</span>             <span class="idlAttrName"><a href="#widl-VideoStreamTrack-sharpness">sharpness</a></span>;</span>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>unsigned long</a>?</span>             <span class="idlAttrName"><a href="#widl-VideoStreamTrack-photoWidth">photoWidth</a></span>;</span>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>unsigned long</a>?</span>             <span class="idlAttrName"><a href="#widl-VideoStreamTrack-photoHeight">photoHeight</a></span>;</span>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a class="idlType" href="#idl-def-PhotoExposureModeEnum"><code>PhotoExposureModeEnum</code></a>?</span>     <span class="idlAttrName"><a href="#widl-VideoStreamTrack-exposureMode">exposureMode</a></span>;</span>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a class="idlType" href="#idl-def-PhotoISOModeEnum"><code>PhotoISOModeEnum</code></a>?</span>          <span class="idlAttrName"><a href="#widl-VideoStreamTrack-isoMode">isoMode</a></span>;</span>
+};</span></pre><section><h5 id="attributes-5">Attributes</h5><dl class="attributes"><dt id="widl-VideoStreamTrack-width"><code>width</code> of type <span class="idlAttrType"><a>unsigned long</a></span>, readonly, nullable</dt><dd>The width (in pixels) of the source of the video flowing through the track.</dd><dt id="widl-VideoStreamTrack-height"><code>height</code> of type <span class="idlAttrType"><a>unsigned long</a></span>, readonly, nullable</dt><dd>The height (in pixels) of the source of the video flowing through the track.</dd><dt id="widl-VideoStreamTrack-frameRate"><code>frameRate</code> of type <span class="idlAttrType"><a>float</a></span>, readonly, nullable</dt><dd>The current frames per second rate of video provided by this source.
+                        <p>If the <a class="internalDFN" href="#dfn-sourcetype">sourceType</a> is a <code>"camera"</code> or <code>"photo-camera"</code>, or a <code>"readonly"</code> variant of those, 
+                            and the source does not provide a frameRate (or the frameRate cannot be determined from the source stream), then this attribute 
+                            <em title="must" class="rfc2119">must</em> be the user agent's vsync display rate.
+                        </p>
+                    </dd><dt id="widl-VideoStreamTrack-facingMode"><code>facingMode</code> of type <span class="idlAttrType"><a class="idlType" href="#idl-def-VideoFacingModeEnum"><code>VideoFacingModeEnum</code></a></span>, readonly, nullable</dt><dd>From the user's perspective, this attribute describes whether this camera is pointed toward the 
+                        user ("user") or away from the user ("environment").
+                    </dd><dt id="widl-VideoStreamTrack-zoom"><code>zoom</code> of type <span class="idlAttrType"><a>float</a></span>, readonly, nullable</dt><dd>The current zoom scale value in use by the camera.
+                        <p>If the <a class="internalDFN" href="#dfn-sourcetype">sourceType</a> is a <code>"camera"</code> or <code>"photo-camera"</code>, or a <code>"readonly"</code> variant of those, 
+                            and the source does not support changing the zoom factor, then this attribute <em title="must" class="rfc2119">must</em> always return the value <code>1.0</code>.
+                        </p>
+                    </dd><dt id="widl-VideoStreamTrack-focusMode"><code>focusMode</code> of type <span class="idlAttrType"><a class="idlType" href="#idl-def-VideoFocusModeEnum"><code>VideoFocusModeEnum</code></a></span>, readonly, nullable</dt><dd>The source's current focusMode state.</dd><dt id="widl-VideoStreamTrack-fillLightMode"><code>fillLightMode</code> of type <span class="idlAttrType"><a class="idlType" href="#idl-def-VideoFillLightModeEnum"><code>VideoFillLightModeEnum</code></a></span>, readonly, nullable</dt><dd>The source's current fill light/flash mode.</dd><dt id="widl-VideoStreamTrack-whiteBalanceMode"><code>whiteBalanceMode</code> of type <span class="idlAttrType"><a class="idlType" href="#idl-def-VideoWhiteBalanceModeEnum"><code>VideoWhiteBalanceModeEnum</code></a></span>, readonly, nullable</dt><dd>The source's current white balance mode.</dd><dt id="widl-VideoStreamTrack-brightness"><code>brightness</code> of type <span class="idlAttrType"><a>unsigned long</a></span>, readonly, nullable</dt><dd>The source's current brightness level. The values of this settings <em title="must" class="rfc2119">must</em> range from 0 to 100.
+                        <p>If the <a class="internalDFN" href="#dfn-sourcetype">sourceType</a> is a <code>"camera"</code> or <code>"photo-camera"</code>, or a <code>"readonly"</code> variant of those, 
+                            and the source does not provide brightness level information, then this attribute <em title="must" class="rfc2119">must</em> always return the value <code>50</code>.
+                        </p>
+                    </dd><dt id="widl-VideoStreamTrack-contrast"><code>contrast</code> of type <span class="idlAttrType"><a>unsigned long</a></span>, readonly, nullable</dt><dd>The source's current contrast level. The values of this settings <em title="must" class="rfc2119">must</em> range from 0 to 100.
+                        <p>If the <a class="internalDFN" href="#dfn-sourcetype">sourceType</a> is a <code>"camera"</code> or <code>"photo-camera"</code>, or a <code>"readonly"</code> variant of those, 
+                            and the source does not provide contrast level information, then this attribute <em title="must" class="rfc2119">must</em> always return the value <code>50</code>.
+                        </p>
+                    </dd><dt id="widl-VideoStreamTrack-saturation"><code>saturation</code> of type <span class="idlAttrType"><a>unsigned long</a></span>, readonly, nullable</dt><dd>The source's current saturation level. The values of this settings <em title="must" class="rfc2119">must</em> range from 0 to 100. 
+                        <p>If the <a class="internalDFN" href="#dfn-sourcetype">sourceType</a> is a <code>"camera"</code> or <code>"photo-camera"</code>, or a <code>"readonly"</code> variant of those, 
+                            and the source does not provide saturation level information, then this attribute <em title="must" class="rfc2119">must</em> always return the value <code>50</code>.
+                        </p>
+                    </dd><dt id="widl-VideoStreamTrack-sharpness"><code>sharpness</code> of type <span class="idlAttrType"><a>unsigned long</a></span>, readonly, nullable</dt><dd>The source's current sharpness level. The values of this settings <em title="must" class="rfc2119">must</em> range from 0 to 100. 
+                        <p>If the <a class="internalDFN" href="#dfn-sourcetype">sourceType</a> is a <code>"camera"</code> or <code>"photo-camera"</code>, or a <code>"readonly"</code> variant of those, 
+                            and the source does not provide sharpness level information, then this attribute <em title="must" class="rfc2119">must</em> always return the value <code>50</code>.
+                        </p>
+                    </dd><dt id="widl-VideoStreamTrack-photoWidth"><code>photoWidth</code> of type <span class="idlAttrType"><a>unsigned long</a></span>, readonly, nullable</dt><dd>The width (in pixels) of the configured <a class="internalDFN" href="#dfn-sourcetype">sourceType</a>'s <code>"photo-camera"</code> (or <code>"readonly"</code> variant) high-resolution sensor.</dd><dt id="widl-VideoStreamTrack-photoHeight"><code>photoHeight</code> of type <span class="idlAttrType"><a>unsigned long</a></span>, readonly, nullable</dt><dd>The height (in pixels) of the configured <a class="internalDFN" href="#dfn-sourcetype">sourceType</a>'s <code>"photo-camera"</code> (or <code>"readonly"</code> variant) high-resolution sensor.</dd><dt id="widl-VideoStreamTrack-exposureMode"><code>exposureMode</code> of type <span class="idlAttrType"><a class="idlType" href="#idl-def-PhotoExposureModeEnum"><code>PhotoExposureModeEnum</code></a></span>, readonly, nullable</dt><dd>The current value of the <a class="internalDFN" href="#dfn-sourcetype">sourceType</a>'s <code>"photo-camera"</code> (or <code>"readonly"</code> variant) light meter.</dd><dt id="widl-VideoStreamTrack-isoMode"><code>isoMode</code> of type <span class="idlAttrType"><a class="idlType" href="#idl-def-PhotoISOModeEnum"><code>PhotoISOModeEnum</code></a></span>, readonly, nullable</dt><dd>The <a class="internalDFN" href="#dfn-sourcetype">sourceType</a>'s <code>"photo-camera"</code> (or <code>"readonly"</code> variant) film-equivalent speed (ISO) setting.</dd></dl></section>
+            </section>
+
+            <section id="video-source-state-supporting-enumerations">
+                <h4><span class="secno">4.1.2 </span>Video Source State Supporting Enumerations</h4>
+
+                <p><dfn id="dfn-videofacingmodeenum">VideoFacingModeEnum</dfn> enumeration</p>
+                <pre class="idl"><span class="idlEnum" id="idl-def-VideoFacingModeEnum">enum <span class="idlEnumID">VideoFacingModeEnum</span> {
+    "<span class="idlEnumItem">notavailable</span>",
+    "<span class="idlEnumItem">user</span>",
+    "<span class="idlEnumItem">environment</span>"
+};</span></pre><table class="simple"><tr><th colspan="2">Enumeration description</th></tr><tr><td><code>notavailable</code></td><td>The relative directionality of the source cannot be determined by the user agent based on the hardware.</td></tr><tr><td><code>user</code></td><td>The source is facing toward the user (a self-view camera).</td></tr><tr><td><code>environment</code></td><td>The source is facing away from the user (viewing the environment).</td></tr></table>
+            
+                <p><dfn id="dfn-videofocusmodeenum">VideoFocusModeEnum</dfn> enumeration</p>
+                <pre class="idl"><span class="idlEnum" id="idl-def-VideoFocusModeEnum">enum <span class="idlEnumID">VideoFocusModeEnum</span> {
+    "<span class="idlEnumItem">notavailable</span>",
+    "<span class="idlEnumItem">auto</span>",
+    "<span class="idlEnumItem">manual</span>"
+};</span></pre><table class="simple"><tr><th colspan="2">Enumeration description</th></tr><tr><td><code>notavailable</code></td><td>This source does not have an option to change focus modes.</td></tr><tr><td><code>auto</code></td><td>The source auto-focuses.</td></tr><tr><td><code>manual</code></td><td>The source must be manually focused.</td></tr></table>
+            
+                <p><dfn id="dfn-videofilllightmodeenum">VideoFillLightModeEnum</dfn> enumeration</p>
+                <pre class="idl"><span class="idlEnum" id="idl-def-VideoFillLightModeEnum">enum <span class="idlEnumID">VideoFillLightModeEnum</span> {
+    "<span class="idlEnumItem">notavailable</span>",
+    "<span class="idlEnumItem">auto</span>",
+    "<span class="idlEnumItem">off</span>",
+    "<span class="idlEnumItem">flash</span>",
+    "<span class="idlEnumItem">on</span>"
+};</span></pre><table class="simple"><tr><th colspan="2">Enumeration description</th></tr><tr><td><code>notavailable</code></td><td>This source does not have an option to change fill light modes (e.g., the camera does not have a flash).</td></tr><tr><td><code>auto</code></td><td>The video device's fill light will be enabled when required (typically low light conditions). Otherwise it will be 
+                        off. Note that <code>auto</code> does not guarantee that a flash will fire when <code>takePhoto</code> is called. 
+                        Use <code>flash</code> to guarantee firing of the flash for the <code>takePhoto</code> API. <code>auto</code> is the initial value.
+                    </td></tr><tr><td><code>off</code></td><td>The source's fill light and/or flash will not be used.</td></tr><tr><td><code>flash</code></td><td>If the track's <a class="internalDFN" href="#dfn-sourcetype">sourceType</a> is <code>"photo-camera"</code>, this value will always cause the flash to fire
+                        for the <code>takePhoto</code> API. Otherwise, for other supporting <a class="internalDFN" href="#dfn-sourcetype">sourceType</a>s, this value is equivalent
+                        to <code>auto</code>.
+                    </td></tr><tr><td><code>on</code></td><td>The source's fill light will be turned on (and remain on) while the source is in either <code>"armed"</code> or <code>"streaming"</code> <a class="internalDFN" href="#dfn-mode">mode</a>.
+                    </td></tr></table>
+
+                <p><dfn id="dfn-videowhitebalancemodeenum">VideoWhiteBalanceModeEnum</dfn> enumeration</p>
+                <pre class="idl"><span class="idlEnum" id="idl-def-VideoWhiteBalanceModeEnum">enum <span class="idlEnumID">VideoWhiteBalanceModeEnum</span> {
+    "<span class="idlEnumItem">notavailable</span>",
+    "<span class="idlEnumItem">auto</span>",
+    "<span class="idlEnumItem">incandescent</span>",
+    "<span class="idlEnumItem">cool-fluorescent</span>",
+    "<span class="idlEnumItem">warm-fluorescent</span>",
+    "<span class="idlEnumItem">daylight</span>",
+    "<span class="idlEnumItem">cloudy</span>",
+    "<span class="idlEnumItem">twilight</span>",
+    "<span class="idlEnumItem">shade</span>"
+};</span></pre><table class="simple"><tr><th colspan="2">Enumeration description</th></tr><tr><td><code>notavailable</code></td><td>The white-balance information is not available from this source.</td></tr><tr><td><code>auto</code></td><td>The white-balance is configured to automatically adjust.</td></tr><tr><td><code>incandescent</code></td><td>Adjust the white-balance between 2500 and 3500 Kelvin</td></tr><tr><td><code>cool-fluorescent</code></td><td>Adjust the white-balance between 4000 and 5000 Kelvin</td></tr><tr><td><code>warm-fluorescent</code></td><td>Adjust the white-balance between 5000 and 6000 Kelvin</td></tr><tr><td><code>daylight</code></td><td>Adjust the white-balance between 5000 and 6500 Kelvin</td></tr><tr><td><code>cloudy</code></td><td>Adjust the white-balance between 6500 and 8000 Kelvin</td></tr><tr><td><code>twilight</code></td><td>Adjust the white-balance between 8000 and 9000 Kelvin</td></tr><tr><td><code>shade</code></td><td>Adjust the white-balance between 9000 and 10,000 Kelvin</td></tr></table>
+
+                <p><dfn id="dfn-photoexposuremodeenum">PhotoExposureModeEnum</dfn> enumeration</p>
+                <pre class="idl"><span class="idlEnum" id="idl-def-PhotoExposureModeEnum">enum <span class="idlEnumID">PhotoExposureModeEnum</span> {
+    "<span class="idlEnumItem">notavailable</span>",
+    "<span class="idlEnumItem">auto</span>",
+    "<span class="idlEnumItem">frame-average</span>",
+    "<span class="idlEnumItem">center-weighted</span>",
+    "<span class="idlEnumItem">spot-metering</span>"
+};</span></pre><table class="simple"><tr><th colspan="2">Enumeration description</th></tr><tr><td><code>notavailable</code></td><td>The exposure mode is not known or not available on this source.</td></tr><tr><td><code>auto</code></td><td>The exposure mode is automatically configured/adjusted at the source's discretion.</td></tr><tr><td><code>frame-average</code></td><td>The light sensor should average of light information from entire scene.</td></tr><tr><td><code>center-weighted</code></td><td>The light sensor should bias sensitivity concentrated toward center of viewfinder.</td></tr><tr><td><code>spot-metering</code></td><td>The light sensor should only consider a centered spot area for exposure calculations.</td></tr></table>
+            
+                <p><dfn id="dfn-photoisomodeenum">PhotoISOModeEnum</dfn> enumeration</p>
+                <pre class="idl"><span class="idlEnum" id="idl-def-PhotoISOModeEnum">enum <span class="idlEnumID">PhotoISOModeEnum</span> {
+    "<span class="idlEnumItem">notavailable</span>",
+    "<span class="idlEnumItem">auto</span>",
+    "<span class="idlEnumItem">100</span>",
+    "<span class="idlEnumItem">200</span>",
+    "<span class="idlEnumItem">400</span>",
+    "<span class="idlEnumItem">800</span>",
+    "<span class="idlEnumItem">1250</span>"
+};</span></pre><table class="simple"><tr><th colspan="2">Enumeration description</th></tr><tr><td><code>notavailable</code></td><td>The ISO value is not known or not available on this source.</td></tr><tr><td><code>auto</code></td><td>The ISO value is automatically selected/adjusted at the source's discretion.</td></tr><tr><td><code>100</code></td><td>An ASA rating of 100</td></tr><tr><td><code>200</code></td><td>An ASA rating of 200</td></tr><tr><td><code>400</code></td><td>An ASA rating of 400</td></tr><tr><td><code>800</code></td><td>An ASA rating of 800</td></tr><tr><td><code>1250</code></td><td>An ASA rating of 1250</td></tr></table>
+            </section>
+        </section>
+
+        <section id="audio-source-state">
+            <h3><span class="secno">4.2 </span>Audio Source State</h3>
+
+            <p>This table summarizes the expected values of the video source state attributes for each of the <code><a class="internalDFN" href="#dfn-sourcetype">sourceType</a></code>s defined earlier:</p>
+
+            <table class="simple">
+                <thead>
+                    <tr>
+                        <th><code>sourceType</code></th>
+                        <th>"none"</th>
+                        <th>"microphone"</th>
+                        <th>"readonly"</th>
+                        <th>"remote"</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>sourceType</code></td>
+                        <td>current <a class="idlType" href="#idl-def-SourceTypeEnum"><code>SourceTypeEnum</code></a> value</td>
+                        <td>current <a class="idlType" href="#idl-def-SourceTypeEnum"><code>SourceTypeEnum</code></a> value</td>
+                        <td>current <a class="idlType" href="#idl-def-SourceTypeEnum"><code>SourceTypeEnum</code></a> value</td>
+                        <td>current <a class="idlType" href="#idl-def-SourceTypeEnum"><code>SourceTypeEnum</code></a> value</td>
+                    </tr>
+                    <tr>
+                        <td><code>sourceId</code></td>
+                        <td>null</td>
+                        <td>current <code>DOMString</code> value</td>
+                        <td>current <code>DOMString</code> value</td>
+                        <td>null</td>
+                    </tr>
+                    <tr>
+                        <td><code>volume</code></td>
+                        <td>null</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                        <td>current <code>unsigned long</code> value</td>
+                    </tr>
+                    <tr>
+                        <td><code>gain</code></td>
+                        <td>null</td>
+                        <td>current <code>float</code> value</td>
+                        <td>current <code>float</code> value</td>
+                        <td>null</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <section id="source-state-api-extensions-to-audiostreamtrack">
+                <h4><span class="secno">4.2.1 </span>Source State API Extensions to AudioStreamTrack</h4>
+                <pre class="idl"><span class="idlInterface" id="idl-def-AudioStreamTrack-1">partial interface <span class="idlInterfaceID">AudioStreamTrack</span> {
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>unsigned long</a>?</span> <span class="idlAttrName"><a href="#widl-AudioStreamTrack-volume">volume</a></span>;</span>
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>float</a>?</span>         <span class="idlAttrName"><a href="#widl-AudioStreamTrack-gain">gain</a></span>;</span>
+};</span></pre><section><h5 id="attributes-6">Attributes</h5><dl class="attributes"><dt id="widl-AudioStreamTrack-volume"><code>volume</code> of type <span class="idlAttrType"><a>unsigned long</a></span>, readonly, nullable</dt><dd>The current audio track's volume (as a percentage). A volume of 0 is silence, while a volume of
+                        100 is the maximum supported volume.
+                    </dd><dt id="widl-AudioStreamTrack-gain"><code>gain</code> of type <span class="idlAttrType"><a>float</a></span>, readonly, nullable</dt><dd>The sensitivity of the source. This value <em title="must" class="rfc2119">must</em> be a positive floating-point number or zero. 
+                        The gain value establishes the maximum threshold of the the microphone's sensitivity. When the gain is 0, 
+                        the source is essentially off (it will not be able to pick-up any sound).
+                        <p>If the <a class="internalDFN" href="#dfn-sourcetype">sourceType</a> is a <code>"microphone"</code> or a <code>"readonly"</code> microphone, 
+                            and the source does not provide gain information, then this attribute <em title="must" class="rfc2119">must</em> always return the value <code>1.0</code>.
+                        </p>
+                    </dd></dl></section>
+            </section>
+        </section>
+
+        <section id="tracking-source-state-changes">
+            <h3><span class="secno">4.3 </span>Tracking Source State Changes</h3>
+
+            <p>As the source adjusts its state (for any reason), applications may observer the related state changes. The following 
+                extensions to the MediaStreamTrack provide an alternative to polling the individual state attributes defined on the 
+                video and audio track-types.
+            </p>
+
+            <section id="event-handlers-and-object-definitions">
+                <h4><span class="secno">4.3.1 </span>Event Handlers and Object Definitions</h4>
+
+                <p>The following event handler is added to the generic <a class="internalDFN" href="#dfn-mediastreamtrack">MediaStreamTrack</a> interface.</p>
+
+                <pre class="idl"><span class="idlInterface" id="idl-def-MediaStreamTrack-2">partial interface <span class="idlInterfaceID">MediaStreamTrack</span> {
+<span class="idlAttribute">             attribute <span class="idlAttrType"><a>EventHandler</a></span> <span class="idlAttrName"><a href="#widl-MediaStreamTrack-onstatechanged">onstatechanged</a></span>;</span>
+};</span></pre><section><h5 id="attributes-7">Attributes</h5><dl class="attributes"><dt id="widl-MediaStreamTrack-onstatechanged"><code>onstatechanged</code> of type <span class="idlAttrType"><a>EventHandler</a></span></dt><dd>Register/unregister for "statechanged" events. The handler should expect to get a <a class="internalDFN" href="#dfn-mediastreamtrackstateevent">MediaStreamTrackStateEvent</a> object as its first
+                        parameter. The event is fired asynchronously after the source changes its state.
+                        <p>The user agent is encouraged to coalesce state changes into as few "statechanged" events as possible (when multiple state changes
+                            occur within a reasonably short amount of time to each other).</p>
+                        <p>The <code>"start"</code> event described earlier is a convenience event because a "statechanged" event will also
+                            be fired when the <a class="internalDFN" href="#dfn-sourcetype">sourceType</a> changes from <code>"none"</code> to something else. The <code>"start"</code> event
+                            <em title="must" class="rfc2119">must</em> fire before the "statechanged" event fires.
+                        </p>
+                    </dd></dl></section>
+
+                <p>The following define the <dfn id="dfn-mediastreamtrackstateevent">MediaStreamTrackStateEvent</dfn> object and related initializer.</p>
+                
+                <pre class="idl"><span class="idlInterface" id="idl-def-MediaStreamTrackStateEvent">[<span class="extAttr">Constructor(DOMString type, optional MediaStreamTrackStateEventInit eventInitDict)</span>]
+interface <span class="idlInterfaceID">MediaStreamTrackStateEvent</span> : <span class="idlSuperclass"><a>Event</a></span> {
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>DOMString</a>[]</span> <span class="idlAttrName"><a href="#widl-MediaStreamTrackStateEvent-states">states</a></span>;</span>
+};</span></pre><section><h5 id="attributes-8">Attributes</h5><dl class="attributes"><dt id="widl-MediaStreamTrackStateEvent-states"><code>states</code> of type array of <span class="idlAttrType"><a>DOMString</a></span>, readonly</dt><dd>A list of state names that just changed values.</dd></dl></section>
+            
+                <p>The initializer for the above-defined event type:</p>
+
+                <pre class="idl"><span class="idlDictionary" id="idl-def-MediaStreamTrackStateEventInit">dictionary <span class="idlDictionaryID">MediaStreamTrackStateEventInit</span> : <span class="idlSuperclass"><a>EventInit</a></span> {
+<span class="idlMember">    <span class="idlMemberType">sequence&lt;<a>DOMString</a>&gt;</span> <span class="idlMemberName"><a href="#widl-MediaStreamTrackStateEventInit-states">states</a></span>;</span>
+};</span></pre><section><h5 id="dictionary-mediastreamtrackstateeventinit-members">Dictionary <a class="idlType" href="#idl-def-MediaStreamTrackStateEventInit"><code>MediaStreamTrackStateEventInit</code></a> Members</h5><dl class="dictionary-members"><dt id="widl-MediaStreamTrackStateEventInit-states"><code>states</code> of type <span class="idlMemberType">sequence&lt;<a>DOMString</a>&gt;</span></dt><dd>List of state names to populate into the MediaStreamTrackStateEvent object's states readonly attribute.</dd></dl></section>
+            </section>
+
+        </section>
+
+        <section id="out-of-scope-state-considered-and-rejected-from-this-proposal">
+            <h3><span class="secno">4.4 </span>Out-of-scope State (Considered and Rejected from this Proposal)</h3>
+
+            <p>The following settings have been proposed, but are not included in this version to keep the 
+                initial set of settings scoped to those that:
+            </p>
+                
+            <ol>
+                <li>cannot be easily computed in post-processing</li>
+                <li>are not redundant with other settings</li>
+                <li>are settings found in nearly all devices (common)</li>
+                <li>can be easily tested for conformance</li>
+            </ol>
+
+            <p>Each setting also includes a brief explanatory rationale for why it's not included:</p>
+
+            <ol>
+                <li><code>horizontalAspectRatio</code> - easily calculated based on width/height in the dimension values</li>
+                <li><code>verticalAspectRatio</code> - see horizontalAspectRatio explanation</li>
+                <li><code>orientation</code> - can be easily calculated based on the width/height values and the current rotation</li>
+                <li><code>aperatureSize</code> - while more common on digital cameras, not particularly common on webcams (major use-case 
+                    for this feature)</li>
+                <li><code>shutterSpeed</code> - see aperatureSize explanation</li>
+                <li><code>denoise</code> - may require specification of the algorithm processing or related image processing filter required
+                    to implement.
+                </li>
+                <li><code>effects</code> - sounds like a v2 or independent feature (depending on the effect).</li>
+                <li><code>faceDetection</code> - sounds like a v2 feature. Can also be done using post-processing techniques (though
+                    perhaps not as fast...)
+                </li>
+                <li><code>antiShake</code>  - sounds like a v2 feature.</li>
+                <li><code>geoTagging</code> - this can be independently associated with a recorded photo/video/audio clip using the 
+                    Geolocation API. Automatically hooking up Geolocation to Media Capture sounds like an exercise for v2
+                    given the possible complications.
+                </li>
+                <li><code>highDynamicRange</code> - not sure how this can be specified, or if this is just a v2 feature.</li>
+                <li><code>skintoneEnhancement</code> - not a particularly common setting.</li>
+                <li><code>shutterSound</code> - Can be accomplished by syncing custom audio playback via the <code>&lt;audio&gt;</code> tag if desired.
+                    By default, there will be no sound issued.
+                </li>
+                <li><code>redEyeReduction</code> - photo-specific setting. (Could be considered if photo-specific settings
+                    are introduced.)
+                </li>
+                <li><code>sceneMode</code> - while more common on digital cameras, not particularly common on webcams (major use-case 
+                    for this feature)</li>
+                <li><code>antiFlicker</code> - not a particularly common setting.</li>
+                <li><code>zeroShutterLag</code> - this seems more like a <em>hope</em> than a setting. I'd rather just have implementations
+                    make the shutter snap as quickly as possible after takePhoto, rather than requiring an opt-in/opt-out
+                    for this setting.
+                </li>
+                <li><code>rotation</code> - rotation can be provided at the sink level if desired (CSS transforms on a video element).</li>
+                <li><code>mirror</code> - mirroring can be provided at the sink level if desired (CSS transforms on a video element).</li>
+                <li><code>bitRate</code> - this is more directly relevant to peer connection transport objects than track-level information.</li>
+            </ol>
+            
+            <p>The following settings may be included by working group decision:</p>
+
+            <ol>
+                <li>exposureCompensation (is this the same as exposure?)</li>
+                <li>evShift</li>
+            </ol>
+        </section>
+    </section>
+
+    <section id="source-capabilities">
+        <!--OddPage--><h2><span class="secno">5. </span>Source Capabilities</h2>
+
+        <p>This section describes APIs for retrieving the capabilities of a given source. The return value of these APIs is contingent on
+            the track's <a class="internalDFN" href="#dfn-sourcetype">sourceType</a> value as summarized in the table below.
+        </p>
+
+        <p>For each source <a class="internalDFN" href="#dfn-state">state</a> attribute defined (in the previous section), there is a corresponding capability associated with it.
+            Capabilities are provided as either a min/max range, or a list of enumerated values but not both. Min/max capabilities are always provided
+            for source <a class="internalDFN" href="#dfn-state">state</a> that are not enumerated types. Listed capabilities are always provided for source <a class="internalDFN" href="#dfn-state">state</a> corresponding
+            to enumerated types.
+        </p>
+        
+        <table class="simple">
+            <thead>
+                <tr>
+                    <th><code>sourceType</code></th>
+                    <th>"none"</th>
+                    <th>"camera"/ "photo-camera"/ "microphone"</th>
+                    <th>"readonly"</th>
+                    <th>"remote"</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>capabilities()</code></td>
+                    <td>null</td>
+                    <td>(<a class="idlType" href="#idl-def-AllVideoCapabilities"><code>AllVideoCapabilities</code></a> or <a class="idlType" href="#idl-def-AllAudioCapabilities"><code>AllAudioCapabilities</code></a>)</td>
+                    <td>(<a class="idlType" href="#idl-def-AllVideoCapabilities"><code>AllVideoCapabilities</code></a> or <a class="idlType" href="#idl-def-AllAudioCapabilities"><code>AllAudioCapabilities</code></a>)</td>
+                    <td>null</td>
+                </tr>
+                <tr>
+                    <td><code>getCapability()</code></td>
+                    <td>null</td>
+                    <td>(CapabilityRange or CapabilityList)</td>
+                    <td>(CapabilityRange or CapabilityList)</td>
+                    <td>null</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <section id="source-capabilities-api-extensions-to-mediastreamtrack">
+            <h3><span class="secno">5.1 </span>Source Capabilities API Extensions to MediaStreamTrack</h3>
+            
+            <pre class="idl"><span class="idlInterface" id="idl-def-MediaStreamTrack-3">partial interface <span class="idlInterfaceID">MediaStreamTrack</span> {
+<span class="idlMethod">    <span class="idlMethType">(<a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a> or <a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a>)</span>            <span class="idlMethName"><a href="#widl-MediaStreamTrack-getCapability-CapabilityRange-CapabilityList-DOMString-stateName">getCapability</a></span> (<span class="idlParam"><span class="idlParamType"><a>DOMString</a></span> <span class="idlParamName">stateName</span></span>);</span>
+<span class="idlMethod">    <span class="idlMethType">(<a class="idlType" href="#idl-def-AllVideoCapabilities"><code>AllVideoCapabilities</code></a> or <a class="idlType" href="#idl-def-AllAudioCapabilities"><code>AllAudioCapabilities</code></a>)</span> <span class="idlMethName"><a href="#widl-MediaStreamTrack-capabilities-AllVideoCapabilities-AllAudioCapabilities">capabilities</a></span> ();</span>
+};</span></pre><section id="methods"><h4><span class="secno">5.1.1 </span>Methods</h4><dl class="methods"><dt id="widl-MediaStreamTrack-getCapability-CapabilityRange-CapabilityList-DOMString-stateName"><code>getCapability</code></dt><dd>
+				    
+                    
+                    <p>If a capability is requested that does not have a corresponding <a class="internalDFN" href="#dfn-state">state</a> on the track-type, then a <code>null</code> value is returned (e.g., 
+                        a <a class="internalDFN" href="#dfn-videostreamtrack">VideoStreamTrack</a> requests the <code>"gain"</code> capability. Since <code>"gain"</code> is not a state supported by video stream tracks, 
+                        this API will return <code>null</code>).
+                    </p>
+
+                    <p>Given that implementations of various hardware may not exactly map to the same range, an implementation <em title="should" class="rfc2119">should</em> make a reasonable attempt to 
+                        translate and scale the hardware's setting onto the mapping provided by this specification. If this is not possible due to the user agent's
+                        inability to retrieve a given capapbility from a source, then for <a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a>-typed capabilities, the <code>min</code> and <code>max</code>  
+                        fields will not be present on the returned dictionary, and the <code>supported</code> field will be <code>false</code>. For <a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a>-typed
+                        capabilities, a suitable <code>"notavailable"</code> value will be the sole capability in the list.
+                    </p>
+
+                    <div class="note"><div class="note-title"><span>Note</span></div><p>An example of the user agent providing an alternative mapping: if a source supports a hypothetical fluxCapacitance state whose type
+                        is a CapabilityRange, and the state is defined in this specification to be the range from -10 (min) to 10 (max), but the source's (hardware setting) 
+                        for fluxCapacitance only supports values of "off" "medium" and "full", then the user agent should map the range value of -10 to "off", 10 should map 
+                        to "full", and 0 should map to "medium". Constraints imposing a strict value of 3 will cause the user agent to attempt to set the value of "medium"
+                        on the hardware, and return a fluxCapacitance <a class="internalDFN" href="#dfn-state">state</a> of 0, the closest supported setting. No error event is raised in this scenario.
+                    </p></div>
+
+                    <p>CapabilityList objects should order their enumerated values from minimum to maximum where it makes sense, or in 
+                        the order defined by the enumerated type where applicable.
+                    </p>
+
+                    <p>See the <a class="idlType" href="#idl-def-AllVideoCapabilities"><code>AllVideoCapabilities</code></a> and <a class="idlType" href="#idl-def-AllAudioCapabilities"><code>AllAudioCapabilities</code></a> dictionary for details on the expected types for the various supported
+                        state names.
+                    </p>
+                <table class="parameters"><tr><th>Parameter</th><th>Type</th><th>Nullable</th><th>Optional</th><th>Description</th></tr><tr><td class="prmName">stateName</td><td class="prmType"><code><a>DOMString</a></code></td><td class="prmNullFalse">?</td><td class="prmOptFalse">?</td><td class="prmDesc">The name of the source <a class="internalDFN" href="#dfn-state">state</a> for which the range of expected values should be returned.</td></tr></table><div><em>Return type: </em><code>(<a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a> or <a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a>)</code></div></dd><dt id="widl-MediaStreamTrack-capabilities-AllVideoCapabilities-AllAudioCapabilities"><code>capabilities</code></dt><dd>Returns a dictionary with all of the capabilities for the track type. If the track type is <a class="internalDFN" href="#dfn-videostreamtrack">VideoStreamTrack</a>, the 
+                    <a class="idlType" href="#idl-def-AllVideoCapabilities"><code>AllVideoCapabilities</code></a> dictionary is returned. If the track type is <a class="internalDFN" href="#dfn-audiostreamtrack">AudioStreamTrack</a>, the 
+                    <a class="idlType" href="#idl-def-AllAudioCapabilities"><code>AllAudioCapabilities</code></a> dictionary is returned.
+                    <p>The dictionaries are populated as if each <a class="internalDFN" href="#dfn-state">state</a> were requested individually using <code>getCapability()</code>,
+                        and the results of that API are assigned as the value of each stateName in the dictionary. Notably, the returned values
+                    </p>
+                <div><em>No parameters.</em></div><div><em>Return type: </em><code>(<a class="idlType" href="#idl-def-AllVideoCapabilities"><code>AllVideoCapabilities</code></a> or <a class="idlType" href="#idl-def-AllAudioCapabilities"><code>AllAudioCapabilities</code></a>)</code></div></dd></dl></section>
+        </section>
+
+        <section id="source-capability-supporting-structures">
+            <h3><span class="secno">5.2 </span>Source Capability Supporting Structures</h3>
+            
+            <p>CapabilityRange dictionary</p>
+            <pre class="idl"><span class="idlDictionary" id="idl-def-CapabilityRange">dictionary <span class="idlDictionaryID">CapabilityRange</span> {
+<span class="idlMember">    <span class="idlMemberType"><a>any</a></span>     <span class="idlMemberName"><a href="#widl-CapabilityRange-max">max</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a>any</a></span>     <span class="idlMemberName"><a href="#widl-CapabilityRange-min">min</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a>boolean</a></span> <span class="idlMemberName"><a href="#widl-CapabilityRange-supported">supported</a></span>;</span>
+};</span></pre><section id="dictionary-capabilityrange-members"><h4><span class="secno">5.2.1 </span>Dictionary <a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a> Members</h4><dl class="dictionary-members"><dt id="widl-CapabilityRange-max"><code>max</code> of type <span class="idlMemberType"><a>any</a></span></dt><dd>The maximum value of this capability. 
+                    <p>The type of this value is specific to the capability as noted in the table for <a>getCapability</a>.</p>
+                    <p>If the related capability is not supported by the source, then this field will not be provided by the 
+                        user agent (it will be <code>undefined</code>).
+                    </p>
+                </dd><dt id="widl-CapabilityRange-min"><code>min</code> of type <span class="idlMemberType"><a>any</a></span></dt><dd>The minimum value of this capability. 
+                    <p>The type of this value is specific to the capability as noted in the table for <a>getCapability</a>.</p>
+                    <p>If the related capability is not supported by the source, then this field will not be provided by the 
+                        user agent (it will be <code>undefined</code>).
+                    </p>
+                </dd><dt id="widl-CapabilityRange-supported"><code>supported</code> of type <span class="idlMemberType"><a>boolean</a></span></dt><dd>Returns the value <code>true</code> if the capability is supported, false otherwise.</dd></dl></section>
+
+            <p>CapabilityList array</p>
+
+            <p>Capability Lists are just an array of supported <code>DOMString</code> values from the possible superset of 
+                values described by each <a class="internalDFN" href="#dfn-state">state</a>'s enumerated type.</p>
+
+            <pre class="idl"><span class="idlTypedef" id="idl-def-CapabilityList">typedef <span class="idlTypedefType">sequence&lt;<a>DOMString</a>&gt;</span> <span class="idlTypedefID">CapabilityList</span>;</span></pre><div class="idlTypedefDesc">
+            </div>
+            
+            <p>AllVideoCapabilities dictionary</p>
+
+            <pre class="idl"><span class="idlDictionary" id="idl-def-AllVideoCapabilities">dictionary <span class="idlDictionaryID">AllVideoCapabilities</span> {
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a>?</span>  <span class="idlMemberName"><a href="#widl-AllVideoCapabilities-sourceType">sourceType</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a>?</span>  <span class="idlMemberName"><a href="#widl-AllVideoCapabilities-sourceId">sourceId</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a>?</span> <span class="idlMemberName"><a href="#widl-AllVideoCapabilities-width">width</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a>?</span> <span class="idlMemberName"><a href="#widl-AllVideoCapabilities-height">height</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a>?</span> <span class="idlMemberName"><a href="#widl-AllVideoCapabilities-frameRate">frameRate</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a>?</span>  <span class="idlMemberName"><a href="#widl-AllVideoCapabilities-facingMode">facingMode</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a>?</span> <span class="idlMemberName"><a href="#widl-AllVideoCapabilities-zoom">zoom</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a>?</span>  <span class="idlMemberName"><a href="#widl-AllVideoCapabilities-focusMode">focusMode</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a>?</span>  <span class="idlMemberName"><a href="#widl-AllVideoCapabilities-fillLightMode">fillLightMode</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a>?</span>  <span class="idlMemberName"><a href="#widl-AllVideoCapabilities-whiteBalanceMode">whiteBalanceMode</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a>?</span> <span class="idlMemberName"><a href="#widl-AllVideoCapabilities-brightness">brightness</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a>?</span> <span class="idlMemberName"><a href="#widl-AllVideoCapabilities-contrast">contrast</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a>?</span> <span class="idlMemberName"><a href="#widl-AllVideoCapabilities-saturation">saturation</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a>?</span> <span class="idlMemberName"><a href="#widl-AllVideoCapabilities-sharpness">sharpness</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a>?</span> <span class="idlMemberName"><a href="#widl-AllVideoCapabilities-photoWidth">photoWidth</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a>?</span> <span class="idlMemberName"><a href="#widl-AllVideoCapabilities-photoHeight">photoHeight</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a>?</span>  <span class="idlMemberName"><a href="#widl-AllVideoCapabilities-exposureMode">exposureMode</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a>?</span>  <span class="idlMemberName"><a href="#widl-AllVideoCapabilities-isoMode">isoMode</a></span>;</span>
+};</span></pre><section id="dictionary-allvideocapabilities-members"><h4><span class="secno">5.2.2 </span>Dictionary <a class="idlType" href="#idl-def-AllVideoCapabilities"><code>AllVideoCapabilities</code></a> Members</h4><dl class="dictionary-members"><dt id="widl-AllVideoCapabilities-sourceType"><code>sourceType</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a></span>, nullable</dt><dd>The available sourceType options (<a class="idlType" href="#idl-def-SourceTypeEnum"><code>SourceTypeEnum</code></a>) on the current source.</dd><dt id="widl-AllVideoCapabilities-sourceId"><code>sourceId</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a></span>, nullable</dt><dd>The available source identifiers of the current source--this will always return a list with a single 
+                    identifier (that of the current source). Note, to get a list of other available source identifiers,
+                    use the static <a>getSourceIds</a> method.
+                </dd><dt id="widl-AllVideoCapabilities-width"><code>width</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a></span>, nullable</dt><dd>The range should span the video source's pre-set width values with min being the smallest width, and max the 
+                    largest width. The type of the min/max values are unsigned long.</dd><dt id="widl-AllVideoCapabilities-height"><code>height</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a></span>, nullable</dt><dd>
+                    The range should span the video source's pre-set height values with min being the smallest width, and max the 
+                    largest width. The type of the min/max values are unsigned long.
+                </dd><dt id="widl-AllVideoCapabilities-frameRate"><code>frameRate</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a></span>, nullable</dt><dd>The supported range of frame rates on the source. The type of the min/max values are float.</dd><dt id="widl-AllVideoCapabilities-facingMode"><code>facingMode</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a></span>, nullable</dt><dd>The available video facing options (<a class="internalDFN" href="#dfn-videofacingmodeenum">VideoFacingModeEnum</a>) on the source.</dd><dt id="widl-AllVideoCapabilities-zoom"><code>zoom</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a></span>, nullable</dt><dd>
+                    The supported zoom range on the source. The type of the min/max/initial values are float. The initial value is 1. The float value is a scale
+                    factor, for example 0.5 is zoomed out by double, while 2.0 is zoomed in by double. Requests should be rounded to the nearest supporting zoom 
+                    factor by the implementation (when zoom is supported).
+                </dd><dt id="widl-AllVideoCapabilities-focusMode"><code>focusMode</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a></span>, nullable</dt><dd>The available focus mode options (<a class="internalDFN" href="#dfn-videofocusmodeenum">VideoFocusModeEnum</a>) on the source.</dd><dt id="widl-AllVideoCapabilities-fillLightMode"><code>fillLightMode</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a></span>, nullable</dt><dd>The available fill light mode options (<a class="internalDFN" href="#dfn-videofilllightmodeenum">VideoFillLightModeEnum</a>) on the source.</dd><dt id="widl-AllVideoCapabilities-whiteBalanceMode"><code>whiteBalanceMode</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a></span>, nullable</dt><dd>The available white-balance mode options (<a class="internalDFN" href="#dfn-videowhitebalancemodeenum">VideoWhiteBalanceModeEnum</a>) on the source.</dd><dt id="widl-AllVideoCapabilities-brightness"><code>brightness</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a></span>, nullable</dt><dd>The supported range of brightness on the source. The type of the min/max values are unsigned long.</dd><dt id="widl-AllVideoCapabilities-contrast"><code>contrast</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a></span>, nullable</dt><dd>The supported range of contrast on the source. The type of the min/max values are unsigned long.</dd><dt id="widl-AllVideoCapabilities-saturation"><code>saturation</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a></span>, nullable</dt><dd>The supported range of saturation on the source. The type of the min/max values are unsigned long.</dd><dt id="widl-AllVideoCapabilities-sharpness"><code>sharpness</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a></span>, nullable</dt><dd>The supported range of sharpness on the source. The type of the min/max values are unsigned long.</dd><dt id="widl-AllVideoCapabilities-photoWidth"><code>photoWidth</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a></span>, nullable</dt><dd>
+                    The range should span the video source's high-resolution photo-mode pre-set width values with min being the smallest width, and max the 
+                    largest width. The type of the min/max/initial values are unsigned long.
+                </dd><dt id="widl-AllVideoCapabilities-photoHeight"><code>photoHeight</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a></span>, nullable</dt><dd>
+                    The range should span the video source's high-resolution photo-mode pre-set height values with min being the smallest width, and max the 
+                    largest width. The type of the min/max/initial values are unsigned long.
+                </dd><dt id="widl-AllVideoCapabilities-exposureMode"><code>exposureMode</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a></span>, nullable</dt><dd>The available exposure mode options (<a class="internalDFN" href="#dfn-photoexposuremodeenum">PhotoExposureModeEnum</a>) on the source.</dd><dt id="widl-AllVideoCapabilities-isoMode"><code>isoMode</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a></span>, nullable</dt><dd>The available ISO mode options (<a class="internalDFN" href="#dfn-photoisomodeenum">PhotoISOModeEnum</a>) on the source.</dd></dl></section>
+
+            <p>AllAudioCapabilities dictionary</p>
+
+            <pre class="idl"><span class="idlDictionary" id="idl-def-AllAudioCapabilities">dictionary <span class="idlDictionaryID">AllAudioCapabilities</span> {
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a>?</span>  <span class="idlMemberName"><a href="#widl-AllAudioCapabilities-sourceType">sourceType</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a>?</span>  <span class="idlMemberName"><a href="#widl-AllAudioCapabilities-sourceId">sourceId</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a>?</span> <span class="idlMemberName"><a href="#widl-AllAudioCapabilities-volume">volume</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a>?</span> <span class="idlMemberName"><a href="#widl-AllAudioCapabilities-gain">gain</a></span>;</span>
+};</span></pre><section id="dictionary-allaudiocapabilities-members"><h4><span class="secno">5.2.3 </span>Dictionary <a class="idlType" href="#idl-def-AllAudioCapabilities"><code>AllAudioCapabilities</code></a> Members</h4><dl class="dictionary-members"><dt id="widl-AllAudioCapabilities-sourceType"><code>sourceType</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a></span>, nullable</dt><dd>The available sourceType options (<a class="idlType" href="#idl-def-SourceTypeEnum"><code>SourceTypeEnum</code></a>) on the current source.</dd><dt id="widl-AllAudioCapabilities-sourceId"><code>sourceId</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityList"><code>CapabilityList</code></a></span>, nullable</dt><dd>The available source identifiers of the current source--this will always return a list with a single 
+                    identifier (that of the current source). Note, to get a list of other available source identifiers,
+                    use the static <a>getSourceIds</a> method.
+                </dd><dt id="widl-AllAudioCapabilities-volume"><code>volume</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a></span>, nullable</dt><dd>
+                    The supported range of output volume percentages on the source. The type of the min/max values are unsigned long.
+                </dd><dt id="widl-AllAudioCapabilities-gain"><code>gain</code> of type <span class="idlMemberType"><a class="idlType" href="#idl-def-CapabilityRange"><code>CapabilityRange</code></a></span>, nullable</dt><dd>The supported gain range on the source. The type of the min/max values are float.</dd></dl></section>
+        </section>
+    </section>
+
+    <section id="track-constraints">
+        <!--OddPage--><h2><span class="secno">6. </span>Track Constraints</h2>
+
+        <p>This section contains an explanation of how constraint manipulation is expected to work with sources under various conditions. It also defines APIs 
+            for working with the set of applied constraints on a track. Finally, it defines a set of constraint names matching the previously-defined 
+            state attributes and capabilities.</p>
+
+        <section id="constraints-manipulation-expectations">
+            <h3><span class="secno">6.1 </span>Constraints Manipulation Expectations</h3>
+
+            <p>Browsers provide a media pipeline from sources to sinks.  In a browser, sinks are the &lt;img&gt;, &lt;video&gt; and &lt;audio&gt; tags. Traditional sources 
+				include camera, microphones, streamed content, files and web resources.  The media produced by these sources typically does not change over time - these sources can be 
+				considered to be static.</p>
+	
+			<p>The sinks that display these sources to the user (the actual tags themselves) have a variety of controls for manipulating the source content.  For 
+				example, an &lt;img&gt; tag scales down a huge source image of 1600x1200 pixels to fit in a rectangle defined with <code>width="400"</code> and 
+				<code>height="300"</code>.</p>
+
+			<p>The getUserMedia API adds dynamic sources such as microphones and cameras - the characteristics of these sources can change in response to application 
+				needs. These sources can be considered to be dynamic in nature. A &lt;video&gt; element that displays media from a dynamic source can either perform 
+				scaling or it can feed back information along the media pipeline and have the source produce content more suitable for display.</p>
+
+			<div class="note"><div class="note-title"><span>Note</span></div><p><strong>Note: </strong> This sort of feedback loop is obviously just enabling an "optimization", but it's a non-trivial gain. This 
+				optimization can save battery, allow for less network congestion, etc...</p></div>
+
+            <p>This proposal assumes that <code>MediaStream</code> sinks (such as <code>&lt;video&gt;</code>, <code>&lt;audio&gt;</code>, 
+                and even <code>RTCPeerConnection</code>) will continue to have mechanisms to further transform the source stream beyond that
+                which the <a class="internalDFN" href="#dfn-state">state</a>s, <a class="internalDFN" href="#dfn-capabilities">capabilities</a>, and <a class="internalDFN" href="#dfn-constraints">constraints</a> described in this proposal offer. (The sink transformation options, including 
+                those of <code>RTCPeerConnection</code> are outside the scope of this proposal.)</p>
+
+            <p>The act of changing or applying a track constraint may affect the <a class="internalDFN" href="#dfn-state">state</a> of all tracks sharing that source and consequently all down-level sinks 
+                that are using that source. Many sinks may be able to take these changes in stride, such as the <code>&lt;video&gt;</code> element or <code>RTCPeerConnection</code>. 
+                Others like the Recorder API may fail as a result of a source state change.</p>
+
+            <p>The <code>RTCPeerConnection</code> is an interesting object because it acts simultaneously as both a sink <strong>and</strong> a source for over-the-network
+                streams. As a sink, it has source transformational capabilities (e.g., lowering bit-rates, scaling-up or down resolutions, adjusting frame-rates), and as a
+                source it could have its own settings changed by a track source (though in this proposal <a class="internalDFN" href="#dfn-sourcetype">sourceType</a>s of type <code>"remote"</code> do not consider 
+                the current constraints applied to a track).
+            </p>
+
+            <p>To illustrate how changes to a given source impact various sinks, consider the following example. This example only uses width and height, but the same
+                principles apply to any of the <a class="internalDFN" href="#dfn-state">state</a>s exposed in this proposal. In the first figure a home client has obtained a video source
+                from its local video camera. The source's width and height state are 800 pixels by 600 pixels, respectively. Three <code>MediaStream</code> objects on the 
+                home client contain tracks that use this same <a>sourceId</a>. The three media streams are connected to three different sinks, a <code>&lt;video&gt;</code> element (A), 
+                another <code>&lt;video&gt;</code> element (B), and a peer connection (C). The peer connection is streaming the source video to an away client. On the away client
+                there are two media streams with tracks that use the peer connection as a source. These two media streams are connected to two <code>&lt;video&gt;</code> element
+                sinks (Y and Z).
+            </p>
+            
+            <img title="Changing media stream source effects: before the requested change" src="change_settings_before.png">
+
+            <p>Note that at this moment, all of the sinks on the home client must apply a transformation to the original source's provided state dimensions. A is scaling the video up
+                (resulting in loss of quality), B is scaling the video down, and C is also scaling the video up slightly for sending over the network. On the away client, sink 
+                Y is scaling the video way down, while sink Z is not applying any scaling.
+            </p>
+
+            <p>Using the constraint APIs defined in the next section, the home client's video source is changed to a higher resolution (1920 by 1200 pixels).</p>
+
+            <img title="Changing media stream source effects: after the requested change" src="change_settings_after.png">
+
+            <p>Note that the source change immediately effects all of the sinks on home client, but does not impact any of the sinks (or sources) on the away client. With the 
+                increase in the home client source video's dimensions, sink A no longer has to perform any scaling, while sink B must scale down even further than before.
+                Sink C (the peer connection) must now scale down the video in order to keep the transmission constant to the away client.
+            </p>
+
+            <p>While not shown, an equally valid settings change request could be made of the away client video source (the peer connection on the away client's side).
+                This would not only impact sink Y and Z in the same manner as before, but would also cause re-negotiation with the peer connection on the home 
+                client in order to alter the transformation that it is applying to the home client's video source. Such a change <strong>would not</strong> change anything
+                related to sink A or B or the home client's video source.
+            </p>
+			
+			<div class="note"><div class="note-title"><span>Note</span></div><p><strong>Note: </strong> This proposal does not define a mechanism by which a change to the away client's video source could
+                automatically trigger a change to the home client's video source. Implementations may choose to make such source-to-sink optimizations as long as they only
+				do so within the constraints established by the application, as the next example describes.
+            </p></div>
+			
+			<p>It is fairly obvious that changes to a given source will impact sink consumers. However, in some situations changes to a given sink may also be cause for 
+				implementations to adjust the characteristics of a source's stream. This is illustrated in the following figures. In the first figure below, the home 
+				client's video source is sending a video stream sized at 1920 by 1200 pixels. The video source is also unconstrained, such that the exact source dimensions 
+				are flexible as far as the application is concerned. Two <code>MediaStream</code> objects contain tracks with the same <a>sourceId</a>, and those 
+				<code>MediaStream</code>s are connected to two different <code>&lt;video&gt;</code> element sinks A and B. Sink A has been sized to <code>width="1920"</code> and 
+				<code>height="1200"</code> and is displaying the source's video content without any transformations. Sink B has been sized smaller and as a result, is scaling the 
+				video down to fit its rectangle of 320 pixels across by 200 pixels down.
+			</p>
+
+			<img title="Changing media stream sinks may affect sources: before the requested change" src="change_settings_before2.png">
+			
+			<p>When the application changes sink A to a smaller dimension (from 1920 to 1024 pixels wide and from 1200 to 768 pixels tall), the browser's media pipeline may 
+				recognize that none of its sinks require the higher source resolution, and needless work is being done both on the part of the source and on sink A. In 
+				such a case and without any other constraints forcing the source to continue producing the higher resolution video, the media pipeline may change the source
+				resolution:</p>
+				
+			<img title="Changing media stream sinks may affect sources: after the requested change" src="change_settings_after2.png">
+            
+			<p>In the above figure, the home client's video source resolution was changed to the max(sinkA, sinkB) in order to optimize playback. While not shown above, the
+				same behavior could apply to peer connections and other sinks.</p>
+        </section>
+
+        <section id="constraint-manipulation-api-extensions-to-mediastreamtrack">
+            <h3><span class="secno">6.2 </span>Constraint Manipulation API Extensions to MediaStreamTrack</h3>
+
+            <p>Constraints are independent of sources. However, depending on the <a class="internalDFN" href="#dfn-sourcetype">sourceType</a> the track's constraints may or may not actually be considered by the user 
+                agent. The following table summarizes the expectations around track constraints given a <a class="internalDFN" href="#dfn-sourcetype">sourceType</a>.
+            </p>
+
+            <table class="simple">
+                <thead>
+                    <tr>
+                        <th><code>sourceType</code></th>
+                        <th>"none"</th>
+                        <th>"camera"/<br>"photo-camera"/<br>"microphone"</th>
+                        <th>"readonly"</th>
+                        <th>"remote"</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Constraints apply to <a class="internalDFN" href="#dfn-sourcetype">sourceType</a>?</td>
+                        <td>No</td>
+                        <td>Yes</td>
+                        <td>No</td>
+                        <td>No
+                            <div class="issue"><div class="issue-title"><span>Issue 5</span></div><p><strong>Issue: </strong>This may be too cut-and-dry. Maybe <em>some</em> of the constraints should apply?</p></div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p>Whether <code>MediaTrackConstraints</code> were provided at track initialization time or need to be established later at runtime, the APIs defined below allow 
+                the retrieval and manipulation of the constraints currently established on a track.
+            </p>
+
+            <p>Each track maintains an internal version of the <code>MediaTrackConstraints</code> structure, namely a mandatory set of constraints (no duplicates),
+                and an optional ordered list of individual constraint objects (may contain duplicates). The internal stored constraint structure is only exposed 
+                to the application using the existing <code>MediaTrackConstraints</code>, <code>MediaTrackConstraintSet</code>, <code>MediaTrackConstraint</code>, 
+                and similarly-derived-type dictionary objects.
+            </p>
+
+            <p>When track constraints change, a user agent <em title="must" class="rfc2119">must</em> queue a task to evaluate those changes when the task queue is next serviced. Similarly, if the
+                <a class="internalDFN" href="#dfn-sourcetype">sourceType</a> changes, then the user agent should perform the same actions to re-evaluate the constraints of each track affected by that source
+                change.
+            </p>
+
+            <pre class="idl"><span class="idlInterface" id="idl-def-MediaStreamTrack-4">partial interface <span class="idlInterfaceID">MediaStreamTrack</span> {
+<span class="idlMethod">    <span class="idlMethType"><a>any</a></span>                    <span class="idlMethName"><a href="#widl-MediaStreamTrack-getConstraint-any-DOMString-constraintName-boolean-mandatory">getConstraint</a></span> (<span class="idlParam"><span class="idlParamType"><a>DOMString</a></span> <span class="idlParamName">constraintName</span></span>, <span class="idlParam">optional <span class="idlParamType"><a>boolean</a></span> <span class="idlParamName">mandatory</span> = <span class="idlDefaultValue">false</span></span>);</span>
+<span class="idlMethod">    <span class="idlMethType"><a>void</a></span>                   <span class="idlMethName"><a href="#widl-MediaStreamTrack-setConstraint-void-DOMString-constraintName-any-constraintValue-boolean-mandatory">setConstraint</a></span> (<span class="idlParam"><span class="idlParamType"><a>DOMString</a></span> <span class="idlParamName">constraintName</span></span>, <span class="idlParam"><span class="idlParamType"><a>any</a></span> <span class="idlParamName">constraintValue</span></span>, <span class="idlParam">optional <span class="idlParamType"><a>boolean</a></span> <span class="idlParamName">mandatory</span> = <span class="idlDefaultValue">false</span></span>);</span>
+<span class="idlMethod">    <span class="idlMethType"><a>MediaTrackConstraints</a>?</span> <span class="idlMethName"><a href="#widl-MediaStreamTrack-constraints-MediaTrackConstraints">constraints</a></span> ();</span>
+<span class="idlMethod">    <span class="idlMethType"><a>void</a></span>                   <span class="idlMethName"><a href="#widl-MediaStreamTrack-applyConstraints-void-MediaTrackConstraints-constraints">applyConstraints</a></span> (<span class="idlParam"><span class="idlParamType"><a>MediaTrackConstraints</a></span> <span class="idlParamName">constraints</span></span>);</span>
+<span class="idlMethod">    <span class="idlMethType"><a>void</a></span>                   <span class="idlMethName"><a href="#widl-MediaStreamTrack-prependConstraint-void-DOMString-constraintName-any-constraintValue">prependConstraint</a></span> (<span class="idlParam"><span class="idlParamType"><a>DOMString</a></span> <span class="idlParamName">constraintName</span></span>, <span class="idlParam"><span class="idlParamType"><a>any</a></span> <span class="idlParamName">constraintValue</span></span>);</span>
+<span class="idlMethod">    <span class="idlMethType"><a>void</a></span>                   <span class="idlMethName"><a href="#widl-MediaStreamTrack-appendConstraint-void-DOMString-constraintName-any-constraintValue">appendConstraint</a></span> (<span class="idlParam"><span class="idlParamType"><a>DOMString</a></span> <span class="idlParamName">constraintName</span></span>, <span class="idlParam"><span class="idlParamType"><a>any</a></span> <span class="idlParamName">constraintValue</span></span>);</span>
+<span class="idlAttribute">             attribute <span class="idlAttrType"><a>EventHandler</a></span> <span class="idlAttrName"><a href="#widl-MediaStreamTrack-onoverconstrained">onoverconstrained</a></span>;</span>
+};</span></pre><section id="attributes"><h4><span class="secno">6.2.1 </span>Attributes</h4><dl class="attributes"><dt id="widl-MediaStreamTrack-onoverconstrained"><code>onoverconstrained</code> of type <span class="idlAttrType"><a>EventHandler</a></span></dt><dd>Register an event handler for the "overconstrained" event. This event fires asynchronously for each affected track (when multiple
+                    tracks share the same source) after the user agent has evaluated the current constraints against a given <a>sourceId</a> and is
+                    not able to configure the source within the limitations established by the union of imposed constraints.
+                    <p>This event may also fire when <a>takePhoto</a> is called and the source cannot record/encode an image due to over-constrained
+                        or conflicting constraints of those uniquely related to <a class="internalDFN" href="#dfn-sourcetype">sourceType</a>s of type <code>"photo-camera"</code>.</p>
+                    <p>Due to being over-constrained, the user agent <em title="must" class="rfc2119">must</em> transition the source to the <code>"armed"</code> <a class="internalDFN" href="#dfn-mode">mode</a>, which may
+                        result in also dispatching one or more "muted" events to affected tracks.
+                    </p>
+                    <p>The affected track(s) will remain un-usable (in the <code>"muted"</code> <a>readyState</a>) until the application adjusts the 
+                        constraints to accommodate the source's capabilities.</p>
+                    <p>The "overconstrained" event is a simple event of type <code>Event</code>; it carries no information about which constraints 
+                        caused the source to be over-constrained (the application has all the necessary APIs to figure it out).
+                    </p>
+                </dd></dl></section><section id="methods-1"><h4><span class="secno">6.2.2 </span>Methods</h4><dl class="methods"><dt id="widl-MediaStreamTrack-getConstraint-any-DOMString-constraintName-boolean-mandatory"><code>getConstraint</code></dt><dd>
+					
+                    <p>Retrieves a specific named constraint value from the track. The named constraints are the same names used for the <a class="internalDFN" href="#dfn-capabilities">capabilities</a> API, and also
+                        are the same names used for the source's <a class="internalDFN" href="#dfn-state">state</a> attributes.
+                    </p>
+                    Returns one of the following types:
+                    <dl>
+                        <dt><strong>null</strong></dt>
+                        <dd>If no constraint matching the provided constraintName exists in the respective optional or mandatory set on this track.</dd>
+                        <dt><strong>sequence&lt;MediaTrackConstraint&gt;</strong></dt>
+                        <dd>If the mandatory flag is false and there is at least one optional matching constraint name defined on this track. 
+                            <p>Each MediaTrackConstraint result in the list will contain a key which matches the requested <a>constraintName</a> parameter, 
+                                and whose value will either be a primitive value, or a <a class="idlType" href="#idl-def-MinMaxConstraint"><code>MinMaxConstraint</code></a> object.
+                            </p>
+                            <p>The returned list will be ordered from most important-to-satisfy at index <code>0</code>, to the least-important-to-satisfy
+                                optional constraint.</p>
+                            <div class="note"><div class="note-title"><span>Note</span></div><p><strong>Example: </strong>Given a track with an internal constraint structure:<tt style="white-space: pre;">
+{
+  <code>mandatory</code>: {
+    width: { min: 640 },
+    height: { min: 480 }
+  },
+  <code>optional</code>: [
+    { width: 650 },
+    { width: { min: 650, max: 800 }},
+    { frameRate: 60 },
+    { fillLightMode: "off" },
+    { facingMode: "user" }
+  ]
+}                                
+</tt>
+                            and a request for <code>getConstraint("width")</code>, the following list would be returned:<tt style="white-space: pre;">
+[
+    { width: 650 },
+    { width: { min: 650, max: 800 }}
+]
+</tt>
+                            </p></div>
+                        </dd>
+                        <dt><strong>MinMaxConstraint</strong></dt>
+                        <dd>If the mandatory flag is true, and the requested constraint is defined in the mandatory <code>MediaTrackConstraintSet</code> associated 
+                            with this track, and the value of the constraint is a min/max range object.
+                        </dd>
+                        <dt><strong><em>primitive_value</em></strong></dt>
+                        <dd>If the mandatory flag is true, and the requested constraint is defined in the mandatory <code>MediaTrackConstraintSet</code> associated 
+                            with this track, and the value of the constraint is a primitive value (DOMString, unsigned long, float, etc.).
+                        </dd>
+                    </dl>
+                <table class="parameters"><tr><th>Parameter</th><th>Type</th><th>Nullable</th><th>Optional</th><th>Description</th></tr><tr><td class="prmName">constraintName</td><td class="prmType"><code><a>DOMString</a></code></td><td class="prmNullFalse">?</td><td class="prmOptFalse">?</td><td class="prmDesc">The name of the setting for which the current value of that setting should be returned</td></tr><tr><td class="prmName">mandatory</td><td class="prmType"><code><a>boolean</a> = false</code></td><td class="prmNullFalse">?</td><td class="prmOptTrue">?</td><td class="prmDesc"><code>true</code> to indicate that the constraint should be looked up in the mandatory set of constraints,
+                            otherwise, the constraintName should be retrieved from the optional list of constraints.</td></tr></table><div><em>Return type: </em><code><a>any</a></code></div></dd><dt id="widl-MediaStreamTrack-setConstraint-void-DOMString-constraintName-any-constraintValue-boolean-mandatory"><code>setConstraint</code></dt><dd>
+					
+                    <p>This method updates the value of a same-named existing constraint (if found) in either the mandatory or optional list, and otherwise sets 
+                        the new constraint.</p>
+                    <p>This method searches the list of optional constraints from index <code>0</code> (highest priority) to the end of the list (lowest priority)
+                        looking for matching constraints. Therefore, for multiple same-named optional constraints, this method will only update the
+                        value of the highest-priority matching constraint.
+                    </p>
+                    <p>If the <code>mandatory</code> flag is <code>false</code> and the constraint is not found in the list of optional constraints, then
+                        a new optional constraint is created and appended to the end of the list (thus having lowest priority).</p>
+                    <div class="note"><div class="note-title"><span>Note</span></div><p><strong>Note: </strong>This behavior allows applications to iteratively call <code>setConstraint</code> and have their 
+                        constraints added in the order specified in the source.
+                    </p></div>
+                <table class="parameters"><tr><th>Parameter</th><th>Type</th><th>Nullable</th><th>Optional</th><th>Description</th></tr><tr><td class="prmName">constraintName</td><td class="prmType"><code><a>DOMString</a></code></td><td class="prmNullFalse">?</td><td class="prmOptFalse">?</td><td class="prmDesc">The name of the constraint to set.</td></tr><tr><td class="prmName">constraintValue</td><td class="prmType"><code><a>any</a></code></td><td class="prmNullFalse">?</td><td class="prmOptFalse">?</td><td class="prmDesc">Either a primitive value (float/DOMString/etc), or a <a class="idlType" href="#idl-def-MinMaxConstraint"><code>MinMaxConstraint</code></a> dictionary.</td></tr><tr><td class="prmName">mandatory</td><td class="prmType"><code><a>boolean</a> = false</code></td><td class="prmNullFalse">?</td><td class="prmOptTrue">?</td><td class="prmDesc">A flag indicating whether this constraint should be applied to the optional 
+                            or mandatory constraints.</td></tr></table><div><em>Return type: </em><code><a>void</a></code></div></dd><dt id="widl-MediaStreamTrack-constraints-MediaTrackConstraints"><code>constraints</code></dt><dd>Returns the complete constraints object associated with the track. If no mandatory constraints have been defined, the <code>mandatory</code>
+                    field will not be present (it will be undefined). If no optional constraints have been defined, the <code>optional</code> field will not be
+                    present (it will be undefined). If neither optional, nor mandatory constraints have been created, the value <code>null</code> is returned. 
+                <div><em>No parameters.</em></div><div><em>Return type: </em><code><a>MediaTrackConstraints</a></code>, nullable</div></dd><dt id="widl-MediaStreamTrack-applyConstraints-void-MediaTrackConstraints-constraints"><code>applyConstraints</code></dt><dd>
+                    
+                    <p>This API will replace all existing constraints with the provided constraints (if existing constraints exist).
+                        Otherwise, it will apply the newly provided constraints to the track.
+                    </p>
+                <table class="parameters"><tr><th>Parameter</th><th>Type</th><th>Nullable</th><th>Optional</th><th>Description</th></tr><tr><td class="prmName">constraints</td><td class="prmType"><code><a>MediaTrackConstraints</a></code></td><td class="prmNullFalse">?</td><td class="prmOptFalse">?</td><td class="prmDesc">A new constraint structure to apply to this track.</td></tr></table><div><em>Return type: </em><code><a>void</a></code></div></dd><dt id="widl-MediaStreamTrack-prependConstraint-void-DOMString-constraintName-any-constraintValue"><code>prependConstraint</code></dt><dd>
+                    
+                    <p>Prepends (inserts before the start of the list) the provided constraint name and value. This method does not consider whether
+                        a same-named constraint already exists in the optional constraints list.
+                    </p>
+                    <p>This method applies exclusively to optional constraints; it does not modify mandatory constraints.</p>
+                    <p>This method is a convenience API for programmatically building constraint structures.</p>
+                <table class="parameters"><tr><th>Parameter</th><th>Type</th><th>Nullable</th><th>Optional</th><th>Description</th></tr><tr><td class="prmName">constraintName</td><td class="prmType"><code><a>DOMString</a></code></td><td class="prmNullFalse">?</td><td class="prmOptFalse">?</td><td class="prmDesc">The name of the constraint to prepend to the list of optional constraints.</td></tr><tr><td class="prmName">constraintValue</td><td class="prmType"><code><a>any</a></code></td><td class="prmNullFalse">?</td><td class="prmOptFalse">?</td><td class="prmDesc">Either a primitive value (float/DOMString/etc), or a <a class="idlType" href="#idl-def-MinMaxConstraint"><code>MinMaxConstraint</code></a> dictionary.</td></tr></table><div><em>Return type: </em><code><a>void</a></code></div></dd><dt id="widl-MediaStreamTrack-appendConstraint-void-DOMString-constraintName-any-constraintValue"><code>appendConstraint</code></dt><dd>
+                    
+                    <p>Appends (at the end of the list) the provided constraint name and value. This method does not consider whether
+                        a same-named constraint already exists in the optional constraints list.</p>
+                    <p>This method applies exclusively to optional constraints; it does not modify mandatory constraints.</p>
+                    <p>This method is a convenience API for programmatically building constraint structures.</p>
+                <table class="parameters"><tr><th>Parameter</th><th>Type</th><th>Nullable</th><th>Optional</th><th>Description</th></tr><tr><td class="prmName">constraintName</td><td class="prmType"><code><a>DOMString</a></code></td><td class="prmNullFalse">?</td><td class="prmOptFalse">?</td><td class="prmDesc">The name of the constraint to append to the list of optional constraints.</td></tr><tr><td class="prmName">constraintValue</td><td class="prmType"><code><a>any</a></code></td><td class="prmNullFalse">?</td><td class="prmOptFalse">?</td><td class="prmDesc">Either a primitive value (float/DOMString/etc), or a <a class="idlType" href="#idl-def-MinMaxConstraint"><code>MinMaxConstraint</code></a> dictionary.</td></tr></table><div><em>Return type: </em><code><a>void</a></code></div></dd></dl></section>
+
+            <section id="constraint-definitions-and-related-structures">
+                <h4><span class="secno">6.2.3 </span>Constraint Definitions and Related Structures</h4>
+                
+                <p>The following constraint names are defined to apply to both <a class="internalDFN" href="#dfn-videostreamtrack">VideoStreamTrack</a> and <a class="internalDFN" href="#dfn-audiostreamtrack">AudioStreamTrack</a> objects:</p>
+
+                <table class="simple">
+                    <thead>
+                        <tr>
+                            <th>Constraint Name</th>
+                            <th>Values</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="def-constraint-sourceType">
+                            <td>sourceType</td>
+                            <td><a class="idlType" href="#idl-def-SourceTypeEnum"><code>SourceTypeEnum</code></a></td>
+                            <td>Constrain the video or audio source to an exact value from the set of enumerated-type values of the <a class="idlType" href="#idl-def-SourceTypeEnum"><code>SourceTypeEnum</code></a>.</td>
+                        </tr>
+                        <tr id="def-constraint-sourceId">
+                            <td>sourceId</td>
+                            <td>DOMString</td>
+                            <td>Constrain the video or audio source to an exact source identifier value.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p>The following constraint names are defined to apply only to <a class="internalDFN" href="#dfn-videostreamtrack">VideoStreamTrack</a> objects:</p>
+
+                <table class="simple">
+                    <thead>
+                        <tr>
+                            <th>Constraint Name</th>
+                            <th>Values</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="def-constraint-width">
+                            <td>width</td>
+                            <td>unsigned long or <a class="idlType" href="#idl-def-MinMaxConstraint"><code>MinMaxConstraint</code></a></td>
+                            <td>Constrain the video source to the exact desired width or width range.</td>
+                        </tr>
+                        <tr id="def-constraint-height">
+                            <td>height</td>
+                            <td>unsigned long or <a class="idlType" href="#idl-def-MinMaxConstraint"><code>MinMaxConstraint</code></a></td>
+                            <td>Constrain the video source to the exact desired height or height range.</td>
+                        </tr>
+                        <tr id="def-constraint-frameRate">
+                            <td>frameRate</td>
+                            <td>float or <a class="idlType" href="#idl-def-MinMaxConstraint"><code>MinMaxConstraint</code></a></td>
+                            <td>Constrain the video source to the exact desired frame rate (fps) or frameRate range.</td>
+                        </tr>
+                        <tr id="def-constraint-facingMode">
+                            <td>facingMode</td>
+                            <td><a class="internalDFN" href="#dfn-videofacingmodeenum">VideoFacingModeEnum</a></td>
+                            <td>Constrain the video source to an exact value from the set of enumerated-type values of the <a class="internalDFN" href="#dfn-videofacingmodeenum">VideoFacingModeEnum</a>.</td>
+                        </tr>
+                        <tr id="def-constraint-zoom">
+                            <td>zoom</td>
+                            <td>float or <a class="idlType" href="#idl-def-MinMaxConstraint"><code>MinMaxConstraint</code></a></td>
+                            <td>Constrain the video source to the exact desired zoom ratio or zoom ratio range.</td>
+                        </tr>
+                        <tr id="def-constraint-focusMode">
+                            <td>focusMode</td>
+                            <td><a class="internalDFN" href="#dfn-videofocusmodeenum">VideoFocusModeEnum</a></td>
+                            <td>Constrain the video source to an exact value from the set of enumerated-type values of the <a class="internalDFN" href="#dfn-videofocusmodeenum">VideoFocusModeEnum</a>.</td>
+                        </tr>
+                        <tr id="def-constraint-fillLightMode">
+                            <td>fillLightMode</td>
+                            <td><a class="internalDFN" href="#dfn-videofilllightmodeenum">VideoFillLightModeEnum</a></td>
+                            <td>Constrain the video source to an exact value from the set of enumerated-type values of the <a class="internalDFN" href="#dfn-videofilllightmodeenum">VideoFillLightModeEnum</a>.</td>
+                        </tr>
+                        <tr id="def-constraint-whiteBalanceMode">
+                            <td>whiteBalanceMode</td>
+                            <td><a class="internalDFN" href="#dfn-videowhitebalancemodeenum">VideoWhiteBalanceModeEnum</a></td>
+                            <td>Constrain the video source to an exact value from the set of enumerated-type values of the <a class="internalDFN" href="#dfn-videowhitebalancemodeenum">VideoWhiteBalanceModeEnum</a>.</td>
+                        </tr>
+                        <tr id="def-constraint-brightness">
+                            <td>brightness</td>
+                            <td>unsigned long or <a class="idlType" href="#idl-def-MinMaxConstraint"><code>MinMaxConstraint</code></a></td>
+                            <td>Constrain the video source to the exact desired brightness or brightness range.</td>
+                        </tr>
+                        <tr id="def-constraint-contrast">
+                            <td>contrast</td>
+                            <td>unsigned long or <a class="idlType" href="#idl-def-MinMaxConstraint"><code>MinMaxConstraint</code></a></td>
+                            <td>Constrain the video source to the exact desired contrast or contrast range.</td>
+                        </tr>
+                        <tr id="def-constraint-saturation">
+                            <td>saturation</td>
+                            <td>unsigned long or <a class="idlType" href="#idl-def-MinMaxConstraint"><code>MinMaxConstraint</code></a></td>
+                            <td>Constrain the video source to the exact desired saturation or saturation range.</td>
+                        </tr>
+                        <tr id="def-constraint-sharpness">
+                            <td>sharpness</td>
+                            <td>unsigned long or <a class="idlType" href="#idl-def-MinMaxConstraint"><code>MinMaxConstraint</code></a></td>
+                            <td>Constrain the video source to the exact desired sharpness or sharpness range.</td>
+                        </tr>
+                        <tr id="def-constraint-photoWidth">
+                            <td>photoWidth</td>
+                            <td>unsigned long or <a class="idlType" href="#idl-def-MinMaxConstraint"><code>MinMaxConstraint</code></a></td>
+                            <td>Constrain the width of the photo produced by the <a>takePhoto</a> method to the exact desired width or width range.</td>
+                        </tr>
+                        <tr id="def-constraint-photoHeight">
+                            <td>photoHeight</td>
+                            <td>unsigned long or <a class="idlType" href="#idl-def-MinMaxConstraint"><code>MinMaxConstraint</code></a></td>
+                            <td>Constrain the height of the photo produced by the <a>takePhoto</a> method to the exact desired height or height range.</td>
+                        </tr>
+                        <tr id="def-constraint-exposureMode">
+                            <td>exposureMode</td>
+                            <td><a class="internalDFN" href="#dfn-photoexposuremodeenum">PhotoExposureModeEnum</a></td>
+                            <td>Constrain the exposure used for the photo produced by the <a>takePhoto</a> method to an exact value from the set of enumerated-type values of the <a class="internalDFN" href="#dfn-photoexposuremodeenum">PhotoExposureModeEnum</a>.</td>
+                        </tr>
+                        <tr id="def-constraint-isoMode">
+                            <td>CapabilityList? isoMode</td>
+                            <td><a class="internalDFN" href="#dfn-photoisomodeenum">PhotoISOModeEnum</a></td>
+                            <td>Constrain the ISO mode used for the photo produced by the <a>takePhoto</a> method to an exact value from the set of enumerated-type values of the <a class="internalDFN" href="#dfn-photoisomodeenum">PhotoISOModeEnum</a>.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p>The following constraint names are defined to apply only to <a class="internalDFN" href="#dfn-audiostreamtrack">AudioStreamTrack</a> objects:</p>
+                
+                <table class="simple">
+                    <thead>
+                        <tr>
+                            <th>Constraint Name</th>
+                            <th>Values</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="def-constraint-volume">
+                            <td>volume</td>
+                            <td>unsigned long or <a class="idlType" href="#idl-def-MinMaxConstraint"><code>MinMaxConstraint</code></a></td>
+                            <td>Constrain the audio source to the exact desired volume or volume range.</td>
+                        </tr>
+                        <tr id="def-constraint-gain">
+                            <td>gain</td>
+                            <td>float or <a class="idlType" href="#idl-def-MinMaxConstraint"><code>MinMaxConstraint</code></a></td>
+                            <td>Constrain the audio source to the exact desired gain or gain range.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p>For constraints that accept ranges, the <a class="idlType" href="#idl-def-MinMaxConstraint"><code>MinMaxConstraint</code></a> dictionary is also defined. Note, that the type 
+                    of the value associated with <code>min</code> and <code>max</code> must be the same for both. The specific 
+                    types associated with <code>min</code> and <code>max</code> are defined differently for each constraint name.</p>
+
+                <pre class="idl"><span class="idlDictionary" id="idl-def-MinMaxConstraint">dictionary <span class="idlDictionaryID">MinMaxConstraint</span> {
+<span class="idlMember">    <span class="idlMemberType"><a>any</a></span> <span class="idlMemberName"><a href="#widl-MinMaxConstraint-max">max</a></span>;</span>
+<span class="idlMember">    <span class="idlMemberType"><a>any</a></span> <span class="idlMemberName"><a href="#widl-MinMaxConstraint-min">min</a></span>;</span>
+};</span></pre><section><h5 id="dictionary-minmaxconstraint-members">Dictionary <a class="idlType" href="#idl-def-MinMaxConstraint"><code>MinMaxConstraint</code></a> Members</h5><dl class="dictionary-members"><dt id="widl-MinMaxConstraint-max"><code>max</code> of type <span class="idlMemberType"><a>any</a></span></dt><dd>The related constraint's maximum allowed value.</dd><dt id="widl-MinMaxConstraint-min"><code>min</code> of type <span class="idlMemberType"><a>any</a></span></dt><dd>The related constraint's minimum allowed value.</dd></dl></section>
+        
+            </section>
+        </section>
+    </section>
+
+    <section id="example-usage-scenarios">
+        <!--OddPage--><h2><span class="secno">7. </span>Example usage scenarios</h2>
+
+        <p>The following JavaScript examples demonstrate how the Settings APIs defined in this proposal could be used.</p>
+
+        <section id="getting-access-to-a-video-and-audio-device-if-available">
+            <h3><span class="secno">7.1 </span>Getting access to a video and audio device (if available)</h3>
+
+            <pre>var audioTrack = (AudioStreamTrack.getSourceIds().length &gt; 0) ? new AudioStreamTrack() : null;
+var videoTrack = (VideoStreamTrack.getSourceIds().length &gt; 0) ? new VideoStreamTrack() : null;
+if (audioTrack &amp;&amp; videoTrack) {
+   videoTrack.onstarted = mediaStarted;
+   var MS = new MediaStream();
+   MS.addTrack(audioTrack);
+   MS.addTrack(videoTrack);
+   navigator.getUserMedia(MS);
+}
+
+function mediaStarted() {
+   // One of the video/audio devices started (assume both, but may not be strictly true if the user doesn't approve both tracks)
+}
+</pre>
+        </section>
+
+        <section id="getting-access-to-a-specific-video-source-if-available">
+            <h3><span class="secno">7.2 </span>Getting access to a specific video source (if available)</h3>
+
+            <pre>var lastUsedSourceId = localStorage["last-source-id"];
+var lastUsedSourceIdAvailable = false;
+VideoStreamTrack.getSourceIds().forEach(function (sourceId) { if (sourceId == lastUsedSourceId) lastUsedSourceIdAvailable = true; });
+if (lastUsedSourceIdAvailable) {
+   // Request this specific source...
+   var vidTrack = new VideoStreamTrack( { mandatory: { sourceId: lastUsedSourceId }});
+   vidTrack.onoverconstrained = function() { alert("User, why didn't to give me access to the same source? I know you have it..."); }
+   navigator.getUserMedia(new MediaStream([vidTrack]));
+}
+else
+   alert("User could you plug back in that camera you were using on this page last time?");
+</pre>
+        </section>
+
+
+        <section id="previewing-the-local-video-audio-in-html5-video-tag----scenario-is-unchanged">
+            <h3><span class="secno">7.3 </span>Previewing the local video/audio in HTML5 video tag -- scenario is unchanged</h3>
+
+            <pre>function mediaStarted() {
+   // objectURL technique
+   document.querySelector("video").src = URL.createObjectURL(MS, { autoRevoke: true }); // autoRevoke is the default
+   // direct-assign technique
+   document.querySelector("video").srcObject = MS; // Proposed API at this time
+}
+</pre>
+        </section>
+
+        <section id="applying-resolution-constraints">
+            <h3><span class="secno">7.4 </span>Applying resolution constraints</h3>
+
+            <pre>function mediaStarted() {
+   videoTrack;
+   var maxWidth = videoTrack.getCapability("width").max;
+   var maxHeight = videoTrack.getCapability("height").max;
+   // Check for 1080p+ support
+   if ((maxWidth &gt;= 1920) &amp;&amp; (maxHeight &gt;= 1080)) {
+      // See if I need to change the current settings...
+      if ((videoTrack.width &lt; 1920) &amp;&amp; (videoTrack.height &lt; 1080)) {
+         videoTrack.setConstraint("width", maxWidth);
+         videoTrack.setConstraint("height", maxHeight);
+         videoTrack.onoverconstrained = failureToComply;
+         videoTrack.onstatechanged = didItWork;
+      }
+   }
+   else
+      failureToComply();
+}
+
+function failureToComply(e) {
+   if (e)
+      console.error("Devices failed to change " + e.settings); // 'width' and/or 'height'
+   else
+      console.error("Device doesn't support at least 1080p");
+}
+
+function didItWork(e) {
+   e.states.forEach( function (state) { if ((state == "width") || (state == "height")) alert("Resolution changed!"); });
+}
+</pre>
+        </section>
+
+        <section id="changing-zoom-in-response-to-user-input">
+            <h3><span class="secno">7.5 </span>Changing zoom in response to user input:</h3>
+
+            <pre>function mediaStarted() {
+   setupRange( videoTrack );
+}
+
+function setupRange(videoTrack) {
+   var zoomCaps = videoTrack.getCapability("zoom");
+   // Check to see if the device supports zooming...
+   if (zoomCaps.supported) {
+      // Set HTML5 range control to min/max values of zoom
+      var zoomControl = document.querySelector("input[type=range]");
+      zoomControl.min = zoomCaps.min;
+      zoomControl.max = zoomCaps.max;
+      zoomControl.value = videoTrack.zoom;
+      zoomControl.onchange = applySettingChanges;
+   }
+}
+
+function applySettingChanges(e) {
+   videoTrack.setConstraint("zoom", parseFloat(e.target.value));
+}
+</pre>
+        </section>
+
+        <section id="adding-the-local-media-tracks-into-a-new-media-stream">
+            <h3><span class="secno">7.6 </span>Adding the local media tracks into a new media stream:</h3>
+
+            <pre>function mediaStarted() {
+   return new MediaStream( [ videoTrack, audioTrack ]);
+}
+</pre>
+        </section>
+
+        <section id="take-a-photo-show-the-photo-in-an-image-tag">
+            <h3><span class="secno">7.7 </span>Take a photo, show the photo in an image tag:</h3>
+
+            <pre>function mediaStarted() {
+   // Check if this device supports a photo mode...
+   if (videoTrack.sourceType == "photo-camera") {
+       videoTrack.onphoto = showPicture;
+       // Turn on flash only for the snapshot...if available
+       if (videoTrack.fillLightMode != "notavailable")
+          videoTrack.setConstraint("fillLightMode", "flash");
+       else
+          console.info("Flash not available");
+       videoTrack.takePhoto();
+   }
+}
+
+function showPicture(e) {
+   var img = document.querySelector("img");
+   img.src = URL.createObjectURL(e.data);
+}
+</pre>
+        </section>
+
+        <section id="show-a-newly-available-device">
+            <h3><span class="secno">7.8 </span>Show a newly available device</h3>
+
+            <div class="note"><div class="note-title"><span>Note</span></div><p>A newly available device occurs when the user plugs in a device that wasn't previously
+                visible to the user agent.</p></div>
+
+            <pre>var lastSourceCount = VideoStreamTrack.getSourceIds().length;
+setTimeout(function () {
+   if (lastSourceCount != VideoStreamTrack.getSourceIds().length)
+      alert("New device available! Do you want to use it?");
+}, 1000 * 60); // Poll every minute
+</pre>
+        </section>
+
+        <section id="show-all-available-video-devices-that-the-user-authorizes">
+            <h3><span class="secno">7.9 </span>Show all available video devices (that the user authorizes):</h3>
+
+            <pre>var allSources = VideoStreamTrack.getSourceIds();
+for (var i = 0; i &lt; allSources.length; i++) {
+   var mediaStream = new MediaStream( new VideoStreamTrack({ mandatory: { sourceId: allSources[i] }}) );
+   // Create a video element and add it to the UI
+   var videoTag = document.createElement('video');
+   videoTag.srcObject = mediaStream;
+   document.body.appendChild(videoTag);
+   // Request to have the track connected to a source device (queue these up in the for-loop)
+   navigator.getUserMedia(mediaStream);
+}
+</pre>
+        </section>
+    </section>
+
+    <section id="remove-localmediastream-interface">
+        <!--OddPage--><h2><span class="secno">8. </span>Remove <code>LocalMediaStream</code> interface</h2>
+        <p>This proposal recommends removing the derived <code>LocalMediaStream</code> interface. All relevant "local" information
+            has been moved to the track level, and anything else that offers a convenience API for working with all the set of tracks
+            on a MediaStream should just be added to the vanilla <code>MediaStream</code> interface itself.
+        </p>
+
+        <p>See the previous proposals for a statement on the rationale behind this recommendation.</p>
+    </section>
+
+	<section id="acknowledgements">
+		<!--OddPage--><h2><span class="secno">9. </span>Acknowledgements</h2>
+		<p>I'd like to specially thank Anant Narayanan of Mozilla for collaborating on the new settings design, and EKR for his 2c. Also, thanks to
+		Martin Thomson (Microsoft) for his comments and review, and other participants on the public-media-capture mailing list.
+	</p></section>
+  
+
+
+
+</body></html>
