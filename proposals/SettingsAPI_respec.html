@@ -59,7 +59,7 @@
         <p>EKR's comments about wondering what happens when multiple apps (or tabs within a browser) go to access and manipulate
             a source also resonated with me. He proposed that this either be not allowed (exclusive locks on devices by apps), or 
             that this be better defined somehow.</p>
-        <p>In thinking about this and wanting to have a better answer than the exclusive lock route, it occured to me that when choosing 
+        <p>In thinking about this and wanting to have a better answer than the exclusive lock route, it occurred to me that when choosing 
             to grant a second app access to the same device, we might offer more than one choice. One choice that we've assumed so far, 
             is to share one device among two apps with either app having the ability to modify the devices' settings. Another option
             that I explore in this proposal is the concept of granting a read-only version of the device. There may be a primary owner
@@ -71,12 +71,12 @@
             be read-only anyway--you wouldn't be allowed to adjust the meta-data of a video streaming from the user's hard drive anyway.
         </p>
         <p>So the "read-only" media source concept was born.</p>
-        <p>The set of source objects was now starting to grow. I could forsee it being difficult to rationalize/manage these objects, their
+        <p>The set of source objects was now starting to grow. I could foresee it being difficult to rationalize/manage these objects, their
             purpose and/or properties into the future, and I as thought about all of these points together, it became clear that having 
             an explicit object defined for various source devices/things was unnecessary overhead and complication.
         </p>
-        <p>As such, the source objects that came into existance in the v4 proposal as track sub-types, and were changed in v5 to be objects
-            tied to tracks, are now gone. Instead, track sources have been simplified into a sigle string itentifier on a track, which allows 
+        <p>As such, the source objects that came into existence in the v4 proposal as track sub-types, and were changed in v5 to be objects
+            tied to tracks, are now gone. Instead, track sources have been simplified into a single string identifier on a track, which allows 
             the app to understand how access to various things about a track behave given a certain type of source (or no source).
         </p>
         <p>In order to clarify the track's behavior under various source types, I also had to get crisp about the things called "settings" 
@@ -111,7 +111,7 @@
                     <tbody>
                         <tr><td>unknown-authorization</td><td>The source hasn't yet been authorized for use by the 
                             application. (Authorization occurs via the getUserMedia API.) All sources start out in this mode at the start of the
-                            application (though trusted hardware or software envirnments MAY automatically pre-authorize certain sources when 
+                            application (though trusted hardware or software environments MAY automatically pre-authorize certain sources when 
                             their use is requested via getUserMedia). Camera or microphone sources that are visible to the user agent can make 
                             their existence known to the application in this mode. Other sources like files on the local file system do not.</td></tr>
                         <tr><td>armed</td><td>the source has been granted use by the application and is on/ready, but not actively broadcasting 
@@ -122,7 +122,7 @@
                         <tr><td>streaming</td><td>The source has been granted use by the application and is actively streaming media. User agents 
                             should provide an indicator to the user that the source is on and streaming in this mode.</td></tr>
                         <tr><td>not-authorized</td><td>This source has been forbidden/rejected by the user.</td></tr>
-                        <tr><td>off</td><td>The source has been turned off, but is still detectable (its existance can still be confirmed) by the 
+                        <tr><td>off</td><td>The source has been turned off, but is still detectable (its existence can still be confirmed) by the 
                             application.</td></tr>
                     </tbody>
                 </table>
@@ -153,7 +153,7 @@
             <dt><dfn title="state">State</dfn></dt>
             <dt>Source State</dt>
             <dd>State refers to the immediate, current value of the source's [optionally constrained] capabilities. State is always read-only.
-                <p>A source's state can change dynamically over time due to envirnmental conditions, sink configurations, or constraint changes. A source's 
+                <p>A source's state can change dynamically over time due to environmental conditions, sink configurations, or constraint changes. A source's 
                     state must always conform to the current set of mandatory constraints that [each of] the tracks it is bound to have defined, and 
                     should do its best to conform to the set of optional constraints specified.
                 </p>
@@ -185,10 +185,10 @@
                 <p>Constraints are stored on the track object, not the source. Each track can be optionally initialized with constraints, or constraints can
                     be added afterward through the constraint APIs defined in this spec.
                 </p>
-                <p>Applying track level contraints to a source is conditional based on the type of source. For example, read-only sources
+                <p>Applying track level constraints to a source is conditional based on the type of source. For example, read-only sources
                     will ignore any specified constraints on the track.
                 </p>
-                <p>It is possible for two tracks that share a unique source to apply contradictory constraints. Under such contraditions, the implementation 
+                <p>It is possible for two tracks that share a unique source to apply contradictory constraints. Under such contradictions, the implementation 
                     may be forced to transition to the source to the "armed" state until the conflict is resolved.
                 </p>
                 <p>Events are available that allow the application to know when constraints cannot be met by the user agent. These typically occur when
@@ -231,7 +231,7 @@
         <section>
             <h2>Generic Tracks</h2>
 
-            <p>This section describes the <dfn>MediaStreamTrack</dfn> interface (currently in the Media Capture and Streams document), but makes targetted changes in order 
+            <p>This section describes the <dfn>MediaStreamTrack</dfn> interface (currently in the Media Capture and Streams document), but makes targeted changes in order 
                 to add the <code>"new"</code> state and associated event handler (<code>onstarted</code>). The definition is otherwise identical to the current definition except that the defined 
                 constants are replaced by strings (using an enumerated type).
             </p>
@@ -376,7 +376,7 @@
                         list constitute those sources that the user agent can identify at the time the API is called (the list can grow/shrink over time as sources may be added or 
                         removed). As a static method, <a>getSourceIds</a> can be queried without instantiating any <a>VideoStreamTrack</a> objects or without calling <code>getUserMedia</code>.
                         <p class="issue"><strong>Issue: </strong> This information deliberately adds to the fingerprinting surface of the UA. However, this information 
-                            will not be identifyable outside the scope of this application. could also be obtained via other round-about techniques using <code>getUserMedia</code>. This editor deems it worthwhile directly providing
+                            will not be identifiable outside the scope of this application. could also be obtained via other round-about techniques using <code>getUserMedia</code>. This editor deems it worthwhile directly providing
                             this data as it seems important for determining whether multiple devices of this type are available.
                         </p>
                     </dd>
@@ -742,14 +742,14 @@
                     <dt>notavailable</dt><dd>The exposure mode is not known or not available on this source.</dd>
                     <dt>auto</dt><dd>The exposure mode is automatically configured/adjusted at the source's discretion.</dd>
                     <dt>frame-average</dt><dd>The light sensor should average of light information from entire scene.</dd>
-                    <dt>center-weighted</dt><dd>The light sensor should bias sensitivity concentrated towards center of viewfinder.</dd>
+                    <dt>center-weighted</dt><dd>The light sensor should bias sensitivity concentrated toward center of viewfinder.</dd>
                     <dt>spot-metering</dt><dd>The light sensor should only consider a centered spot area for exposure calculations.</dd>
                 </dl>
             
                 <p><dfn>PhotoISOModeEnum</dfn> enumeration</p>
                 <dl class="idl" title="enum PhotoISOModeEnum">
-                    <dt>notavailable</dt><dd>The iso value is not known or not available on this source.</dd>
-                    <dt>auto</dt><dd>The iso value is automatically selected/adjusted at the source's discretion.</dd>
+                    <dt>notavailable</dt><dd>The ISO value is not known or not available on this source.</dd>
+                    <dt>auto</dt><dd>The ISO value is automatically selected/adjusted at the source's discretion.</dd>
                     <dt>100</dt><dd>An ASA rating of 100</dd>
                     <dt>200</dt><dd>An ASA rating of 200</dd>
                     <dt>400</dt><dd>An ASA rating of 400</dd>
@@ -851,7 +851,7 @@
                     </dd>
                 </dl>
 
-                <p>The following define the <dfn>MediaStreamTrackStateEvent</dfn> object and related initalizer.</p>
+                <p>The following define the <dfn>MediaStreamTrackStateEvent</dfn> object and related initializer.</p>
                 
                 <dl class="idl" title="[Constructor(DOMString type, optional MediaStreamTrackStateEventInit eventInitDict)] interface MediaStreamTrackStateEvent : Event">
                     <dt>readonly attribute DOMString[] states</dt>
@@ -935,7 +935,7 @@
     <section>
         <h1>Source Capabilities</h1>
 
-        <p>This section describes APIs for retrieving the capabilites of a given source. The return value of these APIs is contingent on
+        <p>This section describes APIs for retrieving the capabilities of a given source. The return value of these APIs is contingent on
             the track's <a>sourceType</a> value as summarized in the table below.
         </p>
 
@@ -1013,7 +1013,7 @@
                 <dt>(AllVideoCapabilities or AllAudioCapabilities) capabilities()</dt>
                 <dd>Returns a dictionary with all of the capabilities for the track type. If the track type is <a>VideoStreamTrack</a>, the 
                     <a>AllVideoCapabilities</a> dictionary is returned. If the track type is <a>AudioStreamTrack</a>, the 
-                    <a>AllAudioCapabilities</a> dictinoary is returned.
+                    <a>AllAudioCapabilities</a> dictionary is returned.
                     <p>The dictionaries are populated as if each <a>state</a> were requested individually using <code>getCapability()</code>,
                         and the results of that API are assigned as the value of each stateName in the dictionary. Notably, the returned values
                     </p>
@@ -1231,7 +1231,7 @@
         <section>
             <h2>Constraint Manipulation API Extensions to MediaStreamTrack</h2>
 
-            <p>Constraints are indpendent of sources. However, depending on the <a>sourceType</a> the track's constraints may or may not actually be considered by the user 
+            <p>Constraints are independent of sources. However, depending on the <a>sourceType</a> the track's constraints may or may not actually be considered by the user 
                 agent. The following table summarizes the expectations around track constraints given a <a>sourceType</a>.
             </p>
 
@@ -1338,7 +1338,7 @@
 					</dl>
                     <p>This method updates the value of a same-named existing constraint (if found) in either the mandatory or optional list, and otherwise sets 
                         the new constraint.</p>
-                    <p>This method searches the list of optional constraints from index <code>0</code> (hightest priority) to the end of the list (lowest priority)
+                    <p>This method searches the list of optional constraints from index <code>0</code> (highest priority) to the end of the list (lowest priority)
                         looking for matching constraints. Therefore, for multiple same-named optional constraints, this method will only update the
                         value of the highest-priority matching constraint.
                     </p>
@@ -1395,7 +1395,7 @@
                         result in also dispatching one or more "muted" events to affected tracks.
                     </p>
                     <p>The affected track(s) will remain un-usable (in the <code>"muted"</code> <a>readyState</a>) until the application adjusts the 
-                        constraints to accomodate the source's capabilities.</p>
+                        constraints to accommodate the source's capabilities.</p>
                     <p>The "overconstrained" event is a simple event of type <code>Event</code>; it carries no information about which constraints 
                         caused the source to be over-constrained (the application has all the necessary APIs to figure it out).
                     </p>
@@ -1441,7 +1441,7 @@
                     </thead>
                     <tbody>
                         <tr id="def-constraint-width">
-                            <td>witdh</td>
+                            <td>width</td>
                             <td>unsigned long or <a>MinMaxConstraint</a></td>
                             <td>Constrain the video source to the exact desired width or width range.</td>
                         </tr>
@@ -1500,8 +1500,8 @@
                             <td>unsigned long or <a>MinMaxConstraint</a></td>
                             <td>Constrain the video source to the exact desired sharpness or sharpness range.</td>
                         </tr>
-                        <tr id="def-constraint-photoWitdh">
-                            <td>photoWitdh</td>
+                        <tr id="def-constraint-photoWidth">
+                            <td>photoWidth</td>
                             <td>unsigned long or <a>MinMaxConstraint</a></td>
                             <td>Constrain the width of the photo produced by the <a>takePhoto</a> method to the exact desired width or width range.</td>
                         </tr>
@@ -1547,7 +1547,7 @@
                     </tbody>
                 </table>
 
-                <p>For constraints that accept ranges, the <a>MinMaxConstraits</a> dictionary is also defined. Note, that the type 
+                <p>For constraints that accept ranges, the <a>MinMaxConstraint</a> dictionary is also defined. Note, that the type 
                     of the value associated with <code>min</code> and <code>max</code> must be the same for both. The specific 
                     types associated with <code>min</code> and <code>max</code> are defined differently for each constraint name.</p>
 
