@@ -361,7 +361,7 @@
    <p><a href="http://www.w3.org/"><img alt="W3C" height="48" src="http://www.w3.org/Icons/w3c_home" width="72"></a></p>
 
    <h1>Media Recording API</h1>
-   <h2>December 19, 2012</h2>
+   <h2>December 20, 2012</h2>
  
    <dt>This version:</dt>
       <dd><a href="@@@">@@@</a></dd>
@@ -465,16 +465,18 @@ interface <span class="idlInterfaceID">MediaRecorder</span> : <span class="idlSu
 <span class="idlAttribute">             attribute <span class="idlAttrType"><a class="idlType" href=""><code>EventHandler</code></a></span>   <span class="idlAttrName"><a href="#widl-ondataavailable">ondataavailable</a></span>;</span>
 <span class="idlAttribute">             attribute <span class="idlAttrType"><a class="idlType" href=""><code>EventHandler</code></a></span>   <span class="idlAttrName"><a href="#widl-onpause">onpause</a></span>;</span>
 <span class="idlAttribute">             attribute <span class="idlAttrType"><a class="idlType" href=""><code>EventHandler</code></a></span>   <span class="idlAttrName"><a href="#widl-onresume">onresume</a></span>;</span>
-<span class="idlAttribute">             attribute <span class="idlAttrType"><a class="idlType" href=""><code>EventHandler</code></a></span>   <span class="idlAttrName"><a href="#widl-onmutetrack">onmutetrack</a></span>;</span>
-<span class="idlAttribute">             attribute <span class="idlAttrType"><a class="idlType" href=""><code>EventHandler</code></a></span>   <span class="idlAttrName"><a href="#widl-onunmutetrack">onunmutetrack</a></span>;</span>
+<span class="idlAttribute">             attribute <span class="idlAttrType"><a class="idlType" href=""><code>EventHandler</code></a></span>   <span class="idlAttrName"><a href="#widl-onmutetrackrecording">onmutetrack</a></span>;</span>
+<span class="idlAttribute">             attribute <span class="idlAttrType"><a class="idlType" href=""><code>EventHandler</code></a></span>   <span class="idlAttrName"><a href="#widl-onunmutetrackrecording">onunmutetrack</a></span>;</span>
+<span class="idlAttribute">             attribute <span class="idlAttrType"><a class="idlType" href=""><code>EventHandler</code></a></span>   <span class="idlAttrName"><a href="#widl-onphoto">onphoto</a></span>;</span>
 <span class="idlAttribute">             attribute <span class="idlAttrType"><a class="idlType" href=""><code>EventHandler</code></a></span>   <span class="idlAttrName"><a href="#widl-onrecordingerror">onrecordingerror</a></span>;</span>
 <span class="idlAttribute">             attribute <span class="idlAttrType"><a class="idlType" href=""><code>EventHandler</code></a></span>   <span class="idlAttrName"><a href="#widl-onrecordingwarning">onrecordingwarning</a></span>;</span>
 <span class="idlMethod">    <span class="idlMethType"><a>void</a></span>                              <span class="idlMethName"><a href="#widl-record">record</a></span> (<span class="idlParam">optional <span class="idlParamType">long</span> <span class="idlParamName">timeSlice</span></span>);</span>
 <span class="idlMethod">    <span class="idlMethType"><a>void</a></span>                              <span class="idlMethName"><a href="#widl-stoprecording">stopRecording</a></span> ();</span>
 <span class="idlMethod">    <span class="idlMethType"><a>void</a></span>                              <span class="idlMethName"><a href="#widl-pause">pause</a></span>();</span>
 <span class="idlMethod">    <span class="idlMethType"><a>void</a></span>                              <span class="idlMethName"><a href="#widl-resume">resume</a></span>();</span>
-<span class="idlMethod">    <span class="idlMethType"><a>void</a></span>                              <span class="idlMethName"><a href="#widl-mutetrack">muteTrack</a></span>(<span class="idlParam">optional <span class="idlParamType">DOMString</span> <span class="idlParamName">trackID</span></span>);</span>
+<span class="idlMethod">    <span class="idlMethType"><a>void</a></span>                              <span class="idlMethName"><a href="#widl-mutetrack">muteTrack</a></span>(<span class="idlParamType">DOMString</span> <span class="idlParamName">trackID</span>);</span>
 <span class="idlMethod">    <span class="idlMethType"><a>void</a></span>                              <span class="idlMethName"><a href="#widl-unmuteTrack">unmuteTrack</a></span>(<span class="idlParamType">DOMString</span> <span class="idlParamName">trackID</span>);</span>
+<span class="idlMethod">    <span class="idlMethType"><a>void</a></span>                              <span class="idlMethName"><a href="#widl-takePhoto">takePhoto</a></span>(<span class="idlParamType">DOMString</span> <span class="idlParamName">trackID</span>);</span>
 <span class="idlMethod">    <span class="idlMethType"><a>void</a></span>                              <span class="idlMethName"><a href="#widl-requestData">requestData</a></span>();</span>
 <span class="idlMethod">    <span class="idlMethType"><a href="#widl-dictionary-availablerecordingformats">AvailableRecordingFormats</a></span>         <span class="idlMethName"><a href="#widl-getrecordingoptions">getRecordingOptions</a></span> ();</span>
 <span class="idlMethod">    <span class="idlMethType"><a>void</a></span>                              <span class="idlMethName"><a href="#widl-setrecordingoptions">setRecordingOptions</a></span> (<span class="idlParam"><span class="idlParamType"><a class=idlType href="#widl-dictionaryrecordingformat">RecordingFormat</a></span> <span class="idlParamName">RequestedFormats</span>);</span>
@@ -512,14 +514,16 @@ interface <span class="idlInterfaceID">MediaRecorder</span> : <span class="idlSu
 <dl class="attributes"><dt id="widl-onresume"><code>onresume</code> of type <span class="idlAttrType"><a class="idlType" href=""><code>EventHandler</code></a></span></dt><dd>
           <p>Called to handle the resume event.  </p>
         </dd></dl> 
-<dl class="attributes"><dt id="widl-onmutetrack"><code>onmutetrack</code> of type <span class="idlAttrType"><a class="idlType" href=""><code>EventHandler</code></a></span></dt><dd>
-          <p>Called to handle the mutetrack event.  Note that the Blob (see <cite><a href="#bib-FILE-API" class="bibref">FILEAPI</a></cite>) of recorded data is contained in this event and can
-          	be accessed via the 'detail' attribute.</p>
+<dl class="attributes"><dt id="widl-onmutetrackrecording"><code>onmutetrackrecording</code> of type <span class="idlAttrType"><a class="idlType" href=""><code>EventHandler</code></a></span></dt><dd>
+          <p>Called to handle the mutetrackrecording event.</p>
         </dd></dl>
         
-<dl class="attributes"><dt id="widl-onunmutetrack"><code>onunmutetrack</code> of type <span class="idlAttrType"><a class="idlType" href=""><code>EventHandler</code></a></span></dt><dd>
-          <p>Called to handle the unmutetrack event.  Note that the Blob (see <cite><a href="#bib-FILE-API" class="bibref">FILEAPI</a></cite>) of recorded data is contained in this event and can
-          	be accessed via the 'detail' attribute.</p>
+<dl class="attributes"><dt id="widl-onunmutetrackrecording"><code>onunmutetrackrecording</code> of type <span class="idlAttrType"><a class="idlType" href=""><code>EventHandler</code></a></span></dt><dd>
+          <p>Called to handle the unmutetrackrecording event.  </p>
+        </dd></dl>  
+<dl class="attributes"><dt id="widl-onphoto"><code>onphoto</code> of type <span class="idlAttrType"><a class="idlType" href=""><code>EventHandler</code></a></span></dt><dd>
+          <p>Called to handle the photo event.  The photo event returns a photo (as a Blob) in a compressed format (for example: PNG/JPEG) rather than a 
+                            raw ImageData object due to the expected large, uncompressed size of the resulting photos.</p>
         </dd></dl>  
 <dl class="attributes"><dt id="widl-onrecordingerror"><code>onrecordingerror</code> of type <span class="idlAttrType"><a class="idlType" href=""><code>EventHandler</code></a></span></dt><dd>
           <p>Called to handle the recordingerror event. </p>
@@ -629,7 +633,7 @@ interface <span class="idlInterfaceID">MediaRecorder</span> : <span class="idlSu
 		<li>If the specified Track is a video track, begin inserting black frames into the Blob
 			in place of any data coming from the underlying source.  Otherwise (the Track is an audio track)
 			insert silence into the Blob in place of any data coming from the underlying source.</li>
-			<li>Raise a <code>mutetrack</code> event.</li>
+			<li>Raise a <code>mutetrackrecording</code> event.</li>
 	</ol>
 		</dd></dl>	
 <dl class="methods"><dt id="widl-unmutetrack"><code>unmuteTrack</code></dt><dd>
@@ -646,7 +650,25 @@ interface <span class="idlInterfaceID">MediaRecorder</span> : <span class="idlSu
 				 insert black frames (for a video track) or silence (for an audio track) into the current Blob. </li>
 		<li>Once data is available for this Track from the underlying media source, start collecting
 			it into the current Blob. </li>
-	 <li>Raise an <code>unmutetrack</code> event.</li>
+	 <li>Raise an <code>unmutetrackrecording</code> event.</li>
+		</dd></dl>
+		
+<dl class="methods"><dt id="widl-takephoto"><code>takePhoto</code></dt><dd>
+	<p>When a <code><a class="idlType" href="#idl-def-MediaRecorder"><code>MediaRecorder</code></a></code> object’s <code>takePhoto()</code></dfn> method is invoked,
+	then if <a href="#widl-recordingstate"><code>state</code></a> is not "recording",
+          the user agent <em title="must" class="rfc2119">must</em> raise an INVALID_STATE exception
+          and return immediately. Otherwise if the <code>trackID</code> provided is not the 
+          <code>id</code> of a Track object in <code>mediaStream</code>'s  <code>videoTrackList</code>
+          with a source type of "photo-camera", the UA <em title="must" class="rfc2119">must</em> raise an INVALID_TRACK_ID exception
+          and return immediately. Otherwise it <em title="must" class="rfc2119">must</em>
+          queue a task, using the DOM manipulation task source, that runs the following steps:</p>
+		<ol>
+			<li>Gather data from the Track into a Blob containing a single still image. The method of doing
+				this will depend on the underlying device.  Some devices may just do a frame grab, while others
+				may temporarilly stop streaming data, reconfigure themselves with the appropriate photo settings, take the photo,
+				and then resume streaming.  In this case, the stopping and restarting of streaming <em title="should" class="rfc2119">should</em>
+				cause <code>mute</code> and <code>unmute</code> events to fire on the Track in question.  </li>
+	 <li>Raise an <code>photo</code> event containing the Blob.</li>
 		</dd></dl>
 				
 <dl class="methods"><dt id="widl-getrecordingoptions"><code>getRecordingOptions</code></dt><dd>
@@ -689,7 +711,25 @@ interface <span class="idlInterfaceID">MediaRecorder</span> : <span class="idlSu
           <tr><td><code>recording</code></td><td>Recording has been started and he UA is capturing data.</td></tr>
           <tr><td><code>paused</code></td><td>Recording has been started, then paused, and not yet stopped or resumed.</td></tr>
 	  	</table>
-<section id="widl-dictionary-availablerecordingformats"><h2><span class="secno">3.1 </span>Dictionary <code>AvailableRecordingFormats</code></h2>
+	  	
+            <section id="blob-event">
+                <h2><span class="secno">3.1 </span>BlobEvent</h2>
+
+                <p><dfn id="dfn-blobevent">BlobEvent</dfn> interface</p>
+                <pre class="idl"><span class="idlInterface" id="idl-def-BlobEvent">[<span class="extAttr">Constructor(DOMString type, optional BlobEventInit blobInitDict)</span>]
+interface <span class="idlInterfaceID">BlobEvent</span> : <span class="idlSuperclass"><a>Event</a></span> {
+<span class="idlAttribute">    readonly attribute <span class="idlAttrType"><a>Blob</a></span> <span class="idlAttrName"><a href="#widl-BlobEvent-data">data</a></span>;</span>
+};</span></pre><section><h5 id="attributes-4">Attributes</h5><dl class="attributes"><dt id="widl-BlobEvent-data"><code>data</code> of type <span class="idlAttrType"><a>Blob</a></span>, readonly</dt><dd>Returns a Blob object whose type attribute indicates the encoding of the blob data. An implementation must
+                        return a Blob in a format that is capable of being viewed in an HTML <code>&lt;img&gt;</code> tag.
+                    </dd></dl></section>
+            
+                <p>BlobEventInit dictionary</p>
+                <pre class="idl"><span class="idlDictionary" id="idl-def-BlobEventInit">dictionary <span class="idlDictionaryID">BlobEventInit</span> : <span class="idlSuperclass"><a>EventInit</a></span> {
+<span class="idlMember">    <span class="idlMemberType"><a>Blob</a></span> <span class="idlMemberName"><a href="#widl-BlobEventInit-data">data</a></span>;</span>
+};</span></pre><section><h5 id="dictionary-blobeventinit-members">Dictionary <a class="idlType" href="#idl-def-BlobEventInit"><code>BlobEventInit</code></a> Members</h5><dl class="dictionary-members"><dt id="widl-BlobEventInit-data"><code>data</code> of type <span class="idlMemberType"><a>Blob</a></span></dt><dd>A Blob object containing the data to deliver via this event.</dd></dl></section>
+            </section>
+            
+<section id="widl-dictionary-availablerecordingformats"><h2><span class="secno">3.2 </span>Dictionary <code>AvailableRecordingFormats</code></h2>
       <pre class="idl"><span class="idlDictionary" id="">dictionary <span class="idlDictionaryID">AvailableRecordingFormats</span> {
 <span class="idlMember">    <span class="idlMemberType"><a>sequence&lt;DOMString&gt;</a></span> <span class="idlMemberName"><a href="">containerEncodingFormats</a></span>;</span>
 <span class="idlMember">    <span class="idlMemberType"><a>sequence&lt;DOMString&gt</a></span> <span class="idlMemberName"><a href="">audioEncodingFormats</a></span>;</span>
@@ -710,7 +750,7 @@ interface <span class="idlInterfaceID">MediaRecorder</span> : <span class="idlSu
         	capable of holding at least two video Tracks and two audio Tracks.  </p>
 </section>
 
-<section id="widl-dictionary-recordingformat"><h3><span class="secno">3.2 </span>Dictionary <a href="#idl-def-DataChannelInit" class="idlType"><code>RecordingFormat</code></a></h3>
+<section id="widl-dictionary-recordingformat"><h3><span class="secno">3.3 </span>Dictionary <a href="#idl-def-DataChannelInit" class="idlType"><code>RecordingFormat</code></a></h3>
       <pre class="idl"><span class="idlDictionary" id="">dictionary <span class="idlDictionaryID">RecordingFormat</span> {
 <span class="idlMember">    <span class="idlMemberType">&lt;DOMString&gt;</span> <span class="idlMemberName"><a href="">containerEncodingFormat</a></span>;</span>
 <span class="idlMember">    <span class="idlMemberType">&lt;DOMString&gt</span> <span class="idlMemberName"><a href="">audioEncodingFormat</a></span>;</span>
@@ -842,7 +882,7 @@ interface <span class="idlInterfaceID">MediaRecorder</span> : <span class="idlSu
         <tr>
           <td><dfn id="event-mediarecorder-recording"><code>recording</code></dfn></td>
 
-          <td><code>Event</code></td>
+          <td><a href="http://dev.w3.org/2011/webrtc/editor/webrtc.html#mediastreamevent"><code>MediaSteamEvent</code></a></td>
 
           <td>The UA has started recording data on the MediaStream.</td>
         </tr>
@@ -850,15 +890,32 @@ interface <span class="idlInterfaceID">MediaRecorder</span> : <span class="idlSu
         <tr>
           <td><dfn id="event-mediarecorder-stoprecording"><code>stoprecording</code></dfn></td>
 
-          <td><code>Event</code></td>
+          <td><a href="http://dev.w3.org/2011/webrtc/editor/webrtc.html#mediastreamevent"><code>MediaSteamEvent</code></a></td>
 
           <td>The UA has stopped recording data on the MediaStream.</td>
         </tr>
         
         <tr>
+          <td><dfn id="event-mediarecorder-dataavailable"><code>dataavailable</code></dfn></td>
+
+          <td><a href="#idl-def-BlobEvent"><code>BlobEvent</code></a></td>
+          <td>The UA generates this even to return data to the application.  The 'detail' attribute of this 
+          	event contains a Blob of recorded data.</td>
+        </tr>
+        
+         <tr>
+          <td><dfn id="event-mediarecorder-photo"><code>photo</code></dfn></td>
+
+          <td><a href="#idl-def-BlobEvent"><code>BlobEvent</code></a></td>
+
+          <td>The UA uses this event to return a  photo to the application (as a Blob).  The 'detail' attribute of this 
+          	event contains a Blob of recorded snapshot data.</td>
+        </tr>
+        
+        <tr>
           <td><dfn id="event-mediarecorder-pause"><code>pause</code></dfn></td>
 
-          <td><code>Event</code></td>
+          <td><a href="http://dev.w3.org/2011/webrtc/editor/webrtc.html#mediastreamevent"><code>MediaSteamEvent</code></a></td>
 
           <td>The UA has paused recording data on the MediaStream.</td>
         </tr>
@@ -866,25 +923,34 @@ interface <span class="idlInterfaceID">MediaRecorder</span> : <span class="idlSu
          <tr>
           <td><dfn id="event-mediarecorder-resume"><code>resume</code></dfn></td>
 
-          <td><code>Event</code></td>
+          <td><a href="http://dev.w3.org/2011/webrtc/editor/webrtc.html#mediastreamevent"><code>MediaSteamEvent</code></a></td>
 
           <td>The UA has resumed recording data on the MediaStream.</td>
         </tr>
+        
+         <tr>
+          <td><dfn id="event-mediarecorder-mutetrackrecording"><code>mutetrackrecording</code></dfn></td>
+
+          <td><a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html"><code>MediaSteamTrackEvent</code></a></td>
+
+          <td>The MediaRecorder has muted recording on a Track.</td>
+        </tr>
+        
+         <tr>
+          <td><dfn id="event-mediarecorder-unmutetrackrecording"><code>unmutetrackrecording</code></dfn></td>
+
+          <td><a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html"><code>MediaSteamTrackEvent</code></a></td>
+
+          <td>The MediaRecorder has unmuted recording on a Track.</td>
+        </tr>
   
 
-        <tr>
-          <td><dfn id="event-mediarecorder-dataavailable"><code>dataavailable</code></dfn></td>
-
-          <td><code>CustomEvent</code></a></code></td>
-
-          <td>The UA returns data to the application.  This 'detail' attribute of this 
-          	event contains a Blob of recorded data.</td>
-        </tr>
+        
 
         <tr>
           <td><dfn id="event-mediarecorder-recordingerror"><code>recordingerror</code></dfn></td>
 
-          <td><code>CustomEvent</code></td>
+          <td><a href="#idl-def-RecordingError"><code>RecordingError</code></a></td>
 
           <td>A fatal error has occurred and the UA has stopped recording. More  detailed error information
           	is available in the 'detail' attribute. </td>
@@ -911,6 +977,8 @@ interface <span class="idlInterfaceID">MediaRecorder</span> : <span class="idlSu
         	<li>Do we need a "setSyncPoint()" operator and a "syncpoint" signal, 
         		so that the client can tell the recorder to insert a point at 
         		which a recording can be broken up (typically a new I-frame)? </li>
+        		<li>For takePhoto, is the restriction that the Track's source have sourcetype "photocamera"
+        			too strict? </li>
  		</ol>
 </section>
 
