@@ -655,11 +655,9 @@ interface <span class="idlInterfaceID">MediaRecorder</span> : <span class="idlSu
 		
 <dl class="methods"><dt id="widl-takephoto"><code>takePhoto</code></dt><dd>
 	<p>When a <code><a class="idlType" href="#idl-def-MediaRecorder"><code>MediaRecorder</code></a></code> object’s <code>takePhoto()</code></dfn> method is invoked,
-	then if <a href="#widl-recordingstate"><code>state</code></a> is not "recording",
-          the user agent <em title="must" class="rfc2119">must</em> raise an INVALID_STATE exception
-          and return immediately. Otherwise if the <code>trackID</code> provided is not the 
+	then  if the <code>trackID</code> provided is not the 
           <code>id</code> of a Track object in <code>mediaStream</code>'s  <code>videoTrackList</code>
-          with a source type of "photo-camera", the UA <em title="must" class="rfc2119">must</em> raise an INVALID_TRACK_ID exception
+          whose <code>readyState</code> is "live", the UA <em title="must" class="rfc2119">must</em> raise an INVALID_TRACK_ID exception
           and return immediately. Otherwise it <em title="must" class="rfc2119">must</em>
           queue a task, using the DOM manipulation task source, that runs the following steps:</p>
 		<ol>
@@ -977,8 +975,6 @@ interface <span class="idlInterfaceID">BlobEvent</span> : <span class="idlSuperc
         	<li>Do we need a "setSyncPoint()" operator and a "syncpoint" signal, 
         		so that the client can tell the recorder to insert a point at 
         		which a recording can be broken up (typically a new I-frame)? </li>
-        		<li>For takePhoto, is the restriction that the Track's source have sourcetype "photocamera"
-        			too strict? </li>
  		</ol>
 </section>
 
