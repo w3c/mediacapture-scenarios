@@ -12,7 +12,7 @@
                             company: "Microsoft Corp.",
                             url: "mailto:travis.leithead@microsoft.com?subject=MediaStream Capture Scenarios Feedback",
                             companyURL: "http://www.microsoft.com"}],
-                  publishDate:  "2012-08-31",
+                  publishDate:  "2013-01-04",
                   edDraftURI:   "http://dvcs.w3.org/hg/dap/raw-file/tip/media-stream-capture/scenarios.html",
                   previousPublishDate: null,
                   prevED: "http://dvcs.w3.org/hg/dap/raw-file/a8e255b904df/media-stream-capture/scenarios.html",
@@ -276,7 +276,7 @@
       </section>
 
       <section>
-        <h3>Find the ball assignment (video effects and upload requirements)</h3>
+        <h3>Find the ball assignment (media processing and recording)</h3>
         <p>
            	Alice is finishing up a college on-line course on image processing, and for the assignment she has to write 
             code that finds a blue ball in each video frame and draws a box around it. She has just finished testing her 
@@ -284,10 +284,7 @@
             frame of the video input. To finish the assignment, she must upload a video to the assignment page, which 
             requires uploads to have a specific encoding (to make it easier for the TA to review and grade all the 
             videos) and to be no larger than 50MB (small camera resolutions are recommended) and no longer than 30 
-            seconds. Alice is now ready; she enables the webcam, a video preview (to see herself), changes the camera's 
-            resolution down to 320x200, starts a video capture, and holds up the blue ball, moving it around to show that 
-            the image-tracking code is working. After recording for 30 seconds, Alice uploads the video to the assignment 
-            upload page using her class account.
+            seconds. Alice is now ready; she enables the webcam, a video preview (to see herself and the ball with the box around it), changes the camera's resolution down to 320x200, starts a video capture along with her media processing code, and holds up the blue ball, moving it around.  As she moves the ball, her code processes each video frame, drawing the box around the ball. The video preview shows output of her code (namely herself with the box tracking the ball) so that she sees that it is working correctly.  After recording the output of her processing code for 30 seconds, Alice stops the recording and immediately uploads the recorded video to the assignment upload page using her class account.
         </p>
         <p>Requirements:<a href="#lm1">LM1</a>, <a href="#lm6">LM6</a>, <a href="#lm7">LM7</a>,
         	<a href="#mc1">MC1</a>,
@@ -295,7 +292,10 @@
 
          <section>
           <h4>Variations</h4>
-          <p>TBD</p>
+          <section></section>
+          <h5>Recording with post-processing</h5>
+          <p>Alice decides to run her image-tracking code as a post-processing step.  She enables the webcam, a video preview (to see herself and the ball), changes the camera's resolution down to 320x200, starts a video recording, and holds up the blue ball, moving it around.  As she does this, the UA records the video stream of her and the ball.  After 30 seconds, she terminates the recording and saves the result to a file.  She then runs her image-processing software on the saved file, producing a new file that shows the box drawn around the moving ball.  She then previews the processed file to make sure it's correct, and uploads it to the assignment page using her class account.   </p>
+         </section>
         </section>
       </section>
 
