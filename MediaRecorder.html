@@ -110,7 +110,7 @@
 
 <section id="overview"><h2>Overview</h2>
   <p>This API attempts to make basic recording very simple, while still allowing for more complex use cases.  In the simplest case,
-  	the application instatiates the MediaRecorder object, calls record() and then calls stopRecord() or waits for the MediaStream to be ended.  The contents of the recording
+  	the application instantiates the MediaRecorder object, calls record() and then calls stopRecord() or waits for the MediaStream to be ended.  The contents of the recording
   	will be made available in the platform's default encoding via the dataavailable event.  Functions are available to query
   	the platform's available set of encodings, and to select the desired ones if the author wishes.  The application can also choose 
   	how much data it wants to receive at one time.  By default a Blob containing the entire recording is returned when
@@ -157,7 +157,7 @@
 				
 				data into a Blob (see [[!FILE-API]]). </li>
 		<li>If the <code>timeSlice</code> argument has been provided, then once <code>timeSlice</code>
-			milliseconds of data have been colleced, raise a <code>dataavailable</code> event containing
+			milliseconds of data have been collected, raise a <code>dataavailable</code> event containing
 			the Blob of collected data, and start gathering a new Blob of data.  Otherwise (if <code>timeSlice</code>
 			has not been provided), continue gathering data into the original Blob.</li>
 			<li>When the <code>stream</code> is ended set <code>recording</code>
@@ -175,9 +175,9 @@
 			in such a way that the original Tracks can be retrieved at playback time.  If any Track within the
 			MediaStream is muted at any time (i.e., if its <code>readyState</code> is set to <code>muted</code>), the UA
 			<em title="must" class="rfc2119">must</em> insert black frames or silence until the Track is unmuted. If the UA is 
-			unable to start recording or at any point is unable to contine recording, it <em title="must" class="rfc2119">must</em> raise 
+			unable to start recording or at any point is unable to continue recording, it <em title="must" class="rfc2119">must</em> raise 
 			a <code>recordingerror</code> event, follwowed by a <code>dataavailable</code> event containing
-			the Blob it has gathered, follwed by the <code>stoprecording</code> event.    
+			the Blob it has gathered, followed by the <code>stoprecording</code> event.    
 		</p>
 		<dl class='parameters'>
             <dt>optional  long? timeslice</dt>
@@ -282,7 +282,7 @@
 		<ol>
 			<li>Gather data from the Track into a Blob containing a single still image. The method of doing
 				this will depend on the underlying device.  Some devices may just do a frame grab, while others
-				may temporarilly stop streaming data, reconfigure themselves with the appropriate photo settings, take the photo,
+				may temporarily stop streaming data, reconfigure themselves with the appropriate photo settings, take the photo,
 				and then resume streaming.  In this case, the stopping and restarting of streaming <em title="should" class="rfc2119">should</em>
 				cause <code>mute</code> and <code>unmute</code> events to fire on the Track in question.  </li>
 	 <li>Raise an <code>photo</code> event containing the Blob.</li>
@@ -355,7 +355,7 @@
 	<h3>RecordingStateEnum</h3>
 	<dl title="enum RecordingStateEnum" class="idl">
    <dt>inactive</dt>
-   <dd>Recording is not occuring. (Either it has not been started or it has been stopped.).</dd>
+   <dd>Recording is not occurring. (Either it has not been started or it has been stopped.).</dd>
    <dt>recording</dt>
    <dd>Recording has been started and the UA is capturing data..</dd>
    <dt>paused</dt>
@@ -405,7 +405,7 @@
             Used to set the value of <code>mimeType</code>.
           </dd>
           <dt>unsigned long? imageWidth</dt>
-          <dd>Used to set hte value of <code>imageWidth</code>.</dd>
+          <dd>Used to set the value of <code>imageWidth</code>.</dd>
           	<dt>unsigned long? imageHeight</dt>
           <dd>Used to set the value of <code>imageWidth</code>.</dd>
         </dl>
@@ -472,7 +472,7 @@
 	<h4>RecordingErrorNameEnum</h4>
 	<dl title="enum RecordingErrorNameEnum" class="idl">
 		<dt>OUT_OF_MEMORY</dt>
-		<dd>The UA has exhaused the available memory. User agents SHOULD provide as much additional information as possible in the <code>message</code> attribute.</dd>
+		<dd>The UA has exhausted the available memory. User agents SHOULD provide as much additional information as possible in the <code>message</code> attribute.</dd>
 	<dt>ILLEGAL_STREAM_MODIFICATION	</dt>
 	<dd>A modification to the <code>stream</code> has occurred that makes it impossible to continue recording. An example would be the addition of a Track while recording is occurring. 
 		User agents SHOULD provide as much additional information  as possible in the <code>message</code> attribute.</dd>
