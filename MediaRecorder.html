@@ -4,7 +4,7 @@
  <head>
     <title>MediaStream Recording</title>
     <meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
-    <script type="text/javascript" src='https://www.w3.org/Tools/respec/respec-w3c-common' class='remove' async></script>
+    <script type="text/javascript" src='http://darobin.github.com/respec/builds/respec-w3c-common.js' class='remove'></script>
     <script type="text/javascript" class='remove'>
             var respecConfig = {
                   specStatus: "ED",
@@ -14,22 +14,21 @@
                   companyURL: "http://www.genesyslab.com"},
                      { name: "Travis Leithead", 
                             company: "Microsoft Corp.",
-                            url: "mailto:travis.leithead@microsoft.com?subject=MediaStream%20Recording",
+                            url: "mailto:travis.leithead@microsoft.com?subject=MediaStream Capture Scenarios Feedback",
                             companyURL: "http://www.microsoft.com"}],
-                  publishDate:  "2013-01-18",
-                  edDraftURI:   "https://dvcs.w3.org/hg/dap/raw-file/default/media-stream-capture/MediaRecorder.html",
-	       overrideCopyright:  "<p class='copyright'>Initial Author of this Specification was Ian Hickson, Google Inc., with the following copyright statement:<br /> &#169; Copyright 2004-2011 Apple Computer, Inc., Mozilla Foundation, and Opera Software ASA. You are granted a license to use, reproduce and create derivative works of this document.<\/p> <p class='copyright'>All subsequent changes since 26 July 2011 done by the W3C WebRTC Working Group and the Device APIs Working Group are under the following <a href='http://www.w3.org/Consortium/Legal/ipr-notice#Copyright'>Copyright<\/a>:<br />&#169; 2011-2013 <a href='http://www.w3.org/'><acronym title='World Wide Web Consortium'>W3C<\/acronym><\/a><sup>&#174;<\/sup> (<a href='http://www.csail.mit.edu/'><acronym title='Massachusetts Institute of Technology'>MIT<\/acronym><\/a>, <a href='http://www.ercim.eu/'><acronym title='European Research Consortium for Informatics and Mathematics'>ERCIM<\/acronym><\/a>, <a href='http://www.keio.ac.jp/'>Keio<\/a>, <a href='http://ev.buaa.edu.cn/'>Beihang<\/a>), All Rights Reserved. <a href='http://www.w3.org/Consortium/Legal/copyright-documents'>Document use<\/a>  rules apply.<\/p> <p class='copyright'>For the entire publication on the W3C site the <a href='http://www.w3.org/Consortium/Legal/ipr-notice#Legal_Disclaimer'>liability<\/a> and <a href='http://www.w3.org/Consortium/Legal/ipr-notice#W3C_Trademarks'>trademark<\/a> rules apply.<\/p>",
+                  publishDate:  "2013-03-22",
+                  edDraftURI:   "http://dvcs.w3.org/hg/dap/raw-file/tip/media-stream-capture/RecordingProposal.html",
                   previousPublishDate: null,
                   prevED: "",
                   noIDLIn:  true,
                   inlineCSS:  true,
-                  noRecTrack:  false,
-                  shortName:  "mediastream-recording",
+                  noRecTrack:  true,
+                  shortName:  "recording",
                   extraCSS: ["http://dev.w3.org/2009/dap/ReSpec.js/css/respec.css"],
-	    wg: ["Web Real-Time Communication Working Group", "Device APIs Working Group"]          ,
-   wgURI:["http://www.w3.org/2011/04/webrtc/","http://www.w3.org/2009/dap/"],
+                  wg:         ["Device APIs Working Group", "Web Real-Time Communications Working Group"],
+                  wgURI:    ["http://www.w3.org/2009/dap/", "http://www.w3.org/2011/04/webrtc/"],
                   wgPublicList: "public-media-capture",
-                  wgPatentURI:  ["http://www.w3.org/2004/01/pp-impl/47318/status", "http://www.w3.org/2004/01/pp-impl/43696/status"]
+                  wgPatentURI:  ["http://www.w3.org/2004/01/pp-impl/43696/status", "http://www.w3.org/2004/01/pp-impl/47318/status"]
               };
     </script>
     <style type="text/css">
@@ -80,16 +79,24 @@
   
   <body>
   	<section id="abstract">
-  		<p>This document defines a recording API for use with MediaStreams as defined in Media Capture and Streams
-  			[[!GETUSERMEDIA]].</p></section>
+  		<p>This document defines a recording API for use with MediaStreams as defined in 
+  			[[!GETUSERMEDIA]]</p></section>
    
   <section id="sotd">
   
     
+      
+        <p>
+          <em>This section describes the status of this document at the time of its publication. Other
+          documents may supersede this document. A list of current <acronym title="World Wide Web Consortium">W3C</acronym> publications and the latest revision
+          of this technical report can be found in the <a href="http://www.w3.org/TR/"><acronym title="World Wide Web Consortium">W3C</acronym> technical reports
+          index</a> at http://www.w3.org/TR/.</em>
+        </p>
+        
     <p>This document is not complete. It is subject to major changes and, while
     early experimentations are encouraged, it is therefore not intended for
-    implementation.
-    The Media Capture Task Force, a joint task force of the Device APIs and WebRTC Working Groups, expects this specification to evolve
+    implementation. 
+    The Media Capture Task Force expects this specification to evolve
     significantly based on:</p>
 
     <ul>
@@ -102,7 +109,44 @@
       <li>Feedback received from other groups and individuals.</li>
     </ul>
   
-
+        <p>
+          This document was published by the <a href="http://www.w3.org/2011/04/webrtc/">Web Real-Time Communication Working Group</a> as an Editor's Draft.
+          
+          If you wish to make comments regarding this document, please send them to 
+          <a href="mailto:public-media-capture@w3.org">public-media-capture@w3.org</a> 
+          (<a href="mailto:public-media-capture-request@w3.org?subject=subscribe">subscribe</a>,
+          <a href="http://lists.w3.org/Archives/Public/public-media-capture/">archives</a>).
+          
+          
+          All feedback is welcome.
+        </p>
+        
+          <p>
+            Publication as an Editor's Draft does not imply endorsement by the <acronym title="World Wide Web Consortium">W3C</acronym> Membership.
+            This is a draft document and may be updated, replaced or obsoleted by other documents at 
+            any time. It is inappropriate to cite this document as other than work in progress.
+          </p>
+        
+        
+        <p>
+          
+            This document was produced by a group operating under the 
+            <a href="http://www.w3.org/Consortium/Patent-Policy-20040205/">5 February 2004 <acronym title="World Wide Web Consortium">W3C</acronym> Patent Policy</a>.
+          
+          
+          
+            
+              <acronym title="World Wide Web Consortium">W3C</acronym> maintains a public list of any patent disclosures (<a href="http://www.w3.org/2004/01/pp-impl/47318/status" rel="disclosure">Web Real-Time Communication Working Group</a>, <a href="http://www.w3.org/2004/01/pp-impl/43696/status" rel="disclosure">Device APIs Working Group</a>)
+            
+            made in connection with the deliverables of the group; that page also includes instructions for 
+            disclosing a patent. An individual who has actual knowledge of a patent which the individual believes contains
+            <a href="http://www.w3.org/Consortium/Patent-Policy-20040205/#def-essential">Essential Claim(s)</a> must disclose the
+            information in accordance with <a href="http://www.w3.org/Consortium/Patent-Policy-20040205/#sec-Disclosure">section
+            6 of the <acronym title="World Wide Web Consortium">W3C</acronym> Patent Policy</a>.
+          
+          
+        </p>
+        
       
     
   
@@ -111,7 +155,7 @@
 
 <section id="overview"><h2>Overview</h2>
   <p>This API attempts to make basic recording very simple, while still allowing for more complex use cases.  In the simplest case,
-  	the application instantiates the MediaRecorder object, calls record() and then calls stopRecord() or waits for the MediaStream to be ended.  The contents of the recording
+  	the application instatiates the MediaRecorder object, calls record() and then calls stopRecord() or waits for the MediaStream to be ended.  The contents of the recording
   	will be made available in the platform's default encoding via the dataavailable event.  Functions are available to query
   	the platform's available set of encodings, and to select the desired ones if the author wishes.  The application can also choose 
   	how much data it wants to receive at one time.  By default a Blob containing the entire recording is returned when
@@ -133,19 +177,16 @@
 	<dt>readonly attribute DOMString mimeType</dt><dd>The MIME type for recording.  It specifies the 
 		container format as well as the audio and video capture formats.  The initial value will
 		be a platform-supplied default.</dd>
-	<dt>attribute EventHandler onrecording</dt><dd>Called to handle the recording event.</dd>
+	<dt>attribute EventHandler onstart</dt><dd>Called to handle the start event.</dd>
 	<dt>attribute EventHandler onstop</dt><dd>Called to handle the stop event.</dd>
 	<dt>attribute EventHandler ondataavailable</dt><dd>Called to handle the dataavailable event.  Note that the Blob (see [[!FILE-API]]) of recorded data is contained in this event and can
           	be accessed via the 'data' attribute.</dd>
           	<dt>attribute EventHandler onpause</dt><dd>Called to handle the pause event. </dd>
           	<dt>attribute EventHandler onresume</dt><dd>Called to handle the resume event. </dd>
-          	<dt>attribute EventHandler onmutetrack</dt><dd>Called to handle the mutetrack event. </dd>
-          	<dt>attribute EventHandler onunmutetrack</dt><dd>Called to handle the unmutetrack event. </dd>
-          	<dt>attribute EventHandler onphoto</dt><dd>Called to handle the photo event. The photo event returns a photo (as a Blob) in a compressed format (for example: PNG/JPEG) rather than a raw ImageData object due to the expected large, uncompressed size of the resulting photos.</dd>
           	<dt>attribute EventHandler onerror</dt><dd>Called to handle the recordingerror event. </dd>
           	<dt>attribute EventHandler onwarning</dt><dd>Called to handle the recordingwarning event. </dd>
-          	<dt>void record ()</dt>
-<dd>When a <code>MediaRecorder</code> object’s <code>record()</code> method is invoked,
+          	<dt>void start()</dt>
+<dd>When a <code>MediaRecorder</code> object’s <code>start()</code> method is invoked,
 			then, if the <code>state</code> is not "inactive", the UA MUST
 				raise an <code>INVALID_STATE</code> exception and return immediately.  
 			Otherwise, it MUST queue a task, using the DOM manipulation task source, 
@@ -154,11 +195,11 @@
 				<li>Set <code>state</code> to 'recording' and wait until media
 					
 					becomes available from <code>stream</code>.</li>
-			<li>Once data becomes available raise a <code>recording</code> event and start gathering the 
+			<li>Once data becomes available raise a <code>start</code> event and start gathering the 
 				
 				data into a Blob (see [[!FILE-API]]). </li>
 		<li>If the <code>timeSlice</code> argument has been provided, then once <code>timeSlice</code>
-			milliseconds of data have been collected, raise a <code>dataavailable</code> event containing
+			milliseconds of data have been colleced, raise a <code>dataavailable</code> event containing
 			the Blob of collected data, and start gathering a new Blob of data.  Otherwise (if <code>timeSlice</code>
 			has not been provided), continue gathering data into the original Blob.</li>
 			<li>When the <code>stream</code> is ended set <code>recording</code>
@@ -176,9 +217,9 @@
 			in such a way that the original Tracks can be retrieved at playback time.  If any Track within the
 			MediaStream is muted at any time (i.e., if its <code>readyState</code> is set to <code>muted</code>), the UA
 			<em title="must" class="rfc2119">must</em> insert black frames or silence until the Track is unmuted. If the UA is 
-			unable to start recording or at any point is unable to continue recording, it <em title="must" class="rfc2119">must</em> raise 
-			a <code>recordingerror</code> event, followed by a <code>dataavailable</code> event containing
-			the Blob it has gathered, followed by the <code>stoprecording</code> event.    
+			unable to start recording or at any point is unable to contine recording, it <em title="must" class="rfc2119">must</em> raise 
+			a <code>recordingerror</code> event, follwowed by a <code>dataavailable</code> event containing
+			the Blob it has gathered, follwed by the <code>stoprecording</code> event.    
 		</p>
 		<dl class='parameters'>
             <dt>optional  long? timeslice</dt>
@@ -190,14 +231,14 @@
           
     <dt>void stop()</dt>
     
-    <dd>When a <code>MediaRecorder</code> object’s <code>stopRecording</code> method is invoked,
+    <dd>When a <code>MediaRecorder</code> object’s <code>stop</code> method is invoked,
           then if <code>state</code> is "inactive", the user agent MUST
           raise an INVALID_STATE exception and return immediately.  Otherwise it MUST 
           queue a task, using the DOM manipulation task source, that runs the following steps:
 		<ol>	
 			<li>Set <code>state</code> to 'inactive' and stop gathering data. </li>
 			<li>Raise a <code>dataavailable</code> event containing the Blob of data that has been gathered.</li>
-			<li>Raise a <code>recordingdone</code> event</li>		
+			<li>Raise a <code>done</code> event</li>		
 			</ol>
 			</dd>
 			<dt>void pause()</dt>
@@ -225,76 +266,6 @@
 		<li>Raise a <code>resume</code> event.</li>
 	</ol></dd>
 	
-	<dt>void muteTrack()</dt>
-	<dd>When a 
-		<code>MediaRecorder</code> object’s <code>muteTrack()</code> method is invoked,
-	then if <code>state</code> is not "recording"
-          the user agent <em title="must" class="rfc2119">must</em> raise an INVALID_STATE exception
-          and return immediately.  Otherwise if the <code>trackID</code> provided is not the 
-          <code>id</code> of a Track object in <code>stream</code>'s <code>audioTrackList</code>
-          or <code>videoTrackList</code> it <em title="must" class="rfc2119">must</em> raise an INVALID_TRACK_ID exception
-          and return immediately.  Otherwise it <em title="must" class="rfc2119">must</em>
-          queue a task, using the DOM manipulation task source, that runs the following steps:
-		<ol>
-		<li>If the specified Track is a video track, begin inserting black frames into the Blob
-			in place of any data coming from the underlying source.  Otherwise (the Track is an audio track)
-			insert silence into the Blob in place of any data coming from the underlying source.</li>
-			<li>Raise a <code>mutetrackrecording</code> event.</li>
-	</ol>
-	<dl class='parameters'>
-            <dt>DOMString trackID</dt>
-            <dd>
-              The id of the audio or video track to mute.
-            </dd>
-          </dl>
-	</dd>
-	<dt>void unmuteTrack()</dt>
-	<dd>
-		When a <code>MediaRecorder</code> object’s <code>unmuteTrack()</code> method is invoked,
-	then if <code>state</code> is not "recording",
-          the user agent <em title="must" class="rfc2119">must</em> raise an INVALID_STATE exception
-          and return immediately. Otherwise if the <code>trackID</code> provided is not the 
-          <code>id</code> of a Track object in <code>stream</code>'s <code>audioTrackList</code>
-          or <code>videoTrackList</code> it <em title="must" class="rfc2119">must</em> raise an INVALID_TRACK_ID exception
-          and return immediately. Otherwise it <em title="must" class="rfc2119">must</em>
-          queue a task, using the DOM manipulation task source, that runs the following steps:
-		<ol>
-			<li>Until such time as data is available for this Track from the underlying media source,
-				 insert black frames (for a video track) or silence (for an audio track) into the current Blob. </li>
-		<li>Once data is available for this Track from the underlying media source, start collecting
-			it into the current Blob. </li>
-	 <li>Raise an <code>unmutetrack</code> event.</li>
-	 </ol>
-		<dl class='parameters'>
-            <dt>DOMString trackID</dt>
-            <dd>
-              The id of the audio or video track to unmute.
-            </dd>
-          </dl>
-          </dd>
-   <dt>void takePhoto()</dt>
-   <dd>
-   	When a <code>MediaRecorder</code> object’s <code>takePhoto()</code> method is invoked,
-	then  if the <code>trackID</code> provided is not the 
-          <code>id</code> of a Track object in <code>stream</code>'s  <code>videoTrackList</code>
-          whose <code>readyState</code> is "live", the UA MUST raise an INVALID_TRACK_ID exception
-          and return immediately. Otherwise it MUST
-          queue a task, using the DOM manipulation task source, that runs the following steps:
-		<ol>
-			<li>Gather data from the Track into a Blob containing a single still image. The method of doing
-				this will depend on the underlying device.  Some devices may just do a frame grab, while others
-				may temporarily stop streaming data, reconfigure themselves with the appropriate photo settings, take the photo,
-				and then resume streaming.  In this case, the stopping and restarting of streaming <em title="should" class="rfc2119">should</em>
-				cause <code>mute</code> and <code>unmute</code> events to fire on the Track in question.  </li>
-	 <li>Raise an <code>photo</code> event containing the Blob.</li>
-	</ol>
-   	<dl class='parameters'>
-            <dt>DOMString trackID</dt>
-            <dd>
-              The id of the video track from which to take a snapshot.
-            </dd>
-          </dl>
-   	</dd>
    	<dt>void requestData()</dt>
    	<dd>
    	When a <code>MediaRecorder</code>object’s <code>requestData()</code> method is invoked,
@@ -346,7 +317,7 @@
       constructor takes one argument which
       <em title="must" class="rfc2119">must</em> be of type <code>MediaStream</code> (see [[!GETUSERMEDIA]]). When the constructor
       is invoked, the UA <em title="must" class="rfc2119">must</em> construct a new <a class="idlType" href="#idl-def-MediaRecorder"><code>MediaRecorder</a></code> object,
-      	 set its <a href="#widl-MediaRecorder-stream">stream</a> attribute to be the provided MediaStream, set its <a href="#widl-MediaRecorder-state">state</a> attribute to 'inactive'
+      	 set its <a href="#widl-mediastream">mediaStream</a> attribute to be the provided MediaStream, set its <a href="#widl-state">state</a> attribute to 'inactive'
       	 and return the object.</p>  
       	 
 	
@@ -356,7 +327,7 @@
 	<h3>RecordingStateEnum</h3>
 	<dl title="enum RecordingStateEnum" class="idl">
    <dt>inactive</dt>
-   <dd>Recording is not occurring. (Either it has not been started or it has been stopped.).</dd>
+   <dd>Recording is not occuring. (Either it has not been started or it has been stopped.).</dd>
    <dt>recording</dt>
    <dd>Recording has been started and the UA is capturing data..</dd>
    <dt>paused</dt>
@@ -406,7 +377,7 @@
             Used to set the value of <code>mimeType</code>.
           </dd>
           <dt>unsigned long? imageWidth</dt>
-          <dd>Used to set the value of <code>imageWidth</code>.</dd>
+          <dd>Used to set hte value of <code>imageWidth</code>.</dd>
           	<dt>unsigned long? imageHeight</dt>
           <dd>Used to set the value of <code>imageWidth</code>.</dd>
         </dl>
@@ -473,7 +444,7 @@
 	<h4>RecordingErrorNameEnum</h4>
 	<dl title="enum RecordingErrorNameEnum" class="idl">
 		<dt>OUT_OF_MEMORY</dt>
-		<dd>The UA has exhausted the available memory. User agents SHOULD provide as much additional information as possible in the <code>message</code> attribute.</dd>
+		<dd>The UA has exhaused the available memory. User agents SHOULD provide as much additional information as possible in the <code>message</code> attribute.</dd>
 	<dt>ILLEGAL_STREAM_MODIFICATION	</dt>
 	<dd>A modification to the <code>stream</code> has occurred that makes it impossible to continue recording. An example would be the addition of a Track while recording is occurring. 
 		User agents SHOULD provide as much additional information  as possible in the <code>message</code> attribute.</dd>
@@ -515,7 +486,7 @@
 
       </tbody><tbody>
         <tr>
-          <td><dfn id="event-mediarecorder-recording"><code>recording</code></dfn></td>
+          <td><dfn id="event-mediarecorder-start"><code>start</code></dfn></td>
 
           <td><code>Event</code></td>
 
@@ -523,7 +494,7 @@
         </tr>
 
         <tr>
-          <td><dfn id="event-mediarecorder-stoprecording"><code>stoprecording</code></dfn></td>
+          <td><dfn id="event-mediarecorder-stop"><code>stop</code></dfn></td>
 
           <td><code>Event</code></td>
 
@@ -558,7 +529,7 @@
          <tr>
           <td><dfn id="event-mediarecorder-resume"><code>resume</code></dfn></td>
 
-          <td><code>MediaStreamEvent</code></td>
+          <td><code>MediaSteamEvent</code></td>
 
           <td>The UA has resumed recording data on the MediaStream.</td>
         </tr>
@@ -566,7 +537,7 @@
          <tr>
           <td><dfn id="event-mediarecorder-mutetrack"><code>mutetrack</code></dfn></td>
 
-          <td><a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html"><code>MediaStreamTrackEvent</code></a></td>
+          <td><a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html"><code>MediaSteamTrackEvent</code></a></td>
 
           <td>The MediaRecorder has muted recording on a Track.</td>
         </tr>
@@ -574,7 +545,7 @@
          <tr>
           <td><dfn id="event-mediarecorder-unmutetrack"><code>unmutetrack</code></dfn></td>
 
-          <td><a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html"><code>MediaStreamTrackEvent</code></a></td>
+          <td><a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html"><code>MediaSteamTrackEvent</code></a></td>
 
           <td>The MediaRecorder has unmuted recording on a Track.</td>
         </tr>
@@ -592,7 +563,7 @@
         </tr>
         
           <tr>
-          <td><dfn id="event-mediarecorder-recordingwarning"><code>recordingwarning</code></dfn></td>
+          <td><dfn id="event-mediarecorder-warning"><code>warning</code></dfn></td>
 
           <td><code>CustomEvent</code></td>
 
