@@ -16,7 +16,7 @@
                             company: "Microsoft Corp.",
                             url: "mailto:travis.leithead@microsoft.com?subject=MediaStream Capture Scenarios Feedback",
                             companyURL: "http://www.microsoft.com"}],
-                  publishDate:  "2013-03-22",
+                  publishDate:  "2013-05-07",
                   edDraftURI:   "http://dvcs.w3.org/hg/dap/raw-file/tip/media-stream-capture/RecordingProposal.html",
                   previousPublishDate: null,
                   prevED: "",
@@ -183,7 +183,7 @@
           	be accessed via the 'data' attribute.</dd>
           	<dt>attribute EventHandler onpause</dt><dd>Called to handle the pause event. </dd>
           	<dt>attribute EventHandler onresume</dt><dd>Called to handle the resume event. </dd>
-          	<dt>attribute EventHandler onerror</dt><dd>Called to handle the recordingerror event. </dd>
+          	<dt>attribute EventHandler onerror</dt><dd>Called to handle the DOMError event. </dd>
           	<dt>attribute EventHandler onwarning</dt><dd>Called to handle the recordingwarning event. </dd>
           	<dt>void start()</dt>
 <dd>When a <code>MediaRecorder</code> object’s <code>start()</code> method is invoked,
@@ -209,8 +209,7 @@
 			</ol>
 			
 			<p>Note that <code>stop()</code>,
-				<code>requestData()</code>, <code>pause</code>,
-				and <code>muteTrack</code> also affect the recording behavior.</p>
+				<code>requestData()</code>, and <code>pause</code> also affect the recording behavior.</p>
 				
 
 			<p>The UA <em title="must" class="rfc2119">must</em> record the MediaStream
@@ -218,11 +217,11 @@
 			MediaStream is muted at any time (i.e., if its <code>readyState</code> is set to <code>muted</code>), the UA
 			<em title="must" class="rfc2119">must</em> insert black frames or silence until the Track is unmuted. If the UA is 
 			unable to start recording or at any point is unable to contine recording, it <em title="must" class="rfc2119">must</em> raise 
-			a <code>recordingerror</code> event, follwowed by a <code>dataavailable</code> event containing
+			a <code>DOMError</code> event, follwowed by a <code>dataavailable</code> event containing
 			the Blob it has gathered, follwed by the <code>stoprecording</code> event.    
 		</p>
 		<dl class='parameters'>
-            <dt>optional  long? timeslice</dt>
+            <dt>optional  long timeslice</dt>
             <dd>
               The number of milliseconds of data to return in a single Blob.
             </dd>
@@ -392,23 +391,23 @@
         <h3>General Principles</h3>
 
         <p>Errors are indicated in two ways: exceptions and objects passed to
-        error callbacks. Both forms of error reporting <em title="must" class="rfc2119">must</em> provide an object
-        of type <code>RecordingError</code>. An exception <em title="must" class="rfc2119">must</em> be thrown in the
+        error callbacks. In the former case, a <a href="http://www.w3.org/TR/2012/WD-dom-20121206/#exception-domexception">DOMException</a> is raised (see [[!DOM4]]).
+        An exception <em title="must" class="rfc2119">must</em> be thrown in the
         following cases:</p>
 
         <ul>
           <li>The type of any argument passed to a function did not match what
-          was expected. An appropriate string from the
+          was expected. An appropriate name from the
           <code>RecordingExceptionName</code> enum <em title="must" class="rfc2119">must</em> be used as the error
           name.</li>
 
           <li>A function call was made when the Recorder is in an
           invalid state, or a state in which that particular function is not
-          allowed to be executed. In this case, the string
+          allowed to be executed. In this case, the name
           <code>INVALID_STATE</code> <em title="must" class="rfc2119">must</em> be used as the error name.</li>
         </ul>
 
-        <p>In all other cases, an error object <em title="must" class="rfc2119">must</em> be provided to the failure
+        <p>In all other cases, an <a href="http://www.w3.org/TR/2012/WD-dom-20121206/#interface-domerror">DOMError</a> object(see [[!DOM4]]) <em title="must" class="rfc2119">must</em> be provided to the failure
         callback. The error name in the object provided <em title="must" class="rfc2119">must</em> be picked from
          the <code>RecordingErrorName</code>
         enums.  After raising the error, the UA <em title="must" class="rfc2119">must</em>
@@ -421,25 +420,9 @@
    	the nature of the problem, and continue recording.</p>
  </section>   
      
-<section id="recordingerror">
-        <h3>RecordingError</h3>
-        
-        <dl title='interface RecordingError : Error' class='idl'>
-        	<dt>readonly attribute RecordingErrorEnum  name</dt>
-        	<dd>A string representing the type of the error. </dd>
-        	<dt>readonly attribute DOMString? message</dt>
-       <dd>A human readable description of the error. This string MAY vary between different user agents.</dd>
-        	</dl>
+     
         	
- 
-  <dl title='dictionary RecordingErrorInit' class='idl'>
-          <dt>RecordingErrorEnum name</dt>
-          <dd>
-            Used to set the <code>name</code> attribute.
-          </dd>
-          <dt>DOMString? message</dt>
-          <dd>Used to set the <code>message</code> attribute.</dd>
-        </dl>
+
 <section>
 	<h4>RecordingErrorNameEnum</h4>
 	<dl title="enum RecordingErrorNameEnum" class="idl">
@@ -532,31 +515,12 @@
           <td><code>MediaSteamEvent</code></td>
 
           <td>The UA has resumed recording data on the MediaStream.</td>
-        </tr>
-        
-         <tr>
-          <td><dfn id="event-mediarecorder-mutetrack"><code>mutetrack</code></dfn></td>
-
-          <td><a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html"><code>MediaSteamTrackEvent</code></a></td>
-
-          <td>The MediaRecorder has muted recording on a Track.</td>
-        </tr>
-        
-         <tr>
-          <td><dfn id="event-mediarecorder-unmutetrack"><code>unmutetrack</code></dfn></td>
-
-          <td><a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html"><code>MediaSteamTrackEvent</code></a></td>
-
-          <td>The MediaRecorder has unmuted recording on a Track.</td>
-        </tr>
-  
-
-        
+        </tr>       
 
         <tr>
-          <td><dfn id="event-mediarecorder-recordingerror"><code>recordingerror</code></dfn></td>
+          <td><dfn id="event-mediarecorder-DOMError"><code>DOMError</code></dfn></td>
 
-          <td><a href="#idl-def-RecordingError"><code>RecordingError</code></a></td>
+          <td><a href="http://www.w3.org/TR/2012/WD-dom-20121206/#interface-domerror"><code>DOMError</code></a></td>
 
           <td>A fatal error has occurred and the UA has stopped recording. More  detailed error information
           	is available in the 'message' attribute. </td>
@@ -584,6 +548,7 @@
         	<li>Do we need a "setSyncPoint()" operator and a "syncpoint" signal, 
         		so that the client can tell the recorder to insert a point at 
         		which a recording can be broken up (typically a new I-frame)? </li>
+        		<li>Do we need warning events? </li>
         		<li>Do we need to ask the user's permission before we record?</li>
  		</ol>
 </section>
