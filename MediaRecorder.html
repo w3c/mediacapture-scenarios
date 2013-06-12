@@ -16,7 +16,7 @@
                             company: "Microsoft Corp.",
                             url: "mailto:travis.leithead@microsoft.com?subject=MediaStream Capture Scenarios Feedback",
                             companyURL: "http://www.microsoft.com"}],
-                  publishDate:  "2013-05-23",
+                  publishDate:  "2013-06-12",
                   edDraftURI:   "http://dvcs.w3.org/hg/dap/raw-file/tip/media-stream-capture/RecordingProposal.html",
                   previousPublishDate: null,
                   prevED: "",
@@ -190,7 +190,7 @@
 			the UA <em title="must" class="rfc2119">must</em> queue a task, using the DOM manipulation task source, 
 			that runs the following steps:
 		<ol>
-			<li>If the <code>state</code> is not "inactive", 	raise a DOM <code>InvalidStateError</code> event and terminate these steps. Otherwise:</li>
+			<li>If the <code>state</code> is not "inactive", 	raise a DOM <code>InvalidState</code> error and terminate these steps. Otherwise:</li>
 				<li>Set <code>state</code> to 'recording' and wait until media
 					
 					becomes available from <code>stream</code>.</li>
@@ -247,7 +247,7 @@
 		<ol>
 		<li>If <code>state</code> is  "inactive"
           raise a DOM 
-          <code>InvalidStateError</code> event and terminate these steps.  Otherwise: </li>
+          <code>InvalidState</code> error and terminate these steps.  Otherwise: </li>
 		<li>Set <code>state</code> to "paused".</li>
 		<li>Stop gathering data into its current Blob (but keep the Blob available so that 
 			recording can be resumed in the future).</li>
@@ -260,8 +260,8 @@
           queue a task, using the DOM manipulation task source, that runs the following steps:
 		<ol>
 			<li>If <code>state</code> is  "inactive"
-          raise a DOM <code>InvalidStateError</code>
-          event and terminate these steps.  Otherwise: </li>
+          raise a DOM <code>InvalidState</code>
+          error and terminate these steps.  Otherwise: </li>
 		<li>Set <code>state</code> to "recording".</li>
 		<li>Resume (or continue) gathering data into its current Blob.</li>
 		<li>Raise a <code>resume</code> event.</li>
@@ -275,7 +275,7 @@
 		<ol>
 			<li>If <code>state</code> is not "recording"
          raise a DOM
-          <code>InvalidStateError</code> event and terminate these steps.
+          <code>InvalidState</code> error and terminate these steps.
           Otherwise:</li>
 		<li>Raise a <code>dataavailable</code> event containing the current Blob of saved data.</li>
 		<li>Create a new Blob and gather subsequent data into it.</li>
@@ -299,7 +299,7 @@
 		<ol>
 			<li>If <code>state</code> is not
 					"inactive", raise a DOM
-					<code>InvalidStateError</code> event and terminate these steps.
+					<code>InvalidState</code> error and terminate these steps.
 					Otherwise:</li>
 				<li>Let <em>currentOptions</em> be the current set of options that are specified
 					to be used for recording by the MediaRecorder.  (If setOptions() has not yet been called, these will
@@ -421,26 +421,27 @@
 <section>
 	<h4>RecordingErrorNameEnum</h4>
 	<dl title="enum RecordingErrorNameEnum" class="idl">
-		<dt>OUT_OF_MEMORY</dt>
+				<dt>InvalidState</dt>
+		<dd>The <code>MediaRecorder</code> is not in a state
+          in which the proposed operation is allowed
+          to be executed.</dd>
+		<dt>OutOfMemory</dt>
 		<dd>The UA has exhaused the available memory. User agents SHOULD provide as much additional information as possible in the <code>message</code> attribute.</dd>
-	<dt>ILLEGAL_STREAM_MODIFICATION	</dt>
+	<dt>IllegalStreamModification</dt>
 	<dd>A modification to the <code>stream</code> has occurred that makes it impossible to continue recording. An example would be the addition of a Track while recording is occurring. 
 		User agents SHOULD provide as much additional information  as possible in the <code>message</code> attribute.</dd>
-	<dt>"OTHER_RECORDING_ERROR"</dt>
+	<dt>OtherRecordingError</dt>
 	<dd>Used for an fatal error other than those listed above.  User agents SHOULD provide as much additional information as possible in the <code>message</code> attribute.</dd>
 	
 	</section>
 </section> 
 <section id="recordingexceptionenum">
 	<h2>RecordingExceptionEnum</h2>
-	<dl title="enum RecordingExcedptionEnum" class="idl">
-		<dt>INVALID_STATE</dt>
-		<dd>The function was called on a <code>MediaRecorder</code> that
-          is an invalid state, or a state in which the function is not allowed
-          to be executed.</dd>
-		<dt>INVALID_MEDIASTREAM_TRACK_ID</dt>
+	<dl title="enum RecordingExceptionEnum" class="idl">
+
+		<dt>InvalidMediaStreamTrackId</dt>
 		<dd>	The argument provided is not the ID of any <code>MediaStreamTrack</code> belonging to the <code>MediaRecorder</code>'s <code>stream</code>.</dd>
-    <dt>UNSUPPORTED_OPTION</dt>
+    <dt>UnsupportedOption</dt>
     <dd>The UA cannot provide the codec or recording option that has
           	been requested.</dd>
 	</section> 
