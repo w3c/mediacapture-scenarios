@@ -14,6 +14,7 @@
           ]
       ,   edDraftURI:   "https://dvcs.w3.org/hg/dap/raw-file/default/media-stream-capture/ImageCapture.html"
       ,   copyrightStart: 2012
+//      ,   publishDate: "2013-07-09"
       ,   noIDLIn:      true
       ,   wg:           ["Web Real-Time Communication Working Group", "Device APIs Working Group"]
       ,   wgURI:        ["http://www.w3.org/2011/04/webrtc/","http://www.w3.org/2009/dap"]
@@ -32,12 +33,12 @@
     </section>
     
     <section id='abstract'>
-      This document specific the takePhoto() and getFrame methods, and corresponding camera settings for use with MediaStreams as defined in Media Capture and Streams [[!GETUSERMEDIA]].
+      This document specifies the <code>takePhoto()</code> and <code>getFrame()</code> methods, and corresponding camera settings for use with MediaStreams as defined in Media Capture and Streams [[!GETUSERMEDIA]].
     </section>
     
     Introduction
     ------------
-    <p>The API defined in this document taks a valid MediaStream and returns an encoded image in the form of a <code>Blob</code> (as defined in [[!FILE-API]]).  The image is
+    <p>The API defined in this document takes a valid MediaStream and returns an encoded image in the form of a <code>Blob</code> (as defined in [[!FILE-API]]).  The image is
     provided by the capture device that provides the MediaStream.  Moreover, 
     picture-specific settings can be optionally provided as arguments that can be applied to the image being captured.</p>
     
