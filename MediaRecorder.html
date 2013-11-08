@@ -16,7 +16,7 @@
                             company: "Microsoft Corp.",
                             url: "mailto:travis.leithead@microsoft.com?subject=MediaStream Capture Scenarios Feedback",
                             companyURL: "http://www.microsoft.com"}],
-                  publishDate:  "2013-08-09",
+                  publishDate:  "2013-11-08",
                   edDraftURI:   "http://dvcs.w3.org/hg/dap/raw-file/tip/media-stream-capture/RecordingProposal.html",
                   previousPublishDate: null,
                   prevED: "",
@@ -155,7 +155,7 @@
 
 <section id="overview"><h2>Overview</h2>
   <p>This API attempts to make basic recording very simple, while still allowing for more complex use cases.  In the simplest case,
-  	the application instatiates the MediaRecorder object, calls record() and then calls stopRecord() or waits for the MediaStream to be ended.  The contents of the recording
+  	the application instatiates the MediaRecorder object, calls record() and then calls stop() or waits for the MediaStream to be ended.  The contents of the recording
   	will be made available in the platform's default encoding via the dataavailable event.  Functions are available to query
   	the platform's available set of encodings, and to select the desired ones if the author wishes.  The application can also choose 
   	how much data it wants to receive at one time.  By default a Blob containing the entire recording is returned when
@@ -166,17 +166,15 @@
 
 
  <section id="MediaRecorderAPI"><h2>Media Recorder API</h2>
+ 	
+ 	<div class="idl" title="MediaRecorder implements Constrainable"></div>
+ 	<p>For the definition of the Constrainable API, see [[!GETUSERMEDIA]].  For the 
+ 		definition of MediaRecorder's constrainable properties see <a href="#properties">MediaRecorder 
+ 			Constrainable Properties</a>.</p>
 
 <dl title='[Constructor (MediaStream stream)] interface MediaRecorder : EventTarget' class="idl">
 	<dt>readonly attribute MediaStream stream</dt><dd>The MediaStream passed in to the constructor.</dd>
 	<dt>readonly attribute RecordingStateEnum state</dt><dd>The current state of the MediaRecorder object. </dd>
-	<dt>readonly attribute unsigned long imageWidth</dt><dd>The width of the video or photo image to capture.  
-		The initial value will be a platform-supplied default.</dd>
-	<dt>readonly attribute unsigned long imageHeight</dt><dd>The height of the video or photo image to capture.  
-		The initial value will be a platform-supplied default.</dd>
-	<dt>readonly attribute DOMString mimeType</dt><dd>The MIME type for recording.  It specifies the 
-		container format as well as the audio and video capture formats.  The initial value will
-		be a platform-supplied default.</dd>
 	<dt>attribute EventHandler onstart</dt><dd>Called to handle the start event.</dd>
 	<dt>attribute EventHandler onstop</dt><dd>Called to handle the stop event.</dd>
 	<dt>attribute EventHandler ondataavailable</dt><dd>Called to handle the dataavailable event.  Note that the Blob (see [[!FILE-API]]) of recorded data is contained in this event and can
@@ -198,11 +196,12 @@
 				
 				data into a Blob (see [[!FILE-API]]). </li>
 		<li>If the <code>timeSlice</code> argument has been provided, then once <code>timeSlice</code>
-			milliseconds of data have been colleced, raise a <code>dataavailable</code> event containing
+			milliseconds of data have been colleced, or some minimum time slice imposed
+			by the UA, whichever is greater, raise a <code>dataavailable</code> event containing
 			the Blob of collected data, and start gathering a new Blob of data.  Otherwise (if <code>timeSlice</code>
 			has not been provided), continue gathering data into the original Blob.</li>
 			<li>When the <code>stream</code> is ended set <code>recording</code>
-				to 'false' and stop gathering data.</li>
+				to 'false' and stop gathering data.  . Callers SHOULD not rely on exactness of the timeSlice value, especially if the timeSlice value is small. Callers SHOULD consider timeSlice as a minimum value</li>
 					<li>Then  raise a <code>dataavailable</code> event containing the Blob of data.</li>
 					<li>Finally, raise a <code>stop</code> event.</li> 
 			</ol>
@@ -285,37 +284,6 @@
 		<li>Create a new Blob and gather subsequent data into it.</li>
 	</ol>	
    		</dd>
-   		
-<dt>AvailableSettings getOptions()</dt>
-<dd>When a <code>MediaRecorder</code> object’s <code>getOptions()</code> method is invoked,
-          the user agent <em title="must" class="rfc2119">must </em>return an 
-          	AvailableSettings structure
-          containing the set of recording options that it supports.  These are the legal
-          values that can be set via <code>setOptions</code>.
-	</dd>
-
-<dt>void setOptions(RecordingSettings optionValues)</dt>
-<dd>
-	When a 
-			<code>MediaRecorder</code> object’s <code>setOptions()</code> method is invoked,
-				the UA <em title="must" class="rfc2119">must</em>
-					run the following steps before returning:
-		<ol>
-			<li>If <code>state</code> is not
-					"inactive", raise a DOM
-					<code>InvalidState</code> error and terminate these steps.
-					Otherwise:</li>
-				<li>Let <em>currentOptions</em> be the current set of options that are specified
-					to be used for recording by the MediaRecorder.  (If setOptions() has not yet been called, these will
-					be the UA's defaults.)</li>
-			<li>For each option that is specified in the <code>optionVlaues</code> argument,
-				if the UA does not support it, raise a UNSUPPORTED_OPTION exception, set <em>currentOptions</em>
-				back to its value in step 2, and terminate these steps.  Otherwise
-				replace the corresponding member of <em>currentOptions</em> with the specified value.</li>
-			</ol>
-			
-			
-	</dd>
           	
 </dl>
 
@@ -365,35 +333,40 @@
         </dl>
 </section>
 
-<section id="availablesettings">
-	<h3>Settings Dictionaries</h3>
-	<dl title='dictionary AvailableSettings' class='idl'>
-          <dt>CapabilityList MimeType</dt>
-          <dd>
-            A list of the MIME types that can be selected as encodings for recording.  The UA
-            <em title="should" class="rfc2119">should</em> be able to play back any of the MIME types it supports for recording.  
-            For example, it <em title="should" class="rfc2119">should</em> be able to display a video
-            recording in the HTML <code>&lt;img&gt;</code> tag. 
-          </dd>
-          <dt>CapabilityRange imageWidth</dt>
-          <dd>The maximum and minimum width, in pixels, for the capture of video or photo
-          	images.</dd>
-          	<dt>CapabilityRange imageHeight</dt>
-          <dd>The maximum and minimum height, in pixels, for the capture of video or photo
-          	images.</dd>
-        </dl>
-        
- <dl title='dictionary RecordingSettings' class='idl'>
-          <dt>DOMString? MimeType</dt>
-          <dd>
-            Used to set the value of <code>mimeType</code>.
-          </dd>
-          <dt>unsigned long? imageWidth</dt>
-          <dd>Used to set hte value of <code>imageWidth</code>.</dd>
-          	<dt>unsigned long? imageHeight</dt>
-          <dd>Used to set the value of <code>imageWidth</code>.</dd>
-        </dl>
-   
+<section id="properties">
+	<h3>MediaRecorder Constrainable Properties</h3>
+	  <p>IANA is requested to register the following properties as specified
+      in [[!RTCWEB-CONSTRAINTS]]:</p>
+     <table class="simple">
+        <thead>
+          <tr>
+            <th>Property Name</th>
+            <th>Values</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="def-property-MimeType">
+            <td>MimeType</td>
+            <td><a><code>list of DOMString</code></a></td>
+            <td> The MIME types that can be selected as encodings for recording. The UA should be able to play back any of the MIME types it supports for recording. For example, it should be able to display a video recording in the HTML &lt;img&gt; tag.</td>
+          </tr>
+          <tr id="def-property-imageHeight">
+            <td>imageHeight</td>
+            <td><code>PropertyValueRange</code></td>
+            <td>The maximum and minimum height, in pixels, for the capture of videomages</td>
+          </tr>
+          
+         <tr id="def-property-imageWidth">
+            <td>imageWidth</td>
+            <td><code>PropertyValueRange</code></td>
+            <td>The maximum and minimum width, in pixels, for the capture of videomages</td>
+          </tr>
+
+       
+
+        </tbody>
+      </table>
 	</section>
 
 
