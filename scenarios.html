@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
   <head>
     <title>MediaStream Capture Scenarios</title>
@@ -12,18 +12,16 @@
                             company: "Microsoft Corp.",
                             url: "mailto:travis.leithead@microsoft.com?subject=MediaStream Capture Scenarios Feedback",
                             companyURL: "http://www.microsoft.com"}],
-                  publishDate:  "2013-01-04",
-                  edDraftURI:   "http://w3c.github.io/mediacapture-scenarios/scenarios.html",
+                  edDraftURI:   "https://w3c.github.io/mediacapture-scenarios/scenarios.html",
                   previousPublishDate: null,
                   noIDLIn:  true,
                   inlineCSS:  true,
                   noRecTrack:  true,
                   shortName:  "capture-scenarios",
-                  extraCSS: ["http://dev.w3.org/2009/dap/ReSpec.js/css/respec.css"],
                   wg:         ["Device APIs Working Group", "Web Real-Time Communications Working Group"],
-                  wgURI:    ["http://www.w3.org/2009/dap/", "http://www.w3.org/2011/04/webrtc/"],
+                  wgURI:    ["https://www.w3.org/2009/dap/", "https://www.w3.org/2011/04/webrtc/"],
                   wgPublicList: "public-media-capture",
-                  wgPatentURI:  ["http://www.w3.org/2004/01/pp-impl/43696/status", "http://www.w3.org/2004/01/pp-impl/47318/status"]
+                  wgPatentURI:  ["https://www.w3.org/2004/01/pp-impl/43696/status", "https://www.w3.org/2004/01/pp-impl/47318/status"]
               };
     </script>
     <style type="text/css">
@@ -111,7 +109,7 @@
       </p>
       <p>
         Both groups include overlapping chartered deliverables in this space. Namely in DAP, 
-        <a href="http://www.w3.org/2011/07/DeviceAPICharter">the charter specifies a recommendation-track deliverable</a>:
+        <a href="https://www.w3.org/2011/07/DeviceAPICharter">the charter specifies a recommendation-track deliverable</a>:
         <ul>
          <li>
            <dl>
@@ -122,13 +120,13 @@
         </ul>
       </p>
       <p>
-         And <a href="http://www.w3.org/2011/04/webrtc-charter.html">WebRTC's charter scope</a> describes enabling 
+         And <a href="https://www.w3.org/2011/04/webrtc-charter.html">WebRTC's charter scope</a> describes enabling 
          real-time communications between web browsers that will require specific client-side technologies:
          <ul>
           <li>API functions to explore device capabilities, e.g. camera, microphone, speakers (currently in scope
-           for the <a href="http://www.w3.org/2009/dap/">Device APIs &amp; Policy Working Group</a>)</li>
+           for the <a href="https://www.w3.org/2009/dap/">Device APIs &amp; Policy Working Group</a>)</li>
           <li>API functions to capture media from local devices (camera and microphone) (currently in scope for the 
-            <a href="http://www.w3.org/2009/dap/">Device APIs &amp; Policy Working Group</a>)</li>
+            <a href="https://www.w3.org/2009/dap/">Device APIs &amp; Policy Working Group</a>)</li>
           <li>API functions for encoding and other processing of those media streams,</li>
           <li>API functions for decoding and processing (including echo cancelling, stream synchronization and a
             number of other functions) of those streams at the incoming end,</li>
@@ -140,7 +138,7 @@
          Note, that the scenarios described in this document specifically exclude declarative capture scenarios, such as those where media capture can be 
          obtained and submitted to a server entirely without the use of script. Such scenarios generally involve the use 
          of a UA-specific app or mode for interacting with the capture device, altering settings and completing the 
-         capture. Such scenarios are currently captured by the DAP working group's <a href="http://dev.w3.org/2009/dap/camera/">HTML Media Capture</a>
+         capture. Such scenarios are currently captured by the DAP working group's <a href="https://dev.w3.org/2009/dap/camera/">HTML Media Capture</a>
          specification.
       </p>
       <p>
@@ -151,8 +149,8 @@
       </p>
       <p>
          Some of the scenarios described in this document may overlap existing 
-         <a href="http://tools.ietf.org/html/draft-ietf-rtcweb-use-cases-and-requirements-06">usage scenarios</a>
-         defined by the <a href="http://datatracker.ietf.org/wg/rtcweb/">IETF RTCWEB Working Group</a>. This document
+         <a href="https://tools.ietf.org/html/draft-ietf-rtcweb-use-cases-and-requirements-06">usage scenarios</a>
+         defined by the <a href="https://datatracker.ietf.org/wg/rtcweb/">IETF RTCWEB Working Group</a>. This document
          is specifically focused on the capture aspects of media streams, while the linked document is geared toward
          networking and peer-to-peer RTC scenarios.
       </p>
@@ -165,7 +163,7 @@
          interpreted uniformly.
       </p>
        <dl>
-         <dt> Media Stream and Stream</dt>
+         <dt> Media Stream and <dfn>Stream</dfn></dt>
          <dd>This document uses these terms interchangeably.  They are intended to be
            a generalization of the more specific <code>MediaStream</code> interface as currently defined in the 
            WebRTC spec. Generally, a stream can be understood as a tube or conduit between sources (the stream's 
@@ -291,9 +289,10 @@
 
          <section>
           <h4>Variations</h4>
-          <section></section>
+          <section>
           <h5>Recording with post-processing</h5>
           <p>Alice decides to run her image-tracking code as a post-processing step.  She enables the webcam, a video preview (to see herself and the ball), changes the camera's resolution down to 320x200, starts a video recording, and holds up the blue ball, moving it around.  As she does this, the UA records the video stream of her and the ball.  After 30 seconds, she terminates the recording and saves the result to a file.  She then runs her image-processing software on the saved file, producing a new file that shows the box drawn around the moving ball.  She then previews the processed file to make sure it's correct, and uploads it to the assignment page using her class account.   </p>
+          </section>
          </section>
         </section>
       </section>
@@ -415,68 +414,68 @@
            		<p>PERMISSIONS</p>
       	<ol>
  
-      		<li ><a name="p1">The UA must </a> request the user's permission before accessing any media devices.</li>
-      		<li><a name="p2">The UA must </a>allow the user to grant permission to specific devices.  (Example: front camera is ok, back camera is not.)</li>
-      		<li><a name="p3">The UA must </a>request the user's permission before sending or receiving  a media stream to or from another user.</li> 
-      		<li><a name="p4">The UA must </a>be able to store permissions granted to certain applications. [THIS NEEDS TO BE RESTRICTED.]</li>
-      		<li><a name="p5">The UA must </a>not make information about the user's media devices available to the Application
+      		<li id="p1">The UA must  request the user's permission before accessing any media devices.</li>
+      		<li id="p2">The UA must allow the user to grant permission to specific devices.  (Example: front camera is ok, back camera is not.)</li>
+      		<li id="p3">The UA must request the user's permission before sending or receiving  a media stream to or from another user.</li> 
+      		<li id="p4">The UA must be able to store permissions granted to certain applications. [THIS NEEDS TO BE RESTRICTED.]</li>
+      		<li id="p5">The UA must not make information about the user's media devices available to the Application
       			until the user grants permission to use them.</li>
       		</ol>
       		<p>LOCAL MEDIA</p>
       		<ol>
-      		<li><a name="lm1">The UA must </a>be able to show the image stream from a camera on the screen.</li>
-          <li><a name="lm2">The UA must </a>be able to provide a visual display of the properties of the sound captured from from a microphone (volume in this  case).</li>
-         <li><a name="lm3">The UA must </a>be able to trigger an event based on the volume of sound over some period of
+      		<li id="lm1">The UA must be able to show the image stream from a camera on the screen.</li>
+          <li id="lm2">The UA must be able to provide a visual display of the properties of the sound captured from from a microphone (volume in this  case).</li>
+         <li id="lm3">The UA must be able to trigger an event based on the volume of sound over some period of
 time (silence, in this case).</li>
-<li><a name="lm4">The UA must </a>be able to blend remote audio streams with the local stream.</li>
-<li><a name="lm5">The UA must </a>be able to continue sending and/or capturing media while the tab is in the background.</li>
-<li><a name="lm6">The UA must </a>be able to extract image frames from video.</li>
-<li><a name="lm7">The UA must </a>be able to insert image frames into a local video stream (or capture).</li>
-<li><a name="lm8">The UA must </a>be able to modify stream parameters such as size and frame rate within the
+<li id="lm4">The UA must be able to blend remote audio streams with the local stream.</li>
+<li id="lm5">The UA must be able to continue sending and/or capturing media while the tab is in the background.</li>
+<li id="lm6">The UA must be able to extract image frames from video.</li>
+<li id="lm7">The UA must be able to insert image frames into a local video stream (or capture).</li>
+<li id="lm8">The UA must be able to modify stream parameters such as size and frame rate within the
 	limits set by the local hardware. </li>
-	<li><a name="lm9">The UA must </a>be able to display multiple local or remote streams simultaneously.</li>
-	<li><a name="lm10">The UA must </a>support the use of the local screen/display as a video source.</li>
-	<li><a name="lm11">The UA must </a>allow the user to pause or stop media streams via UXes (and not just the 
+	<li id="lm9">The UA must be able to display multiple local or remote streams simultaneously.</li>
+	<li id="lm10">The UA must support the use of the local screen/display as a video source.</li>
+	<li id="lm11">The UA must allow the user to pause or stop media streams via UXes (and not just the 
 		buttons on the underlying hardware.)  The UX provided by the chrome must override any UX provided
 		by the Application. </li>
-		<li><a name="lm12">The UA must </a>provide a UX letting the user know when it is using one or more of
+		<li id="lm12">The UA must provide a UX letting the user know when it is using one or more of
 			his media devices.</li>
 	</ol>
 
 <p>REMOTE MEDIA</p>
 <p>These requirements for remote media are outside the scope of the Media Capture task force, but are relevant to
-	the related WebRTC/rtcWeb work, which is a joint effort of the W3C and the IETF.  The <a href="http://datatracker.ietf.org/doc/draft-ietf-rtcweb-use-cases-and-requirements">
+	the related WebRTC/rtcWeb work, which is a joint effort of the W3C and the IETF.  The <a href="https://datatracker.ietf.org/doc/draft-ietf-rtcweb-use-cases-and-requirements">
 		scenarios
 	and requirements document</a> for that effort contains requirements that are similar to those given here.
 	They are listed in parentheses after each item. .</p>
 <ol>
-<li><a name="rm1">The UA must </a>be able to transmit media to one or more remote sites and to receive media from them. (rtcWeb: F2, F4, F11, F12)</li>
-<li><a name="rm2">The UA must </a>be able to play audio and video media received from a remote site. (rtcWeb: F4, F10)</li>
-<li><a name="rm3">The UA must </a>be able to stop or pause the reception and/or transmission of any media stream independent of any other streams. (rtcWeb: A8)</li>
-<li><a name="rm4">The UA must </a>be able to add new remote media connections while a recording is running.  The new remote streams
+<li id="rm1">The UA must be able to transmit media to one or more remote sites and to receive media from them. (rtcWeb: F2, F4, F11, F12)</li>
+<li id="rm2">The UA must be able to play audio and video media received from a remote site. (rtcWeb: F4, F10)</li>
+<li id="rm3">The UA must be able to stop or pause the reception and/or transmission of any media stream independent of any other streams. (rtcWeb: A8)</li>
+<li id="rm4">The UA must be able to add new remote media connections while a recording is running.  The new remote streams
 	may or may not be included in the recording. </li>
-	<li><a name="rm5">The UA must </a>be able to send or receive a still image over a video stream. </li>
-	<li><a name="rm6">The UA must </a>provide the Application with the parameters of all streams (for example, audio level). (rtcWeb: F14, F38, A12, A14) </li>
+	<li id="rm5">The UA must be able to send or receive a still image over a video stream. </li>
+	<li id="rm6">The UA must provide the Application with the parameters of all streams (for example, audio level). (rtcWeb: F14, F38, A12, A14) </li>
 
 	</ol>
 
 
 <p>RECORDING</p>
 <ol>
-<li><a name="mc1">The UA must </a>be able to record local or remote audio streams, video streams or still images from a camera or microphone 
+<li id="mc1">The UA must be able to record local or remote audio streams, video streams or still images from a camera or microphone 
 	and store the result as a file.</li>
-<li><a name="mc2"> The UA must </a>enable the Application to trigger recording either from a button click or a timer event.</li>
-<li><a name="mc3">The UA must </a>be able to send recorded media to one or more remote locations while recording is running.</li>
-<li><a name="mc4">The UA must </a>enable the Application to select the recording format and resolution from those available on the local hardware.</li>
-<li><a name="mc5">the UA must </a>enable the Application to set size contraints and time limits on recording. </li>
-<li><a name="mc6">The UA must </a>allow the user to switch recording between one or more local and remote streams without interruption.</li>
-<li><a name="mc7">The UA must </a>enable the Application to use device properties, such as battery level, to determine when to terminate media capture.</li>
-<li><a name="mc8">The UA must </a>enable error recovery in the case of premature termination of recording.</li>
-<li><a name="mc9">The UA must </a>support simultaneous recording from multiple devices into separate recordings.</li>
-<li><a name="mc10">The UA must </a>support simultaneous recording from multiple devices into a single recording. </li>
-<li><a name="mc11">The UA must </a>support the dynamic addition and deletion of  streams from a recording.</li>
-<li><a name="mc12">The UA must </a>enable the Application to pause and resume the recording of local or remote streams.</li>
-<li><a name="mc13">The UA must </a>enable the Application to rewind and replay a paused recorded stream.</li>
+<li id="mc2"> The UA must enable the Application to trigger recording either from a button click or a timer event.</li>
+<li id="mc3">The UA must be able to send recorded media to one or more remote locations while recording is running.</li>
+<li id="mc4">The UA must enable the Application to select the recording format and resolution from those available on the local hardware.</li>
+<li id="mc5">the UA must </a>enable the Application to set size contraints and time limits on recording. </li>
+<li id="mc6">The UA must allow the user to switch recording between one or more local and remote streams without interruption.</li>
+<li id="mc7">The UA must enable the Application to use device properties, such as battery level, to determine when to terminate media capture.</li>
+<li id="mc8">The UA must enable error recovery in the case of premature termination of recording.</li>
+<li id="mc9">The UA must support simultaneous recording from multiple devices into separate recordings.</li>
+<li id="mc10">The UA must support simultaneous recording from multiple devices into a single recording. </li>
+<li id="mc11">The UA must support the dynamic addition and deletion of  streams from a recording.</li>
+<li id="mc12">The UA must enable the Application to pause and resume the recording of local or remote streams.</li>
+<li id="mc13">The UA must enable the Application to rewind and replay a paused recorded stream.</li>
 
 </ol>
     
@@ -511,7 +510,7 @@ time (silence, in this case).</li>
          is sent to the background. For the purposes of many common scenarios (especially involving real-time communications), it is not
          recommended that the browser automatically shut down capture devices when the capturing browser tab is sent to the background.
          If such a scenario is desired by the application author, the tab switch may be detected via other browser events (e.g., the 
-         <a href="http://www.w3.org/TR/page-visibility/">page visibility event</a>) and the <code>MediaStream</code> can be stopped via <code>stop()</code>.
+         <a href="https://www.w3.org/TR/page-visibility/">page visibility event</a>) and the <code>MediaStream</code> can be stopped via <code>stop()</code>.
         </p>
         <section>
          <h4>Privacy</h4>
@@ -672,7 +671,7 @@ time (silence, in this case).</li>
       <section>
        <h4>Examples</h4>
        <ol>
-        <li>Audio end-pointing. As described in <a href="http://lists.w3.org/Archives/Public/www-archive/2011Mar/att-0001/microsoft-api-draft-final.html">a 
+        <li>Audio end-pointing. As described in <a href="https://lists.w3.org/Archives/Public/www-archive/2011Mar/att-0001/microsoft-api-draft-final.html">a 
          speech API proposal</a>, audio end-pointing allows for the detection of noise, speech, or silence and raises events 
          when these audio states change. End-pointing is necessary for scenarios that programmatically determine when to 
          start and stop capturing an audio stream for purposes of hands-free speech commands, dictation, and a variety of 
@@ -741,21 +740,21 @@ time (silence, in this case).</li>
         of which have widely-deployed implementations:
        </p>
        <ol>
-        <li>HTML5 <a href="http://dev.w3.org/html5/spec/Overview.html#the-video-element"><code>video</code></a> and 
-         <a href="http://dev.w3.org/html5/spec/Overview.html#the-audio-element"><code>audio</code></a> tags. These elements are natural 
+        <li>HTML5 <a href="https://dev.w3.org/html5/spec/Overview.html#the-video-element"><code>video</code></a> and 
+         <a href="https://dev.w3.org/html5/spec/Overview.html#the-audio-element"><code>audio</code></a> tags. These elements are natural 
          candidates for media stream output sinks. Additionally, they provide an API (see 
-         <a href="http://dev.w3.org/html5/spec/Overview.html#htmlmediaelement">HTMLMediaElement</a>) for interacting with 
+         <a href="https://dev.w3.org/html5/spec/Overview.html#htmlmediaelement">HTMLMediaElement</a>) for interacting with 
          the source content. Note: in some cases, these elements are not well-specified for stream-type sources—this task 
          force may need to drive some stream-source requirements into HTML5.
         </li>
-        <li>HTML5 <a href="http://dev.w3.org/html5/spec/Overview.html#the-canvas-element"><code>canvas</code></a> element 
-         and the <a href="http://dev.w3.org/html5/2dcontext/">Canvas 2D context</a>. The <code>canvas</code> element employs 
+        <li>HTML5 <a href="https://dev.w3.org/html5/spec/Overview.html#the-canvas-element"><code>canvas</code></a> element 
+         and the <a href="https://dev.w3.org/html5/2dcontext/">Canvas 2D context</a>. The <code>canvas</code> element employs 
          a fairly extensive 2D drawing API and will soon be extended with audio capabilities as well (<b>RichT, can you 
          provide a link?</b>). Canvas' drawing API allows for drawing frames from a <code>video</code> element, which is 
          the link between the media capture sink and the effects made possible via Canvas.
         </li>
-        <li><a href="http://dev.w3.org/2006/webapi/FileAPI/">File API</a> and 
-         <a href="http://www.w3.org/TR/file-writer-api/">File API Writer</a>. The File API provides various methods for 
+        <li><a href="https://dev.w3.org/2006/webapi/FileAPI/">File API</a> and 
+         <a href="https://www.w3.org/TR/file-writer-api/">File API Writer</a>. The File API provides various methods for 
          reading and writing to binary formats. The fundamental container for these binary files is the <code>Blob</code> 
          which put simply is a read-only structure with a MIME type and a length. The File API integrates with many other 
          web APIs such that the <code>Blob</code> can be used uniformly across the entire web platform. For example, 
@@ -768,14 +767,14 @@ time (silence, in this case).</li>
          length. The Stream API includes a mechanism to buffer from a <code>Stream</code> into a <code>Blob</code>, and 
          thus all <code>Stream</code> scenarios are a super-set of <code>Blob</code> scenarios.
         </li>
-        <li>JavaScript <a href="http://wiki.ecmascript.org/doku.php?id=strawman:typed_arrays">TypedArrays</a>. Especially 
+        <li>JavaScript <a href="https://wiki.ecmascript.org/doku.php?id=strawman:typed_arrays">TypedArrays</a>. Especially 
          useful for post-processing scenarios, TypedArrays allow JavaScript code to crack-open a binary file 
          (<code>Blob</code>) and read/write its contents using the numerical data types already provided by JavaScript. 
          There's a cool explanation and example of TypedArrays 
-         <a href="http://blogs.msdn.com/b/ie/archive/2011/12/01/working-with-binary-data-using-typed-arrays.aspx">here</a>.
+         <a href="https://blogs.msdn.com/b/ie/archive/2011/12/01/working-with-binary-data-using-typed-arrays.aspx">here</a>.
         </li>
-        <li><a href="http://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html">Web Audio API</a>. A proposal 
-         for processing and synthesizing audio in web applications. Additionally, that group publishes the <a href="http://www.w3.org/TR/audioproc/">
+        <li><a href="https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html">Web Audio API</a>. A proposal 
+         for processing and synthesizing audio in web applications. Additionally, that group publishes the <a href="https://www.w3.org/TR/audioproc/">
          Audio Processing API</a> containing additional information.
         </li>
        </ol>
